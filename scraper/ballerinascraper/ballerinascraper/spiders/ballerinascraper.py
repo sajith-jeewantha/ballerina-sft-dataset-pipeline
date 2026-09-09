@@ -21,6 +21,7 @@ def clean_url(url: str) -> str:
 
 class BallerinaSpider(scrapy.Spider):
     name = "ballerinascraper"
+    allowed_domains = ["ballerina.io", "github.com", "central.ballerina.io", "dev.to", "medium.com","stackoverflow.com"]
 
     custom_settings = {
         "ROBOTSTXT_OBEY": True,

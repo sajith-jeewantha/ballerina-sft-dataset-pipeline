@@ -10,4 +10,4 @@ wc -l seeds/common_crawl_urls.txt   # should now be > 0
 
 scrapy crawl ballerinascraper -L INFO
 
-Initial commit
+scrapy crawl ballerinascraper -L DEBUG
