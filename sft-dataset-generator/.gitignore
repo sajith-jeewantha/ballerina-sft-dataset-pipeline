@@ -1,0 +1,69 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Environment / secrets ---
+.env
+#.env.*
+*.key
+
+# --- Vector DB / local data stores ---
+chroma_db/
+*.sqlite3
+*.faiss
+*.index
+
+# --- Generated datasets & model artifacts ---
+*.jsonl
+!examples/*.jsonl
+data/
+raw/
+processed/
+checkpoints/
+*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+outputs/
+wandb/
+runs/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Ballerina build artifacts ---
+target/
+*.jar
+Dependencies.toml
+
+*.hprof
+*.jsonl
+generated.jsonl
+test.py

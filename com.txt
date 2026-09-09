@@ -1,0 +1,13 @@
+python scripts/generate_seeds.py
+
+source .venv/bin/activate
+
+pip freeze > requirements.txt
+
+pip install -r requirements.txt
+
+wc -l seeds/common_crawl_urls.txt   # should now be > 0
+
+scrapy crawl ballerinascraper -L INFO
+
+Initial commit

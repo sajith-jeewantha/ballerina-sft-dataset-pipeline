@@ -1,0 +1,29 @@
+[
+  //Scraper
+  {
+    "url": "https://central.ballerina.io/",
+    "content": "",
+    "file_type": "html",
+    "content_type": "text/html; charset=utf-8",
+    "source_domain": "central.ballerina.io",
+    "fetched_at": "2026-08-31T09:03:18.528797+00:00",
+    "content_hash": "351153fdf772fd301e24b384af238ba59ba7dbd096cd461860be9179fdc71f3b"
+  },
+  //Data to vectorDB
+  {
+    "id": "bal_services_1",
+    "text": "",
+    "metadata": {
+      "source": "ballerina.io/learn/services"
+    }
+  },
+  //Generated Questions and answers
+  {
+    "instruction": "",
+    "output": "",
+    "source_chunk_ids": [
+      "bal_services_1",
+      "bal_services_2"
+    ]
+  }
+]

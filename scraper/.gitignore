@@ -1,0 +1,11 @@
+key.json
+*.key.json
+.venv/
+__pycache__/
+*.pyc
+output/
+seeds/*.txt
+proxy_list.txt
+.env
+.idea
+
