@@ -12,14 +12,6 @@ class BallerinascraperItem(scrapy.Item):
     # define the fields for your item here like:
     # name: str | None = None
 
-    # url: str = None
-    # content: str = None
-    # file_type: str = None
-    # content_type: str = None
-    # source_domain: str = None
-    # content_hash: str = None
-    # fetched_at: str = None
-
     url = scrapy.Field()
     content = scrapy.Field()
     file_type = scrapy.Field()  # "bal", "bal_embedded", "md", "html"

@@ -53,9 +53,9 @@ def call_llm(prompt: str, system: str = "", max_tokens: int = 1024, model: str =
     return resp.choices[0].message.content or ""
 
 
-# ---------------------------------------------------------------------------
+#
 # 0. Data structures
-# ---------------------------------------------------------------------------
+#
 @dataclass
 class SFTExample:
     instruction: str
@@ -71,7 +71,8 @@ class CorpusIndex:
     def __init__(self, collection_name=CHROMADB_COLLECTION_NAME, embed_model=EMBEDDING_MODEL) -> None:
         self.collection_name = collection_name
         self.embedder = SentenceTransformer(embed_model)
-        self.client = chromadb.PersistentClient(path="./chroma_db")
+        db_path = CHROMADB_PATH or "./chroma_db"
+        self.client = chromadb.PersistentClient(path=db_path)
         self.collection = self.client.get_or_create_collection(self.collection_name)
 
     def reset(self):
@@ -143,12 +144,6 @@ def generate_grounded_answer(index: CorpusIndex, question: str, top_k: int = 4) 
     if "INSUFFICIENT_CONTEXT" in answer:
         return None  # LLM itself flagged it doesn't have grounding — drop it
 
-    # return SFTExample(
-    #     instruction=question,
-    #     output=answer,
-    #     source_chunk_ids=[r["id"] for r in retrieved],
-    # )
-
     example = SFTExample(
         instruction=question,
         output=answer,
@@ -211,22 +206,6 @@ def _exact_dedup(examples: list[SFTExample]) -> list[SFTExample]:
             seen.add(key)
             keep.append(ex)
     return keep
-
-
-# def deduplicate(examples: list[SFTExample], embedder: SentenceTransformer, threshold: float = 0.92) -> list[SFTExample]:
-#     """Drop near-duplicate questions using cosine similarity on embeddings."""
-#
-#     if not examples:
-#         return []
-#     embs = embedder.encode([e.instruction for e in examples])
-#     embs = embs / np.linalg.norm(embs, axis=1, keepdims=True)
-#     keep = []
-#     kept_embs = []
-#     for i, emb in enumerate(embs):
-#         if not kept_embs or max(emb @ k for k in kept_embs) < threshold:
-#             keep.append(examples[i])
-#             kept_embs.append(emb)
-#     return keep
 
 def deduplicate(
         examples: list[SFTExample],
@@ -331,39 +310,11 @@ if __name__ == "__main__":
     index = CorpusIndex()
     index.reset()
 
-    # Index your Ballerina docs / stdlib source / spec here
-    # index.add_chunks([
-    #     {
-    #         "id": "bal_services_1",
-    #         "text": "In Ballerina, a service is a first-class construct for exposing "
-    #                 "network-accessible APIs. A service declaration groups related "
-    #                 "resource functions, each mapped to an HTTP method and path...",
-    #         "metadata": {"source": "ballerina.io/learn/services"},
-    #     },
-    #     {
-    #         "id": "bal_services_2",
-    #         "text": "The Client is used to connect to and interact with HTTP endpoints. They support connection pooling and can be configured to have a maximum number of active connections that can be made with the remote endpoint. The Client activates connection eviction after a given idle period and also supports follow-redirects so that you do not have to manually handle 3xx HTTP status codes.",
-    #         "metadata": {"source": "https://central.ballerina.io/ballerina/http/2.16.6"},
-    #     },
-    #     # ... load your full corpus here (from GCS)
-    # ])
-
-    # Load your crawled corpus from GCS, extracted + chunked + deduped.
-    # See ingest_corpus.py for the html/code extraction and chunking logic.
-    # chunk_batch = []
-    # for chunk in build_chunks_from_gcs(bucket_name=BUCKET_NAME, prefix="ballerina/"):
-    #     chunk_batch.append(chunk)
-    #     if len(chunk_batch) >= 256:  # batch embedding calls
-    #         index.add_chunks(chunk_batch)
-    #         chunk_batch = []
-    # if chunk_batch:
-    #     index.add_chunks(chunk_batch)
-
     # Google Cloud storage
     # chunk_source = build_chunks_from_gcs(bucket_name="your-crawler-bucket", prefix="ballerina/"):
 
     # Local Data
-    chunk_source = build_chunks_from_local_jsonl("../../data/data.jsonl")
+    chunk_source = build_chunks_from_local_jsonl("../../data/scraper/ballerina_corpus.jsonl")
 
     chunk_batch = []
     for chunk in chunk_source:

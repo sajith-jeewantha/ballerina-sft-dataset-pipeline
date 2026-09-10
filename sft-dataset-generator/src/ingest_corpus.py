@@ -131,7 +131,6 @@ class HashDeduper:
 #
 # 3. Extract clean text per file_type
 #
-
 def extract_text(record: dict) -> Optional[str]:
     content = record.get("content", "")
     if not content or not content.strip():
@@ -355,30 +354,3 @@ def build_chunks_from_local_jsonl(path: str) -> Iterator[dict]:
             ...
     """
     yield from _process_records(iter_local_jsonl_records(path))
-
-
-
-
-# if __name__ == "__main__":
-#     from sft_dataset_generator import CorpusIndex, build_sft_dataset
-#
-#     index = CorpusIndex()
-#     index.reset()  # start clean each run — see CorpusIndex.reset() docstring
-#
-#     # --- For local testing (no GCS needed) ---
-#     chunk_source = build_chunks_from_local_jsonl("data.jsonl")
-#
-#     # --- For real runs against GCS ---
-#     # chunk_source = build_chunks_from_gcs(bucket_name="your-crawler-bucket", prefix="ballerina/")
-#
-#     chunk_batch = []
-#     for chunk in chunk_source:
-#         chunk_batch.append(chunk)
-#         if len(chunk_batch) >= 256:  # batch embedding calls
-#             index.add_chunks(chunk_batch)
-#             chunk_batch = []
-#     if chunk_batch:
-#         index.add_chunks(chunk_batch)
-#
-#     print(f"Indexed {index.count()} chunks total.")
-#     build_sft_dataset(index, questions_per_chunk=3, output_path="ballerina_sft-old.jsonl")

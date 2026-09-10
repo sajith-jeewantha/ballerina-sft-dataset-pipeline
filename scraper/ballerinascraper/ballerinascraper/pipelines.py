@@ -33,80 +33,6 @@ class BallerinascraperPipeline:
         return item
 
 
-# class LocalFilePipeline:
-#     @classmethod
-#     def from_crawler(cls, crawler):
-#         pipeline = cls()
-#         pipeline.crawler = crawler
-#         return pipeline
-#
-#     def open_spider(self):
-#         os.makedirs("output", exist_ok=True)
-#         self.seen_hashes = set()
-#         self.out_file = open("output/ballerina_corpus_old.jsonl", "a", encoding="utf-8")
-#
-#     def process_item(self, item):
-#         # content_hash = hashlib.sha256(
-#         #     item["content"].encode("utf-8", errors="ignore")
-#         # ).hexdigest()
-#         #
-#         # if content_hash in self.seen_hashes:
-#         #     raise scrapy.exceptions.DropItem("duplicate content")
-#         # self.seen_hashes.add(content_hash)
-#         # item["content_hash"] = content_hash
-#         #
-#         # self.out_file.write(json.dumps(dict(item), ensure_ascii=False) + "\n")
-#         # self.crawler.spider.logger.info(f"Saved: {item['url']} ({item['file_type']})")
-#         # return item
-#
-#         content_hash = hashlib.sha256(item.content.encode("utf-8", errors="ignore")).hexdigest()
-#         if content_hash in self.seen_hashes:
-#             raise scrapy.exceptions.DropItem("duplicate content")
-#         self.seen_hashes.add(content_hash)
-#         item.content_hash = content_hash
-#
-#         self.out_file.write(json.dumps(asdict(item), ensure_ascii=False) + "\n")
-#         self.crawler.spider.logger.info(f"Saved: {item.url} ({item.file_type})")
-#         return item
-#
-#     def close_spider(self):
-#         self.out_file.close()
-#         self.crawler.spider.logger.info(
-#             f"Total unique items saved: {len(self.seen_hashes)}"
-#         )
-
-# class GCSPipeline:
-#     def open_spider(self, spider):
-#         self.client = storage.Client()
-#         self.bucket = self.client.bucket("your-bucket-name")
-#         self.seen_hashes = set()
-#         self.buffer = []
-#         self.buffer_size = 100  # batch writes instead of one API call per item
-#
-#     def process_item(self, item, spider):
-#         content_hash = hashlib.sha256(item["content"].encode("utf-8", errors="ignore")).hexdigest()
-#         if content_hash in self.seen_hashes:
-#             raise scrapy.exceptions.DropItem("duplicate")
-#         self.seen_hashes.add(content_hash)
-#         item["content_hash"] = content_hash
-#         self.buffer.append(json.dumps(dict(item), ensure_ascii=False))
-#
-#         if len(self.buffer) >= self.buffer_size:
-#             self._flush(spider)
-#         return item
-#
-#     def _flush(self, spider):
-#         if not self.buffer:
-#             return
-#         blob_name = f"raw/{spider.name}-{spider.crawler.stats.get_value('start_time').timestamp()}.jsonl"
-#         blob = self.bucket.blob(blob_name)
-#         blob.upload_from_string("\n".join(self.buffer) + "\n", content_type="application/json")
-#         self.buffer = []
-#
-#     def close_spider(self, spider):
-#         self._flush(spider)
-
-
 class ExtractionPipeline:
     MIN_HTML_LEN = 200
 
@@ -180,7 +106,7 @@ class QualityFilterPipeline:
 
 
 class DedupPipeline:
-    def open_spider(self):
+    def open_spider(self, spider):
         self.seen_hashes = set()
 
     def process_item(self, item):
@@ -239,7 +165,7 @@ class LocalFilePipeline:
         self.crawler.spider.logger.info(f"Wrote batch of {len(self.buffer)} items")
         self.buffer = []
 
-    def close_spider(self):
+    def close_spider(self, spider):
         self._flush()
         self.out_file.close()
         self.crawler.spider.logger.info(
@@ -261,7 +187,7 @@ class GCSPipeline:
         pipeline.crawler = crawler
         return pipeline
 
-    def open_spider(self):
+    def open_spider(self, spider):
         spider = self.crawler.spider
         if storage is None:
             spider.logger.error(
@@ -307,7 +233,7 @@ class GCSPipeline:
 
         self.buffer = []
 
-    def close_spider(self):
+    def close_spider(self, spider):
         self._flush()
         if self.local_file:
             self.local_file.close()
