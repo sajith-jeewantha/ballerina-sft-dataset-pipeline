@@ -31,7 +31,7 @@ Quickstart
   pip install scrapy trafilatura beautifulsoup4 google-cloud-storage
 
 - Run the crawler (will use seeds/common_crawl_urls.txt):
-  scrapy crawl ballerinascraper
+  scrapy crawl ballerinascraper -L DEBUG
 
 - Output (local): data/scraper/ballerina_corpus.jsonl
 
@@ -43,7 +43,7 @@ Quickstart
   pip install openai chromadb sentence-transformers numpy tqdm trafilatura
 
 - Populate .env with OPENAI_API_KEY and model names.
-- Local run (the script expects a local corpus JSONL at ../../data/data.jsonl by default):
+- Local run (the script expects a local corpus JSONL at ../../data/scraper/ballerina_corpus.jsonl by default):
   python src/main.py
 
 - The pipeline will:
