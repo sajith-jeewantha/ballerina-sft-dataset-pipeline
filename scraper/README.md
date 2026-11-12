@@ -1,37 +1,17 @@
+# scraper — collect stage
 
-`GITHUB_TOKEN` isn't strictly required, but without it GitHub's API rate
-limits you heavily (10 req/min for code search vs. much higher with a
-token). `GCS_BUCKET_NAME` is only needed once you switch to `GCSPipeline`.
+Writes immutable `RawRecord`s to `data/raw/<source>/<run_id>/part-*.jsonl.gz`
+(schema: [../docs/schemas.md](../docs/schemas.md) §1). Setup and the full pipeline are in the
+[root README](../README.md).
 
-## Generate seed URLs
+| Command | Source | Notes |
+|---|---|---|
+| `python -m ballerinascraper.collect github` | Repos in `sources.github_repos` | GitHub API + raw files pinned to a commit SHA; files whose blob SHA is unchanged are not re-downloaded. `GITHUB_TOKEN` is optional but raises API limits. |
+| `python -m ballerinascraper.collect central` | `api.central.ballerina.io` registry | Package README + license + version; volatile fields (signed URLs, pull counts) are dropped before hashing. |
+| `scrapy crawl web` (from `scraper/ballerinascraper/`) | `sources.web_sitemaps` | Sitemap-only (no link following), robots.txt obeyed, AutoThrottle, ≤ 2 requests/domain, RFC 2616 HTTP cache (conditional GETs). |
 
-```bash
-python scripts/generate_seeds.py   # Common Crawl — known domains
-python scripts/github_seeds.py     # GitHub org repos + .bal search
+Politeness and limits are configured in `config/pipeline.yaml` (`crawl:` section). There is no
+proxy or User-Agent rotation: the crawler identifies itself honestly.
 
-wc -l seeds/common_crawl_urls.txt  # sanity check — should be > 0
-```
-
-Re-run these periodically to refresh seeds; both scripts merge with
-whatever's already in `ballerinascraper/seeds/common_crawl_urls.txt` rather than
-overwriting it.
-
-## Run the crawl
-
-**Local testing** (default — writes to `ballerinascraper/output`):
-```bash
-scrapy crawl ballerinascraper -L INFO
-```
-
-
-**Switch to GCS** — in `settings.py`, swap the last pipeline stage:
-```python
-ITEM_PIPELINES = {
-    "ballerinascraper.pipelines.ExtractionPipeline": 100,
-    "ballerinascraper.pipelines.QualityFilterPipeline": 200,
-    "ballerinascraper.pipelines.DedupPipeline": 300,
-    # "ballerinascraper.pipelines.GCSPipeline": 400,   # was LocalFilePipeline
-    "ballerinascraper.pipelines.LocalFilePipeline": 400,
-
-}
-```
+Every run writes `_manifest.json` with counts (`written`, `unchanged`, errors). Content identical
+to an earlier run is skipped, so re-running is cheap and safe.

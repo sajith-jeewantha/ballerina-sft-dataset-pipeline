@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ballerina SFT Pipeline</title>
+<style>
+:root{
+  --bg:#f7f7f5;--surface:#ffffff;--surface-2:#f0efec;--text:#1d1d1b;--muted:#5f5e5a;--border:#e2e0db;
+  --accent:#2f6f5e;--accent-soft:#e3efe9;--warn:#9a5b13;--warn-soft:#f8ecdc;--code-bg:#f3f2ef;
+  --s-src:#5b6b8c;--s-collect:#2f6f5e;--s-process:#7a5aa6;--s-gen:#b0562e;--s-out:#3d7a2a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141413;--surface:#1d1d1b;--surface-2:#262624;--text:#ecebe6;--muted:#a3a29c;--border:#34332f;
+    --accent:#6fc2a8;--accent-soft:#1f332c;--warn:#e0a35a;--warn-soft:#3a2b1a;--code-bg:#232321;
+    --s-src:#8ea0c4;--s-collect:#6fc2a8;--s-process:#b69ad9;--s-gen:#e48f63;--s-out:#8fcf74;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141413;--surface:#1d1d1b;--surface-2:#262624;--text:#ecebe6;--muted:#a3a29c;--border:#34332f;
+  --accent:#6fc2a8;--accent-soft:#1f332c;--warn:#e0a35a;--warn-soft:#3a2b1a;--code-bg:#232321;
+  --s-src:#8ea0c4;--s-collect:#6fc2a8;--s-process:#b69ad9;--s-gen:#e48f63;--s-out:#8fcf74;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre.block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;line-height:1.5;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header{padding:40px 0 20px;border-bottom:1px solid var(--border)}
+header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:760px}
+.status{display:inline-block;margin-top:12px;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--warn-soft);color:var(--warn)}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px}
+nav.toc a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13px;padding:5px 10px;border-radius:6px}
+nav.toc a:hover{background:var(--surface-2);color:var(--text)}
+section{padding:36px 0 8px}
+section h2{font-size:20px;margin:0 0 6px}
+section > .wrap > p.lead{color:var(--muted);margin:0 0 18px;max-width:780px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.diagram{overflow-x:auto}
+.diagram pre.mermaid{margin:0;background:transparent;text-align:center}
+.grid{display:grid;gap:12px}
+.principles{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.principles .card h3{margin:0 0 4px;font-size:14px}
+.principles .card p{margin:0;color:var(--muted);font-size:14px}
+.note{border-left:3px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin-top:14px;font-size:14px}
+/* stage explorer */
+.stages{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.stage-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.stage-btn .dot{width:8px;height:8px;border-radius:50%}
+.stage-btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.stage-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.stage-detail h3{margin:0 0 2px;font-size:17px}
+.kv dt{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:10px}
+.kv dd{margin:2px 0 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.tbl{overflow-x:auto}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.cmd-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.cmd-row .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13px;font-weight:600}
+.cmd-row .body{flex:1;min-width:0}
+.cmd-row .body p{margin:0 0 6px;font-size:14px}
+footer{padding:36px 0 48px;color:var(--muted);font-size:13px}
+.theme-toggle{float:right;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+@media (max-width:600px){header h1{font-size:23px}.theme-toggle{float:none;margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
+    <h1>Ballerina SFT Data Pipeline</h1>
+    <p>A pipeline that builds a traceable, compiler-checked fine-tuning dataset for a Ballerina small language model. It takes upstream sources through collect, clean, extract, chunk, embed, generate, validate, judge and export.</p>
+    <span class="status">Implemented in Phase 5; see CHANGELOG.md</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <a href="#principles">Principles</a><a href="#flow">Data flow</a><a href="#components">Components</a>
+    <a href="#lineage">Lineage</a><a href="#storage">Storage</a><a href="#repo">Repo layout</a>
+    <a href="#config">Config</a><a href="#run">Run</a><a href="#resume">Resume</a><a href="#safety">Reliability</a>
+  </div>
+</nav>
+
+<main>
+<section id="principles"><div class="wrap">
+  <h2>Principles</h2>
+  <p class="lead">Data quality, correct code and traceability matter more than volume.</p>
+  <div class="grid principles">
+    <div class="card"><h3>Source first</h3><p>Pull clean upstream files (GitHub repos, the Central API). The HTML crawl only covers sites with no source files.</p></div>
+    <div class="card"><h3>Raw is never modified</h3><p><code>data/raw</code> is append-only. Every other folder can be deleted and rebuilt from it.</p></div>
+    <div class="card"><h3>One stage, one output</h3><p>Stages communicate only through schema-checked files and a manifest.</p></div>
+    <div class="card"><h3>Idempotent and resumable</h3><p>IDs are computed from content, and work already done is skipped. A crash loses at most the item in progress.</p></div>
+    <div class="card"><h3>Verify, don't trust</h3><p>The compiler checks the code, and a judge from a different model family scores each answer. Every score is kept.</p></div>
+    <div class="card"><h3>Traceable</h3><p>Every training row links back to seed → chunk → document → raw → commit SHA or URL.</p></div>
+  </div>
+</div></section>
+
+<section id="flow"><div class="wrap">
+  <h2>End-to-end data flow</h2>
+  <p class="lead">Collectors write raw records. Each stage after that reads the previous stage's file and writes its own.</p>
+  <div class="card diagram"><pre class="mermaid">
+flowchart LR
+  subgraph SRC["Upstream sources (allowlist)"]
+    GH[("GitHub: examples, dev-website, module repos")]
+    CEN[("Central registry API")]
+    WEB[("blog.ballerina.io sitemap")]
+  end
+  subgraph SCRAPER["scraper: collect"]
+    C1[collect github]
+    C2[collect central]
+    C3[scrapy crawl web]
+  end
+  subgraph GEN["sft-dataset-generator"]
+    CL[clean] --> EX[extract]
+    CL --> CH[chunk]
+    CH --> IX[index / embed]
+    GQ[generate] --> VA[validate] --> JU[judge] --> EP[export]
+  end
+  GH --> C1
+  CEN --> C2
+  WEB --> C3
+  C1 & C2 & C3 --> RAW[/"data/raw · RawRecord"/]
+  RAW --> CL
+  CL --> DOC[/"documents.jsonl"/]
+  EX --> CE[/"code_examples.jsonl"/]
+  CH --> CK[/"chunks.jsonl"/]
+  IX --> VDB[("Chroma")]
+  CK --> GQ
+  CE --> GQ
+  VDB -- retrieve --> GQ
+  EP --> OUT[/"train.jsonl · eval.jsonl"/]
+  </pre></div>
+  <div class="note"><strong>Changed order:</strong> the pipeline runs validate → judge, not judge → validate. The compiler and static checks are free and deterministic, so candidates that fail them are rejected before any judge tokens are spent. Both results are still stored on every record.</div>
+</div></section>
+
+<section id="components"><div class="wrap">
+  <h2>Components</h2>
+  <p class="lead">Select a stage to see its inputs, outputs, command and main logic.</p>
+  <div class="stages" id="stageButtons" role="group" aria-label="Pipeline stages"></div>
+  <div class="card" id="stageDetail" aria-live="polite"></div>
+  <h3 style="margin:26px 0 10px;font-size:16px">One item through generate → validate → judge</h3>
+  <div class="card diagram"><pre class="mermaid">
+sequenceDiagram
+  participant G as generate
+  participant V as Chroma
+  participant L as LLM (OpenRouter)
+  participant B as bal worker pool
+  participant J as judge LLM
+  G->>L: question prompt (task_type, seed)
+  L-->>G: question
+  G->>V: retrieve top-k (same split as seed)
+  V-->>G: context chunks
+  G->>L: answer prompt
+  L-->>G: answer, appended to candidates.jsonl
+  Note over G,B: validate
+  G->>B: code blocks (wrapped if fragment)
+  B-->>G: compile status + errors (cached)
+  Note over G,J: judge (only if checks passed)
+  G->>J: question + answer + exact context
+  J-->>G: 5 scores + reasons, written to judged.jsonl
+  </pre></div>
+</div></section>
+
+<section id="lineage"><div class="wrap">
+  <h2>Lineage of records</h2>
+  <p class="lead">Every field is defined in <a href="docs/schemas.md">docs/schemas.md</a>. The train/eval split is set once on each Document, and everything derived from it inherits it.</p>
+  <div class="card diagram"><pre class="mermaid">
+erDiagram
+  RAW_RECORD ||--o| DOCUMENT : "cleaned into"
+  DOCUMENT ||--o{ CODE_EXAMPLE : contains
+  DOCUMENT ||--o{ CHUNK : "split into"
+  CHUNK }o--o{ CODE_EXAMPLE : "code_example_ids"
+  CHUNK ||--o{ SFT_META : "seed / context"
+  CODE_EXAMPLE ||--o{ SFT_META : seed
+  SFT_META ||--|| TRAIN_ROW : id
+  RAW_RECORD { string raw_id PK }
+  DOCUMENT { string doc_id PK }
+  CODE_EXAMPLE { string example_id PK }
+  CHUNK { string chunk_id PK }
+  SFT_META { string id PK }
+  TRAIN_ROW { string id PK }
+  </pre></div>
+</div></section>
+
+<section id="storage"><div class="wrap">
+  <h2>Where data is stored</h2>
+  <p class="lead">Everything under <code>data/</code> is gitignored. GCS can optionally mirror the same layout.</p>
+<pre class="block">data/
+├── raw/                          # immutable, append-only
+│   └── {github|central|web}/{run_id}/part-00000.jsonl.gz + _manifest.json
+├── clean/   documents.jsonl · code_examples.jsonl · _manifest.json
+├── chunks/{chunker-version}/   chunks.jsonl · _manifest.json
+├── chroma/                       # derived index, safe to delete and rebuild
+├── sft/{run_id}/
+│   ├── candidates.jsonl          # generate checkpoint (append-only)
+│   ├── validated.jsonl · judged.jsonl
+│   ├── metadata.jsonl            # all candidates + checks + scores + decision
+│   ├── train.jsonl · eval.jsonl  # {id, messages} only
+│   └── _manifest.json
+└── cache/  llm/ · compile/ · http/</pre>
+</div></section>
+
+<section id="repo"><div class="wrap">
+  <h2>Repo folder structure</h2>
+  <p class="lead">Option A (approved): the two existing projects plus a small shared package for schemas, config, logging, I/O and manifests.</p>
+<pre class="block">ballerina-llm-pipeline/
+├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md
+├── .env.example · config/pipeline.yaml
+├── docs/  recommendations.md · schemas.md · schemas/*.json
+├── shared/balpipe_common/  schemas · config · logging · jsonl_io · manifest · ids · tests/
+├── scraper/ballerinascraper/
+│   ├── ballerinascraper/  settings · items · pipelines · spiders/web.py
+│   │                      collectors/github.py · collectors/central.py · collect.py
+│   └── tests/
+├── sft-dataset-generator/
+│   ├── src/sftgen/  cli · clean/ · extract/ · chunk/ · index/ · generate/
+│   │                validate/ · judge/ · export/ · prompts/*.yaml
+│   └── tests/
+└── data/   (gitignored)</pre>
+</div></section>
+
+<section id="config"><div class="wrap">
+  <h2>Configuration</h2>
+  <p class="lead">Precedence: environment variable &gt; <code>.env</code> &gt; <code>config/pipeline.yaml</code> &gt; code default. Values are checked at startup, so a bad config fails before any work starts.</p>
+  <div class="two">
+    <div class="card"><h3 style="margin:0 0 8px;font-size:15px">.env (never committed)</h3>
+      <div class="tbl"><table><tbody>
+        <tr><td><code>OPENROUTER_API_KEY</code></td><td>LLM access</td></tr>
+        <tr><td><code>LLM_BASE_URL</code></td><td>OpenRouter by default; any OpenAI-compatible endpoint works</td></tr>
+        <tr><td><code>QUESTION_GEN_MODEL</code> · <code>ANSWER_GEN_MODEL</code></td><td>Generation models</td></tr>
+        <tr><td><code>JUDGE_MODEL</code></td><td>Must be a different model family from the answer model</td></tr>
+        <tr><td><code>EMBEDDING_MODEL</code></td><td>Its max length limits the chunk token budget</td></tr>
+        <tr><td><code>GITHUB_TOKEN</code> · <code>GCS_BUCKET</code></td><td>Optional</td></tr>
+      </tbody></table></div></div>
+    <div class="card"><h3 style="margin:0 0 8px;font-size:15px">config/pipeline.yaml (committed)</h3>
+      <div class="tbl"><table><tbody>
+        <tr><td><code>sources</code></td><td>Repo allowlist, Central orgs, sitemaps</td></tr>
+        <tr><td><code>crawl</code></td><td>User-agent, concurrency, delays</td></tr>
+        <tr><td><code>chunk</code></td><td><code>max_tokens</code>, chunker version</td></tr>
+        <tr><td><code>generate</code></td><td>Task quotas, top-k, requests per minute</td></tr>
+        <tr><td><code>judge.thresholds</code></td><td>faithfulness ≥ 4, correctness ≥ 4, others ≥ 3</td></tr>
+        <tr><td><code>split.eval_fraction</code></td><td>Held-out documents, e.g. 0.05</td></tr>
+        <tr><td><code>validate</code></td><td>Ballerina version, pool size, timeout, heap</td></tr>
+      </tbody></table></div></div>
+  </div>
+</div></section>
+
+<section id="run"><div class="wrap">
+  <h2>How to run</h2>
+  <p class="lead"><code>--limit N</code> runs a small test, and <code>--dry-run</code> shows the plan without calling any model.</p>
+  <div class="card">
+    <div class="cmd-row"><div class="n">1</div><div class="body"><p>Set up once</p><pre class="block">python3.11 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -e shared -r scraper/requirements.txt -e scraper \
+  -r sft-dataset-generator/requirements.txt -e sft-dataset-generator
+cp .env.example .env &amp;&amp; bal version</pre></div></div>
+    <div class="cmd-row"><div class="n">2</div><div class="body"><p>Collect</p><pre class="block">python -m ballerinascraper.collect github
+python -m ballerinascraper.collect central
+(cd scraper/ballerinascraper &amp;&amp; scrapy crawl web)</pre></div></div>
+    <div class="cmd-row"><div class="n">3</div><div class="body"><p>Process, generate and export (each stage can also run on its own)</p><pre class="block">sftgen all
+# or: sftgen clean · extract · chunk · index · generate · validate · judge · export</pre></div></div>
+  </div>
+</div></section>
+
+<section id="resume"><div class="wrap">
+  <h2>Resuming after a failure</h2>
+  <div class="card tbl"><table>
+    <thead><tr><th>Mechanism</th><th>How it works</th></tr></thead>
+    <tbody>
+      <tr><td>Stage manifest</td><td><code>status: running → completed | failed</code>. Re-running a stage that didn't complete resumes the same run, if its input hashes haven't changed.</td></tr>
+      <tr><td>Item checkpoints</td><td>generate, validate and judge append and flush one line per item. On resume, IDs already written are skipped.</td></tr>
+      <tr><td>Atomic outputs</td><td>Batch stages write <code>*.tmp</code> and rename it when done. A half-written file is never read.</td></tr>
+      <tr><td>Deterministic IDs + upsert</td><td>Re-runs never duplicate records or vectors.</td></tr>
+      <tr><td>Caches</td><td>LLM responses and compile results are cached on disk, so repeated work costs nothing.</td></tr>
+      <tr><td>Item failures</td><td>Recorded in <code>manifest.errors</code>; the run continues. <code>--retry-errors</code> retries only those items.</td></tr>
+    </tbody></table></div>
+</div></section>
+
+<section id="safety"><div class="wrap">
+  <h2>Reliability, politeness and safety</h2>
+  <div class="card tbl"><table>
+    <thead><tr><th>Concern</th><th>Approach</th></tr></thead>
+    <tbody>
+      <tr><td>Scraping</td><td>Obeys robots.txt. One honest user-agent. AutoThrottle, ≤ 2 requests per domain, ETag. No proxies, no user-agent rotation.</td></tr>
+      <tr><td>HTTP retries</td><td>Backoff that honours <code>Retry-After</code> and GitHub's rate-limit reset.</td></tr>
+      <tr><td>LLM calls</td><td>SDK retries with backoff; no retries on 400 or 401. Semaphore plus a requests-per-minute limit per model. JSON outputs checked against schemas.</td></tr>
+      <tr><td>Compiling generated code</td><td>Compile only, never run. Temp working folder, <code>--offline</code>, 60 s timeout, <code>-Xmx1g</code>, pool of 4.</td></tr>
+      <tr><td>Logging</td><td>JSON logs with run_id, stage and item ID. Funnel counts saved in manifests.</td></tr>
+      <tr><td>Secrets</td><td>Only in the environment. Redacted in logs and manifests.</td></tr>
+      <tr><td>License and contamination</td><td>SPDX license per record. Train/eval split per document. Retrieval limited to the seed's split. 13-gram overlap check.</td></tr>
+    </tbody></table></div>
+</div></section>
+</main>
+
+<footer><div class="wrap">Source: <a href="ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="docs/recommendations.md">recommendations</a> · <a href="docs/schemas.md">schemas</a></div></footer>
+
+<script>
+const STAGES = [
+  {id:"collect", name:"Collect", color:"--s-collect", module:"scraper · collectors/github.py, collectors/central.py, spiders/web.py",
+   cmd:"python -m ballerinascraper.collect github|central · scrapy crawl web",
+   inputs:"GitHub API + shallow clones (pinned SHA), Central registry API, blog sitemap",
+   outputs:"data/raw/{source}/{run_id}/*.jsonl.gz (RawRecord)",
+   logic:"Allowlisted sources only. License recorded for each record. Conditional GET, robots.txt, one honest user-agent."},
+  {id:"clean", name:"Clean", color:"--s-process", module:"sftgen.clean",
+   cmd:"sftgen clean", inputs:"data/raw", outputs:"data/clean/documents.jsonl (Document)",
+   logic:"Extractor chosen per source (BBE Markdown, Next.js data, trafilatura Markdown, Central readme, .bal). Labels each code block's language. Exact and MinHash dedup. Assigns doc_type and split."},
+  {id:"extract", name:"Extract", color:"--s-process", module:"sftgen.extract",
+   cmd:"sftgen extract", inputs:"documents.jsonl", outputs:"data/clean/code_examples.jsonl (CodeExample)",
+   logic:"Pairs code with its prose (BBE directive, adjacent Markdown, doc comments). Compiles every example. Runs BBEs against .out where upstream flags say they should match."},
+  {id:"chunk", name:"Chunk", color:"--s-process", module:"sftgen.chunk",
+   cmd:"sftgen chunk", inputs:"documents + code examples", outputs:"data/chunks/{chunker}/chunks.jsonl (Chunk)",
+   logic:"Splits along headings with a token budget no larger than the embedder's max length. Never splits a code block. Adds a heading breadcrumb header."},
+  {id:"index", name:"Index", color:"--s-process", module:"sftgen.index",
+   cmd:"sftgen index", inputs:"chunks.jsonl", outputs:"Chroma collection bal__{model}__{chunker}",
+   logic:"Batched embedding. Upsert by chunk_id. Flat metadata used for filtering by split, doc_type and license."},
+  {id:"generate", name:"Generate", color:"--s-gen", module:"sftgen.generate",
+   cmd:"sftgen generate", inputs:"chunks, code examples, Chroma", outputs:"data/sft/{run}/candidates.jsonl",
+   logic:"Fills task-type quotas. Grounded LLM answers; mutation for debug_fix; back-translation for convert_from_language. Retrieval limited to the seed's split."},
+  {id:"validate", name:"Validate", color:"--s-gen", module:"sftgen.validate",
+   cmd:"sftgen validate", inputs:"candidates.jsonl", outputs:"validated.jsonl",
+   logic:"Sandboxed bal build --offline in a process pool, cached. Flags answers that mention 'the context'. Flags unknown module:symbol references."},
+  {id:"judge", name:"Judge", color:"--s-gen", module:"sftgen.judge",
+   cmd:"sftgen judge", inputs:"validated.jsonl", outputs:"judged.jsonl",
+   logic:"Judge model from a different family. Scores 1–5 for faithfulness, correctness, helpfulness, instruction following and code quality, with reasons."},
+  {id:"export", name:"Export", color:"--s-out", module:"sftgen.export",
+   cmd:"sftgen export", inputs:"judged.jsonl", outputs:"train.jsonl · eval.jsonl ({id, messages}) + metadata.jsonl",
+   logic:"Applies thresholds from config. Near-duplicate filter. 13-gram decontamination against eval. Writes the chat messages format."}
+];
+const btnWrap = document.getElementById("stageButtons");
+const detail = document.getElementById("stageDetail");
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function show(id){
+  const s = STAGES.find(x=>x.id===id);
+  btnWrap.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.id===id)));
+  detail.innerHTML = `<div class="stage-detail">
+    <div><h3>${esc(s.name)}</h3><dl class="kv"><dt>Module</dt><dd><code>${esc(s.module)}</code></dd><dt>Command</dt><dd><code>${esc(s.cmd)}</code></dd></dl></div>
+    <dl class="kv"><dt>Reads</dt><dd>${esc(s.inputs)}</dd><dt>Writes</dt><dd>${esc(s.outputs)}</dd></dl>
+    <dl class="kv"><dt>Main logic</dt><dd>${esc(s.logic)}</dd></dl></div>`;
+}
+STAGES.forEach(s=>{
+  const b=document.createElement("button");
+  b.className="stage-btn"; b.type="button"; b.dataset.id=s.id;
+  b.innerHTML=`<span class="dot" style="background:var(${s.color})"></span>${esc(s.name)}`;
+  b.addEventListener("click",()=>show(s.id));
+  btnWrap.appendChild(b);
+});
+show("collect");
+
+// theme
+const root=document.documentElement;
+function isDark(){const t=root.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;}
+document.getElementById("themeToggle").addEventListener("click",()=>{
+  root.dataset.theme = isDark() ? "light" : "dark";
+  try{localStorage.setItem("arch-theme",root.dataset.theme);}catch(e){}
+  location.reload();
+});
+try{const saved=localStorage.getItem("arch-theme"); if(saved) root.dataset.theme=saved;}catch(e){}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+if (window.mermaid) {
+  mermaid.initialize({startOnLoad:true, theme: isDark() ? "dark" : "neutral", securityLevel:"strict", flowchart:{useMaxWidth:true}});
+}
+</script>
+</body>
+</html>

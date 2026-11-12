@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sftgen"
+version = "2.0.0"
+description = "Clean, extract, chunk, index, generate, validate, judge and export a Ballerina SFT dataset"
+requires-python = ">=3.11"
+# Pinned runtime deps live in requirements.txt (install with -r).
+
+[project.scripts]
+sftgen = "sftgen.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sftgen = ["prompts/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]

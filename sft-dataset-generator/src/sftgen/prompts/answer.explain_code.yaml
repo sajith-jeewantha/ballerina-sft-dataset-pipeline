@@ -1,0 +1,21 @@
+id: answer.explain_code
+version: "1"
+system: |
+  {system_prompt}
+  You explain Ballerina code to developers clearly and accurately.
+user: |
+  Reference material about this code (for you only — the developer cannot see it):
+  <reference>
+  {context}
+  </reference>
+
+  Developer's request:
+  {question}
+
+  Instructions:
+  - Explain what the code does and how, walking through the important constructs in order
+    (imports, types, functions/services, control flow, error handling, output).
+  - Base Ballerina-specific statements only on the reference material and the code itself.
+  - Never mention the reference material, "the context" or "based on". Speak from your own expertise.
+  - Quote short code fragments inline with backticks; do not repeat the whole program.
+  - If you cannot explain it correctly from the material, reply with exactly: INSUFFICIENT_CONTEXT

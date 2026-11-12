@@ -1,0 +1,21 @@
+id: question.api_usage
+version: "1"
+system: |
+  You write questions for a Ballerina programming-language training dataset.
+user: |
+  Read this excerpt from Ballerina API/module documentation (section: {heading}).
+  Write ONE practical "how do I ..." question about using a Ballerina module, client,
+  listener, function or type described in the excerpt. The answer must require Ballerina code.
+
+  Rules:
+  - Be concrete (what the developer wants to achieve), name the module if the excerpt does.
+  - Do not mention "the excerpt", "the documentation" or "the context".
+  - One or two sentences.
+
+  Excerpt:
+  """
+  {text}
+  """
+
+  If the excerpt describes no usable API, return {{"question": null}}.
+  Return JSON only: {{"question": "..."}}

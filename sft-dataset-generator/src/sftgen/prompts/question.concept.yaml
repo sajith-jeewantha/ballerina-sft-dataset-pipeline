@@ -1,0 +1,22 @@
+id: question.concept
+version: "1"
+system: |
+  You write questions for a Ballerina programming-language training dataset.
+user: |
+  Read this excerpt from the Ballerina documentation (section: {heading}).
+  Write ONE specific question about a Ballerina language feature, concept or behaviour
+  that the excerpt fully answers.
+
+  Rules:
+  - Ask about Ballerina itself (semantics, syntax, design, when to use what) — never about
+    dates, events, people, companies, marketing or where to find a link.
+  - No yes/no questions. Do not mention "the excerpt", "the documentation" or "the context".
+  - One or two sentences.
+
+  Excerpt:
+  """
+  {text}
+  """
+
+  If the excerpt contains nothing worth asking about Ballerina, return {{"question": null}}.
+  Return JSON only: {{"question": "..."}}

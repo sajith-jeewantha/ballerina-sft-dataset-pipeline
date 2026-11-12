@@ -1,0 +1,117 @@
+# Non-secret pipeline settings. Secrets and model names live in .env.
+# Any key can be overridden with an env var: BALPIPE__<SECTION>__<KEY>=value
+# (e.g. BALPIPE__GENERATE__TARGET_RECORDS=50).
+
+data_dir: data
+gcs_mirror: false                  # true = also copy outputs to gs://$GCS_BUCKET (needs: pip install -e "shared[gcs]")
+
+sources:
+  github_repos:
+    # Ballerina-by-Example: .bal code + .md explanation + .out expected output
+    - repo: ballerina-platform/ballerina-distribution
+      include: ["examples/index.json", "examples/*/*.md", "examples/*/*.bal", "examples/*/*.metatags", "examples/*/*.out"]
+      exclude: ["examples/*/tests/**"]
+    # Markdown sources of ballerina.io learn pages
+    - repo: ballerina-platform/ballerina-dev-website
+      include:
+        - "swan-lake/**/*.md"                                  # learn docs
+        - "public/spec/lang/2024R1/index.html"                 # language spec 2024R1
+        - "public/spec/*/spec.md"                              # stdlib module specs (http, sql, ...)
+        - "pages/learn/enterprise-integration-patterns/enterprise-integration-patterns/*/*.bal"
+        - "pages/learn/enterprise-integration-patterns/enterprise-integration-patterns/*/*.yml"
+      exclude:
+        - "swan-lake/**/release-notes/**"
+        - "pages/learn/enterprise-integration-patterns/enterprise-integration-patterns/mock-http/**"
+    # Standard library modules: public API source + module docs
+    - repo: ballerina-platform/module-ballerina-http
+      include: ["ballerina/*.bal", "ballerina/Module.md", "ballerina/Package.md"]
+      exclude: ["ballerina/tests/**"]
+    - repo: ballerina-platform/module-ballerina-io
+      include: ["ballerina/*.bal", "ballerina/Module.md", "ballerina/Package.md"]
+      exclude: ["ballerina/tests/**"]
+  central_orgs: [ballerina, ballerinax]
+  central_page_size: 50
+  central_max_packages: 400          # cap per org; null = everything
+  web_sitemaps: ["https://blog.ballerina.io/sitemap.xml"]
+  web_allowed_domains: [blog.ballerina.io]
+  web_sitemap_follow: ["/posts/"]
+
+crawl:
+  user_agent: "BallerinaCorpusBot/1.0 (+https://github.com/ballerina-platform; research corpus)"
+  concurrent_per_domain: 2
+  download_delay_s: 1.0
+  download_timeout_s: 60
+  retry_times: 3
+  http_cache: true
+  collector_delay_s: 0.2
+
+clean:
+  min_words: 30
+  near_dup_threshold: 0.8
+  minhash_num_perm: 128
+  shingle_size: 5
+  ballerina_signal_min: 2
+
+chunk:
+  name: md_structural
+  version: "1.0.0"
+  max_tokens: 300                    # must be <= embedding model max_seq_length (384 for all-mpnet-base-v2) minus header
+
+index:
+  collection_prefix: bal
+  batch_size: 64
+
+generate:
+  target_records: 500
+  tasks:
+    write_code: 0.25
+    explain_code: 0.20
+    debug_fix: 0.15
+    convert_from_language: 0.10
+    complete_code: 0.10
+    concept: 0.10
+    api_usage: 0.10
+  top_k: 4
+  max_per_doc: 12
+  concurrency: 8
+  requests_per_minute: 60
+  question_temperature: 0.8
+  answer_temperature: 0.2
+  max_answer_tokens: 2048
+  source_languages: [Python, Java, Go]
+
+validate:
+  enabled: true
+  bal_path: bal
+  workers: 4
+  timeout_s: 60
+  java_heap: 1g
+  offline: true
+  run_bbe_output: true
+  prewarm_modules: [ballerina/io, ballerina/http, ballerina/log]
+
+judge:
+  thresholds:
+    faithfulness: 4
+    correctness: 4
+    helpfulness: 3
+    instruction_following: 3
+    code_quality: 3
+  thresholds_version: "1"
+  strict_family_check: false
+  concurrency: 8
+
+split:
+  eval_fraction: 0.05
+
+export:
+  near_dup_threshold: 0.92
+  ngram_size: 13
+  max_ngram_overlap: 0.2
+  allowed_licenses: [Apache-2.0, MIT, BSD-3-Clause]
+  include_system_prompt: true
+  reject_unknown_symbols: false
+
+logging:
+  level: INFO
+  format: json

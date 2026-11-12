@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "ChunkerInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "max_tokens": {
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "tokenizer": {
+          "title": "Tokenizer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "max_tokens",
+        "tokenizer"
+      ],
+      "title": "ChunkerInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "chunk/1",
+      "default": "chunk/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "chunk_id": {
+      "title": "Chunk Id",
+      "type": "string"
+    },
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "ordinal": {
+      "title": "Ordinal",
+      "type": "integer"
+    },
+    "heading_path": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heading Path",
+      "type": "array"
+    },
+    "context_header": {
+      "title": "Context Header",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "token_count": {
+      "title": "Token Count",
+      "type": "integer"
+    },
+    "has_code": {
+      "title": "Has Code",
+      "type": "boolean"
+    },
+    "code_example_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Code Example Ids",
+      "type": "array"
+    },
+    "doc_type": {
+      "enum": [
+        "bbe",
+        "guide",
+        "tutorial",
+        "spec",
+        "api_readme",
+        "module_source",
+        "blog",
+        "release_notes",
+        "other"
+      ],
+      "title": "Doc Type",
+      "type": "string"
+    },
+    "source_uri": {
+      "title": "Source Uri",
+      "type": "string"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "eval"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "license_spdx": {
+      "title": "License Spdx",
+      "type": "string"
+    },
+    "chunker": {
+      "$ref": "#/$defs/ChunkerInfo"
+    }
+  },
+  "required": [
+    "chunk_id",
+    "doc_id",
+    "run_id",
+    "ordinal",
+    "context_header",
+    "text",
+    "token_count",
+    "has_code",
+    "doc_type",
+    "source_uri",
+    "split",
+    "license_spdx",
+    "chunker"
+  ],
+  "title": "Chunk",
+  "type": "object"
+}

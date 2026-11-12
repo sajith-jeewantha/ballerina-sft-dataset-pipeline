@@ -1,0 +1,380 @@
+{
+  "$defs": {
+    "CodeValidationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "compile_status": {
+          "default": "skipped",
+          "enum": [
+            "ok",
+            "error",
+            "skipped",
+            "timeout"
+          ],
+          "title": "Compile Status",
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/CompileError"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "wrapped": {
+          "default": false,
+          "title": "Wrapped",
+          "type": "boolean"
+        },
+        "imports_added": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Imports Added",
+          "type": "array"
+        },
+        "output_match": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Match"
+        },
+        "ballerina_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ballerina Version"
+        },
+        "checked_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked At"
+        }
+      },
+      "title": "CodeValidationResult",
+      "type": "object"
+    },
+    "CompileError": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line"
+        },
+        "col": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Col"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "title": "CompileError",
+      "type": "object"
+    },
+    "DedupInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "unique",
+          "enum": [
+            "unique",
+            "exact_dup",
+            "near_dup"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Of"
+        },
+        "near_dup_cluster": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Near Dup Cluster"
+        }
+      },
+      "title": "DedupInfo",
+      "type": "object"
+    },
+    "License": {
+      "additionalProperties": false,
+      "properties": {
+        "spdx": {
+          "default": "NOASSERTION",
+          "title": "Spdx",
+          "type": "string"
+        },
+        "basis": {
+          "default": "unknown",
+          "enum": [
+            "repo_license",
+            "package_metadata",
+            "site_terms",
+            "unknown"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "License",
+      "type": "object"
+    },
+    "UpstreamFlags": {
+      "additionalProperties": false,
+      "properties": {
+        "verify_build": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verify Build"
+        },
+        "verify_output": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verify Output"
+        },
+        "need_central": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Need Central"
+        }
+      },
+      "title": "UpstreamFlags",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "code_example/1",
+      "default": "code_example/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "example_id": {
+      "title": "Example Id",
+      "type": "string"
+    },
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "source_uri": {
+      "title": "Source Uri",
+      "type": "string"
+    },
+    "ordinal": {
+      "title": "Ordinal",
+      "type": "integer"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "heading_path": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heading Path",
+      "type": "array"
+    },
+    "intro": {
+      "default": "",
+      "title": "Intro",
+      "type": "string"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    },
+    "code": {
+      "title": "Code",
+      "type": "string"
+    },
+    "code_sha256": {
+      "title": "Code Sha256",
+      "type": "string"
+    },
+    "code_form": {
+      "enum": [
+        "program",
+        "declarations",
+        "fragment"
+      ],
+      "title": "Code Form",
+      "type": "string"
+    },
+    "imports": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Imports",
+      "type": "array"
+    },
+    "symbols": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Symbols",
+      "type": "array"
+    },
+    "expected_output": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Output"
+    },
+    "pairing_method": {
+      "enum": [
+        "bbe_directive",
+        "md_adjacent",
+        "doc_comment"
+      ],
+      "title": "Pairing Method",
+      "type": "string"
+    },
+    "upstream_flags": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UpstreamFlags"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "validation": {
+      "$ref": "#/$defs/CodeValidationResult"
+    },
+    "dedup": {
+      "$ref": "#/$defs/DedupInfo"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "eval"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "license": {
+      "$ref": "#/$defs/License"
+    }
+  },
+  "required": [
+    "example_id",
+    "doc_id",
+    "run_id",
+    "source_uri",
+    "ordinal",
+    "title",
+    "code",
+    "code_sha256",
+    "code_form",
+    "pairing_method",
+    "split",
+    "license"
+  ],
+  "title": "CodeExample",
+  "type": "object"
+}

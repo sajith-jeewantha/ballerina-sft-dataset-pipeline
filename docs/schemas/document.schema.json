@@ -1,0 +1,345 @@
+{
+  "$defs": {
+    "BBEInfo": {
+      "additionalProperties": false,
+      "description": "Extra metadata for Ballerina-by-Example documents (from examples/index.json).",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "verify_build": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verify Build"
+        },
+        "verify_output": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verify Output"
+        },
+        "need_central": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Need Central"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "BBEInfo",
+      "type": "object"
+    },
+    "DedupInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "unique",
+          "enum": [
+            "unique",
+            "exact_dup",
+            "near_dup"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Of"
+        },
+        "near_dup_cluster": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Near Dup Cluster"
+        }
+      },
+      "title": "DedupInfo",
+      "type": "object"
+    },
+    "DocStats": {
+      "additionalProperties": false,
+      "properties": {
+        "word_count": {
+          "default": 0,
+          "title": "Word Count",
+          "type": "integer"
+        },
+        "code_block_count": {
+          "default": 0,
+          "title": "Code Block Count",
+          "type": "integer"
+        },
+        "ballerina_block_count": {
+          "default": 0,
+          "title": "Ballerina Block Count",
+          "type": "integer"
+        },
+        "token_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Token Count"
+        }
+      },
+      "title": "DocStats",
+      "type": "object"
+    },
+    "ExtractorInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ExtractorInfo",
+      "type": "object"
+    },
+    "License": {
+      "additionalProperties": false,
+      "properties": {
+        "spdx": {
+          "default": "NOASSERTION",
+          "title": "Spdx",
+          "type": "string"
+        },
+        "basis": {
+          "default": "unknown",
+          "enum": [
+            "repo_license",
+            "package_metadata",
+            "site_terms",
+            "unknown"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "License",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "document/1",
+      "default": "document/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "doc_id": {
+      "title": "Doc Id",
+      "type": "string"
+    },
+    "raw_id": {
+      "title": "Raw Id",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "source": {
+      "enum": [
+        "github",
+        "central",
+        "web"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "source_uri": {
+      "title": "Source Uri",
+      "type": "string"
+    },
+    "canonical_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Canonical Url"
+    },
+    "doc_type": {
+      "enum": [
+        "bbe",
+        "guide",
+        "tutorial",
+        "spec",
+        "api_readme",
+        "module_source",
+        "blog",
+        "release_notes",
+        "other"
+      ],
+      "title": "Doc Type",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Category"
+    },
+    "markdown": {
+      "title": "Markdown",
+      "type": "string"
+    },
+    "content_sha256": {
+      "title": "Content Sha256",
+      "type": "string"
+    },
+    "ballerina_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ballerina Version"
+    },
+    "license": {
+      "$ref": "#/$defs/License"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "eval"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "stats": {
+      "$ref": "#/$defs/DocStats"
+    },
+    "dedup": {
+      "$ref": "#/$defs/DedupInfo"
+    },
+    "extractor": {
+      "$ref": "#/$defs/ExtractorInfo"
+    },
+    "bbe": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BBEInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "doc_id",
+    "raw_id",
+    "run_id",
+    "source",
+    "source_uri",
+    "doc_type",
+    "title",
+    "markdown",
+    "content_sha256",
+    "license",
+    "split",
+    "extractor",
+    "created_at"
+  ],
+  "title": "Document",
+  "type": "object"
+}

@@ -1,0 +1,573 @@
+{
+  "$defs": {
+    "Checks": {
+      "additionalProperties": false,
+      "properties": {
+        "mentions_context": {
+          "default": false,
+          "title": "Mentions Context",
+          "type": "boolean"
+        },
+        "unknown_symbols": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unknown Symbols",
+          "type": "array"
+        },
+        "max_ngram_overlap_eval": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Ngram Overlap Eval"
+        },
+        "near_dup_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Near Dup Of"
+        }
+      },
+      "title": "Checks",
+      "type": "object"
+    },
+    "CodeBlockCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "code_sha256": {
+          "title": "Code Sha256",
+          "type": "string"
+        },
+        "code_form": {
+          "enum": [
+            "program",
+            "declarations",
+            "fragment"
+          ],
+          "title": "Code Form",
+          "type": "string"
+        },
+        "compile_status": {
+          "enum": [
+            "ok",
+            "error",
+            "skipped",
+            "timeout"
+          ],
+          "title": "Compile Status",
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/CompileError"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "wrapped": {
+          "default": false,
+          "title": "Wrapped",
+          "type": "boolean"
+        },
+        "imports_added": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Imports Added",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code_sha256",
+        "code_form",
+        "compile_status"
+      ],
+      "title": "CodeBlockCheck",
+      "type": "object"
+    },
+    "CodeValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/CodeBlockCheck"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "ballerina_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ballerina Version"
+        }
+      },
+      "required": [
+        "required"
+      ],
+      "title": "CodeValidation",
+      "type": "object"
+    },
+    "CompileError": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line"
+        },
+        "col": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Col"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "title": "CompileError",
+      "type": "object"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "pending",
+          "enum": [
+            "pending",
+            "accepted",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "thresholds_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thresholds Version"
+        }
+      },
+      "title": "Decision",
+      "type": "object"
+    },
+    "Generation": {
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMCall"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mutation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Mutation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Generation",
+      "type": "object"
+    },
+    "JudgeResult": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "prompt_id": {
+          "title": "Prompt Id",
+          "type": "string"
+        },
+        "prompt_version": {
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "scores": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Scores",
+          "type": "object"
+        },
+        "reasons": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "object"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "provider",
+        "prompt_id",
+        "prompt_version",
+        "scores",
+        "created_at"
+      ],
+      "title": "JudgeResult",
+      "type": "object"
+    },
+    "LLMCall": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "prompt_id": {
+          "title": "Prompt Id",
+          "type": "string"
+        },
+        "prompt_version": {
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Usage"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "model",
+        "provider",
+        "prompt_id",
+        "prompt_version",
+        "created_at"
+      ],
+      "title": "LLMCall",
+      "type": "object"
+    },
+    "Mutation": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "original_example_id": {
+          "title": "Original Example Id",
+          "type": "string"
+        },
+        "compiler_error": {
+          "title": "Compiler Error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "original_example_id",
+        "compiler_error"
+      ],
+      "title": "Mutation",
+      "type": "object"
+    },
+    "PipelineInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Git Commit"
+        },
+        "config_sha256": {
+          "title": "Config Sha256",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "sft_meta/1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_sha256"
+      ],
+      "title": "PipelineInfo",
+      "type": "object"
+    },
+    "Seed": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "chunk",
+            "code_example"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "doc_id": {
+          "title": "Doc Id",
+          "type": "string"
+        },
+        "chunk_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chunk Id"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "doc_id"
+      ],
+      "title": "Seed",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "sft_meta/1",
+      "default": "sft_meta/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "task_type": {
+      "enum": [
+        "write_code",
+        "complete_code",
+        "explain_code",
+        "debug_fix",
+        "convert_from_language",
+        "concept",
+        "api_usage"
+      ],
+      "title": "Task Type",
+      "type": "string"
+    },
+    "construction": {
+      "enum": [
+        "llm_grounded",
+        "mutation",
+        "back_translation",
+        "seed_verified"
+      ],
+      "title": "Construction",
+      "type": "string"
+    },
+    "seed": {
+      "$ref": "#/$defs/Seed"
+    },
+    "context_chunk_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Context Chunk Ids",
+      "type": "array"
+    },
+    "source_uris": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Uris",
+      "type": "array"
+    },
+    "licenses": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Licenses",
+      "type": "array"
+    },
+    "split": {
+      "enum": [
+        "train",
+        "eval"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "generation": {
+      "$ref": "#/$defs/Generation"
+    },
+    "judge": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JudgeResult"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "code_validation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CodeValidation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "checks": {
+      "$ref": "#/$defs/Checks"
+    },
+    "decision": {
+      "$ref": "#/$defs/Decision"
+    },
+    "pipeline": {
+      "$ref": "#/$defs/PipelineInfo"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "run_id",
+    "task_type",
+    "construction",
+    "seed",
+    "split",
+    "pipeline",
+    "created_at"
+  ],
+  "title": "SFTMeta",
+  "type": "object"
+}
