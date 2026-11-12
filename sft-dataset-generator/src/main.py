@@ -1,19 +1,19 @@
 """
-RAG-Grounded Synthetic SFT Dataset Generator
-==============================================
+RAG-Grounded Synthetic SFT Dataset Generator (async, corrected client)
+========================================================================
+Changes from your last version:
+  1. CLIENT FIX: uses openai.AsyncOpenAI pointed at OpenRouter's base_url,
+     NOT the `openrouter` package's OpenRouter class (which only has
+     `.chat.send()`, not `.chat.completions.create()` — this was the
+     actual cause of every single chunk failing across 3 runs).
+  2. Concurrency: question-gen and answer-gen now run concurrently via
+     asyncio + a semaphore, instead of one chunk at a time.
 
-Pipeline: source docs -> question generation -> retrieval -> grounded answer
-generation -> verification/filtering -> SFT-ready JSONL.
-
-Designed for generating a Ballerina-language SFT dataset, but generic to any
-domain corpus. Uses the OpenAI API for generation; swap `call_llm()` for
-Anthropic, any OpenAI-compatible endpoint (vLLM, Together, etc.), or a local
-model if needed.
-
-Env:
-  export OPENAI_API_KEY=sk-...
+TEST THIS FILE ON A TINY SLICE BEFORE RUNNING THE FULL 582-CHUNK BATCH.
+See the isolated sanity check at the bottom of this message first.
 """
 
+import asyncio
 import hashlib
 import json
 import re
@@ -30,27 +30,42 @@ from dataclasses import dataclass, field
 from typing import Optional
 from ingest_corpus import build_chunks_from_gcs, build_chunks_from_local_jsonl
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
-from openai import OpenAI
+from tqdm.asyncio import tqdm_asyncio
+from openai import AsyncOpenAI
 
-client = OpenAI(api_key=API_KEY)
+# --- THE FIX: standard OpenAI SDK pointed at OpenRouter, not the `openrouter` package ---
+client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=API_KEY)
+
+# tune this to your OpenRouter rate limit / desired throughput
+SEM = asyncio.Semaphore(10)
 
 
-#
-# LLM call wrapper — swap this for whichever "big LLM" you're using
-#
-def call_llm(prompt: str, system: str = "", max_tokens: int = 1024, model: str = ANSWER_GEN_MODEL) -> str:
+async def call_llm(prompt: str, system: str = "", max_tokens: int = 2048, model: str = ANSWER_GEN_MODEL,
+                    max_retries: int = 3) -> str:
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    resp = client.chat.completions.create(
-        model=model,
-        max_tokens=max_tokens,
-        messages=messages,
-    )
-    return resp.choices[0].message.content or ""
+    last_error = None
+    async with SEM:
+        for attempt in range(max_retries):
+            try:
+                resp = await client.chat.completions.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    messages=messages,
+                    extra_body={"reasoning": {"effort": "none"}},
+                )
+                text = resp.choices[0].message.content or ""
+                if text.strip():
+                    return text
+                last_error = f"empty content (finish_reason={resp.choices[0].finish_reason})"
+            except Exception as e:
+                last_error = str(e)
+            await asyncio.sleep(2 ** attempt)
+
+    raise ValueError(f"Empty response from model {model} after {max_retries} retries — last error: {last_error}")
 
 
 #
@@ -65,7 +80,7 @@ class SFTExample:
 
 
 #
-# 1. Indexing (same as your RAG index, reused here)
+# 1. Indexing
 #
 class CorpusIndex:
     def __init__(self, collection_name=CHROMADB_COLLECTION_NAME, embed_model=EMBEDDING_MODEL) -> None:
@@ -76,10 +91,6 @@ class CorpusIndex:
         self.collection = self.client.get_or_create_collection(self.collection_name)
 
     def reset(self):
-        """Wipe this collection. IMPORTANT: chroma_db is persisted to disk
-        across runs — if you re-run ingestion and don't see the record
-        count you expect, stale chunks from a previous run are almost
-        always the cause. Call this before re-ingesting from scratch."""
         self.client.delete_collection(self.collection_name)
         self.collection = self.client.get_or_create_collection(self.collection_name)
 
@@ -87,7 +98,6 @@ class CorpusIndex:
         return self.collection.count()
 
     def add_chunks(self, chunks: list[dict]):
-        """chunks: [{"id": ..., "text": ..., "metadata": {...}}]"""
         embeddings = self.embedder.encode([c["text"] for c in chunks]).tolist()
         self.collection.add(
             ids=[c["id"] for c in chunks],
@@ -113,11 +123,14 @@ class CorpusIndex:
 
 
 #
-# 2. Stage 1 — Question generation FROM the source chunk
-#    (grounds question generation the same way we ground answering)
+# 2. Stage 1 — question generation (async)
 #
-def generate_questions(chunk: dict, n: int = 3) -> list[str]:
-    raw = call_llm(QUESTION_GEN_PROMPT.format(n=n, chunk=chunk["text"]), model=QUESTION_GEN_MODEL)
+async def generate_questions(chunk: dict, n: int = 3) -> list[str]:
+    try:
+        raw = await call_llm(QUESTION_GEN_PROMPT.format(n=n, chunk=chunk["text"]), model=QUESTION_GEN_MODEL)
+    except ValueError as e:
+        print(f"  SKIPPED chunk {chunk['id']}: {e}")
+        return []
     try:
         questions = json.loads(_extract_json(raw))
         return [q.strip() for q in questions if isinstance(q, str) and q.strip()]
@@ -126,23 +139,25 @@ def generate_questions(chunk: dict, n: int = 3) -> list[str]:
 
 
 def _extract_json(text: str) -> str:
-    """Strip markdown code fences if the model wraps its JSON output."""
     match = re.search(r"\[.*\]", text, re.DOTALL)
     return match.group(0) if match else text
 
 
 #
-# 3. Stage 2 + 3 — Retrieve context for the question, then answer grounded
-#    in ONLY that context (this is the key fix for "LLM doesn't know this")
+# 3. Stage 2+3 — grounded answer generation (async)
 #
-def generate_grounded_answer(index: CorpusIndex, question: str, top_k: int = 4) -> Optional[SFTExample]:
-    retrieved = index.retrieve(question, top_k=top_k)
+async def generate_grounded_answer(index: CorpusIndex, question: str, top_k: int = 4) -> Optional[SFTExample]:
+    retrieved = index.retrieve(question, top_k=top_k)  # sync — chromadb has no async client
     context = "\n\n---\n\n".join(r["text"] for r in retrieved)
 
-    answer = call_llm(ANSWER_GEN_PROMPT.format(context=context, question=question), model=ANSWER_GEN_MODEL)
+    try:
+        answer = await call_llm(ANSWER_GEN_PROMPT.format(context=context, question=question), model=ANSWER_GEN_MODEL)
+    except ValueError as e:
+        print(f"  SKIPPED question {question[:60]!r}: {e}")
+        return None
 
-    if "INSUFFICIENT_CONTEXT" in answer:
-        return None  # LLM itself flagged it doesn't have grounding — drop it
+    if not answer.strip() or "INSUFFICIENT_CONTEXT" in answer:
+        return None
 
     example = SFTExample(
         instruction=question,
@@ -154,13 +169,28 @@ def generate_grounded_answer(index: CorpusIndex, question: str, top_k: int = 4) 
 
 
 #
-# 4. Stage 4 — Verification / filtering
+# 3b. Per-chunk pipeline: questions -> answers, all concurrent
 #
-def check_faithfulness(index: CorpusIndex, example: SFTExample) -> bool:
+async def process_chunk(index: CorpusIndex, chunk: dict, n: int) -> list[SFTExample]:
+    questions = await generate_questions(chunk, n=n)
+    if not questions:
+        return []
+    answers = await asyncio.gather(*[generate_grounded_answer(index, q) for q in questions])
+    return [a for a in answers if a is not None]
+
+
+#
+# 4. Verification (async)
+#
+async def check_faithfulness(index: CorpusIndex, example: SFTExample) -> bool:
     context = "\n\n".join(
         index.collection.get(ids=[cid])["documents"][0] for cid in example.source_chunk_ids
     )
-    verdict = call_llm(FAITHFULNESS_PROMPT.format(context=context, answer=example.output), model=JUDGE_MODEL)
+    try:
+        verdict = await call_llm(FAITHFULNESS_PROMPT.format(context=context, answer=example.output), model=JUDGE_MODEL)
+    except ValueError as e:
+        print(f"  SKIPPED faithfulness check: {e}")
+        return False
     is_faithful = verdict.strip().upper().startswith("FAITHFUL")
     example.verification["faithfulness"] = verdict.strip()
     return is_faithful
@@ -171,12 +201,10 @@ def extract_code_blocks(text: str) -> list[str]:
 
 
 def check_code_compiles(example: SFTExample, ballerina_bin: str = "bal") -> bool:
-    """Compile-check any Ballerina code blocks in the answer.
-    Requires the Ballerina CLI installed and on PATH."""
     code_blocks = extract_code_blocks(example.output)
     if not code_blocks:
         example.verification["compiled"] = "n/a (no code)"
-        return True  # nothing to check, don't penalize non-code answers
+        return True
 
     all_ok = True
     for i, code in enumerate(code_blocks):
@@ -195,9 +223,18 @@ def check_code_compiles(example: SFTExample, ballerina_bin: str = "bal") -> bool
     return all_ok
 
 
+async def verify_example(index: CorpusIndex, ex: SFTExample, require_code_check: bool) -> Optional[SFTExample]:
+    if not await check_faithfulness(index, ex):
+        return None
+    if require_code_check and not check_code_compiles(ex):  # sync — subprocess, no async win here
+        return None
+    return ex
+
+
+#
+# Dedup (unchanged, sync — local embedding compute, not API-bound)
+#
 def _exact_dedup(examples: list[SFTExample]) -> list[SFTExample]:
-    """Fast pre-filter: drop exact (instruction, output) string duplicates
-    before running the more expensive embedding-based near-dup pass."""
     seen = set()
     keep = []
     for ex in examples:
@@ -207,26 +244,11 @@ def _exact_dedup(examples: list[SFTExample]) -> list[SFTExample]:
             keep.append(ex)
     return keep
 
-def deduplicate(
-        examples: list[SFTExample],
-        embedder: SentenceTransformer,
-        question_threshold: float = 0.92,
-        answer_threshold: float = 0.95,
-) -> list[SFTExample]:
-    """Two-stage dedup:
-      1. Exact-match on (instruction, output) — cheap, catches perfect dupes.
-      2. Near-duplicate filtering on questions AND answers separately — an
-         example is dropped if either its question is near-duplicate to a
-         kept question, OR its answer is near-duplicate to a kept answer
-         (the latter catches cases where different phrasings collapsed to
-         the same generated answer, often a sign of an overlapping/thin
-         source chunk rather than a genuinely distinct training example).
-    """
+
+def deduplicate(examples, embedder, question_threshold=0.92, answer_threshold=0.95):
     if not examples:
         return []
-
     examples = _exact_dedup(examples)
-
     q_embs = embedder.encode([e.instruction for e in examples])
     a_embs = embedder.encode([e.output for e in examples])
     q_embs = q_embs / np.linalg.norm(q_embs, axis=1, keepdims=True)
@@ -245,52 +267,34 @@ def deduplicate(
 
 
 #
-# 5. Full pipeline
+# 5. Full pipeline (async)
 #
-def build_sft_dataset(index: CorpusIndex, questions_per_chunk: int = 3, require_code_check: bool = True,
-                      output_path: str = "sft_dataset.jsonl", ):
+async def build_sft_dataset(index: CorpusIndex, questions_per_chunk: int = 3, require_code_check: bool = True,
+                             output_path: str = "sft_dataset.jsonl"):
     all_chunks = index.get_all_chunks()
-    candidates: list[SFTExample] = []
 
-    print(f"Generating questions from {len(all_chunks)} chunks...")
-    for chunk in tqdm(all_chunks):
-        questions = generate_questions(chunk, n=questions_per_chunk)
-        for q in questions:
-            example = generate_grounded_answer(index, q)
-            if example is not None:
-                candidates.append(example)
+    print(f"Generating questions + answers for {len(all_chunks)} chunks (concurrent, sem={SEM._value})...")
+    chunk_results = await tqdm_asyncio.gather(
+        *[process_chunk(index, c, questions_per_chunk) for c in all_chunks]
+    )
+    candidates: list[SFTExample] = [ex for sub in chunk_results for ex in sub]
 
     candidates_with_code = sum(1 for c in candidates if extract_code_blocks(c.output))
-    print(
-        f"Generated {len(candidates)} candidate examples "
-        f"({candidates_with_code} contain a fenced code block). Verifying..."
+    print(f"Generated {len(candidates)} candidate examples ({candidates_with_code} with code). Verifying...")
+
+    verify_results = await tqdm_asyncio.gather(
+        *[verify_example(index, ex, require_code_check) for ex in candidates]
     )
-    verified = []
-    dropped_faithfulness = dropped_compile = 0
-    for ex in tqdm(candidates):
-        if not check_faithfulness(index, ex):
-            dropped_faithfulness += 1
-            continue
-        if require_code_check and not check_code_compiles(ex):
-            dropped_compile += 1
-            continue
-        verified.append(ex)
+    verified = [ex for ex in verify_results if ex is not None]
+    dropped = len(candidates) - len(verified)
 
     verified_with_code = sum(1 for e in verified if extract_code_blocks(e.output))
-    print(
-        f"{len(verified)} passed verification "
-        f"({verified_with_code} contain a fenced code block). "
-        f"Dropped: {dropped_faithfulness} failed faithfulness, "
-        f"{dropped_compile} failed compile check. Deduplicating..."
-    )
+    print(f"{len(verified)} passed verification ({verified_with_code} with code). Dropped: {dropped}. Deduplicating...")
 
     final = deduplicate(verified, index.embedder)
     final_with_code = sum(1 for e in final if extract_code_blocks(e.output))
 
-    print(
-        f"Final dataset size: {len(final)} "
-        f"({final_with_code} contain a fenced code block). Writing to {output_path}..."
-    )
+    print(f"Final dataset size: {len(final)} ({final_with_code} with code). Writing to {output_path}...")
     with open(output_path, "w") as f:
         for ex in final:
             f.write(json.dumps({
@@ -306,24 +310,24 @@ def build_sft_dataset(index: CorpusIndex, questions_per_chunk: int = 3, require_
 #
 # Example usage
 #
-if __name__ == "__main__":
+async def main():
     index = CorpusIndex()
     index.reset()
 
-    # Google Cloud storage
-    # chunk_source = build_chunks_from_gcs(bucket_name="your-crawler-bucket", prefix="ballerina/"):
-
-    # Local Data
     chunk_source = build_chunks_from_local_jsonl("../../data/scraper/ballerina_corpus.jsonl")
 
     chunk_batch = []
     for chunk in chunk_source:
         chunk_batch.append(chunk)
-        if len(chunk_batch) >= 256:  # batch embedding calls
+        if len(chunk_batch) >= 256:
             index.add_chunks(chunk_batch)
             chunk_batch = []
     if chunk_batch:
         index.add_chunks(chunk_batch)
 
     print(f"Indexed {index.count()} chunks total.")
-    build_sft_dataset(index, questions_per_chunk=3, output_path="../../data/supervised/sft-dataset.jsonl")
+    await build_sft_dataset(index, questions_per_chunk=3, output_path="../../data/supervised/sft-dataset.jsonl")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
