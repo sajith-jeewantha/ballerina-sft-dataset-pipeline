@@ -64,9 +64,7 @@ target/
 Dependencies.toml
 
 *.hprof
-*.jsonl
-generated.jsonl
-test.py
 
-proxy/
-seeds/
+# --- Pipeline outputs (data/ is regenerated from upstream sources) ---
+.pytest_cache/
+httpcache/

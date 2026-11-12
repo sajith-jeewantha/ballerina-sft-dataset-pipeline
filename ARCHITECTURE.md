@@ -4,7 +4,7 @@ This pipeline builds a traceable, compiler-checked supervised fine-tuning (SFT) 
 
 Design references: [docs/recommendations.md](docs/recommendations.md) (the reasoning) and [docs/schemas.md](docs/schemas.md) (every record and field).
 
-> **Status:** this describes the *target* design, approved in Phases 2–3. Phase 5 implements it. Command names below are the planned interface.
+> **Status:** implemented in Phase 5 (see [CHANGELOG.md](CHANGELOG.md)). Commands below are the real interface.
 
 ---
 
@@ -58,8 +58,9 @@ flowchart LR
     CK & CE --> GQ
     VDB -- retrieve --> GQ
     GQ --> CAND[/"data/sft/&lt;run&gt;/candidates.jsonl"/]
-    CAND --> VA --> JU --> META[/"data/sft/&lt;run&gt;/metadata.jsonl"/]
-    META --> EP --> OUT[/"train.jsonl · eval.jsonl<br/>(messages)"/]
+    CAND --> VA --> VAL[/"validated.jsonl"/] --> JU --> JDG[/"judged.jsonl"/]
+    JDG --> EP
+    EP --> OUT[/"train.jsonl · eval.jsonl<br/>(messages) + metadata.jsonl"/]
 ```
 
 **One deliberate change in order:** the brief lists *judge → validate*. This pipeline runs **validate → judge** instead. The compiler and the static checks are free and deterministic, so candidates that don't compile, that mention "the context", or that use unknown APIs are rejected *before* any judge tokens are spent. Nothing else changes: both checks still run, and both results are stored on every record.
@@ -77,10 +78,10 @@ flowchart LR
 | 3 | Extract | `sftgen.extract` | `sftgen extract` | documents | `data/clean/code_examples.jsonl` | Pairs code with prose (`bbe_directive`, `md_adjacent`, `doc_comment`). Compiles each example, and runs it against `.out` where the upstream flags say it should match. |
 | 4 | Chunk | `sftgen.chunk` | `sftgen chunk` | documents, code examples | `data/chunks/<chunker>/chunks.jsonl` | Splits along headings with a token budget. Never splits a code block. Adds the heading breadcrumb as a header. |
 | 5 | Index | `sftgen.index` | `sftgen index` | chunks | Chroma (`data/chroma/`) | Batched embedding. `upsert` by `chunk_id`. Collection named by embedding model and chunker version. |
-| 6 | Generate | `sftgen.generate` | `sftgen generate` | chunks, code examples, Chroma | `data/sft/<run>/candidates.jsonl` | Fills the per-task-type quotas. Uses grounded LLM answers, mutation (`debug_fix`) or back-translation (`convert_from_language`). Retrieval is limited to the seed's split. |
-| 7 | Validate | `sftgen.validate` | `sftgen validate` | candidates | candidates, updated with checks | `bal build --offline` in a process pool, with a sandboxed temp directory per build, a timeout, a heap cap and a cache. Flags mentions of "the context". Flags unknown `module:symbol`s. |
-| 8 | Judge | `sftgen.judge` | `sftgen judge` | validated candidates | `data/sft/<run>/metadata.jsonl` | Rubric judge (1–5 on five criteria, JSON output) from a different model family. |
-| 9 | Export | `sftgen.export` | `sftgen export` | metadata, candidates | `train.jsonl`, `eval.jsonl`, `metadata.jsonl` | Applies thresholds from the config. Near-duplicate filter on question embeddings. 13-gram decontamination against eval. Writes `messages` JSONL. |
+| 6 | Generate | `sftgen.generate` | `sftgen generate` | chunks, code examples, Chroma | `data/sft/<run>/candidates.jsonl` | Fills the per-task-type quotas. Uses grounded LLM answers, mutation (`debug_fix`), back-translation (`convert_from_language`) or the verified seed code itself (`complete_code`). Retrieval is limited to the seed's split. |
+| 7 | Validate | `sftgen.validate` | `sftgen validate` | candidates | `data/sft/<run>/validated.jsonl` | `bal build --offline` in a worker pool (threads driving `bal` subprocesses), with a sandboxed temp directory per build, a timeout, a heap cap and a cache. Flags mentions of "the context". Flags unknown `module:symbol`s. |
+| 8 | Judge | `sftgen.judge` | `sftgen judge` | validated.jsonl | `data/sft/<run>/judged.jsonl` | Rubric judge (1–5 on five criteria, JSON output) from a different model family. |
+| 9 | Export | `sftgen.export` | `sftgen export` | judged.jsonl | `train.jsonl`, `eval.jsonl`, `metadata.jsonl` | Applies thresholds from the config. Near-duplicate filter on question embeddings. 13-gram decontamination against eval. Writes `messages` JSONL. |
 | — | Shared | `shared/balpipe_common` | — | — | — | Pydantic schemas, config loading, JSON logging, atomic JSONL I/O, manifests, ID helpers. |
 
 `sftgen all` runs stages 2–9 in order. Each stage can also be run on its own.
@@ -105,7 +106,7 @@ sequenceDiagram
     B-->>G: compile_status / errors (cached by sha256+version)
     Note over G,J: judge stage (only if checks passed)
     G->>J: question + answer + exact context
-    J-->>G: scores{5} + reasons (JSON) → metadata.jsonl
+    J-->>G: scores{5} + reasons (JSON) → judged.jsonl
 ```
 
 ---
@@ -133,7 +134,7 @@ erDiagram
 
 ## 5. Where data is stored
 
-Everything under `data/` is gitignored. GCS is an optional mirror of the same layout (`gs://$GCS_BUCKET/<same path>`).
+Everything under `data/` is gitignored. GCS mirroring of raw parts to `gs://$GCS_BUCKET/<same path>` is **opt-in** (`gcs_mirror: true` + `pip install -e "shared[gcs]"`).
 
 ```
 data/
@@ -152,7 +153,8 @@ data/
 ├── chroma/                                # derived index — safe to delete & rebuild
 ├── sft/<run_id>/
 │   ├── candidates.jsonl                   # generate output (append-only checkpoint)
-│   ├── metadata.jsonl                     # all candidates + checks + scores + decision
+│   ├── validated.jsonl · judged.jsonl     # validate / judge checkpoints
+│   ├── metadata.jsonl                     # export: all candidates + checks + scores + decision
 │   ├── train.jsonl · eval.jsonl           # export: {id, messages} only
 │   └── _manifest.json
 └── cache/
@@ -235,7 +237,8 @@ Secrets are never logged. Manifests store a **redacted** config snapshot and its
 ```bash
 # one-time setup
 python3.11 -m venv .venv && source .venv/bin/activate
-pip install -e shared -r scraper/requirements.txt -r sft-dataset-generator/requirements.txt
+pip install -e shared -r scraper/requirements.txt -e scraper \
+            -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
 cp .env.example .env            # fill in keys + model names
 bal version                     # Ballerina on PATH (validated against 2201.14.x)
 
@@ -278,7 +281,7 @@ Useful flags: `--limit N` for a small test run, `--dry-run` to show the plan wit
 | Scraping politeness | `ROBOTSTXT_OBEY=True`. One honest user-agent with a contact URL. AutoThrottle, at most 2 concurrent requests per domain, ETag and conditional GET, sitemap-driven seeds. No proxies, no user-agent rotation. |
 | HTTP retries | Scrapy `RETRY_TIMES=3` with backoff. `urllib3.Retry` for GitHub and Central, honouring `Retry-After` and GitHub's `X-RateLimit-Reset`. |
 | LLM calls | OpenAI SDK pointed at OpenRouter: `max_retries` with exponential backoff and `Retry-After`. No retries on 400 or 401. An `asyncio.Semaphore` plus a requests-per-minute limiter for each model. Responses must be JSON, checked against a Pydantic model. |
-| Compiling generated code | Compile only, never run. A fresh temp directory as the working folder, `--offline` after a one-time warm-up, a timeout of 60 s, `JAVA_OPTS=-Xmx1g`, and a process pool of 4. |
+| Compiling generated code | Compile only, never run. A fresh temp directory as the working folder, `--offline` after a one-time warm-up, a timeout of 60 s, `JAVA_OPTS=-Xmx1g`, and 4 parallel builds. |
 | Logging | Structured JSON logs (stdlib `logging`) with `run_id`, `stage`, item ID and event fields. Funnel counts go to the manifest. |
 | Secrets | Only in `.env` or the environment, gitignored. Redacted in logs and manifests. Not passed to subprocesses. |
 | Licensing | Every record carries an SPDX license and how it was determined. Export can filter with `allowed_licenses`. |

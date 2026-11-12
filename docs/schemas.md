@@ -223,7 +223,7 @@ One Ballerina code block paired with the prose that explains it. These are the s
 
 | Field | Why it exists |
 |---|---|
-| `chunk_id` | `chk_<doc hash>_<content_sha256[:8]>_<ordinal>`. Readable, deterministic, and **it changes when the document content changes**, so stale vectors are never mixed with new text. |
+| `chunk_id` | `chk_<doc hash>_<sha256(chunk text)[:8]>_<ordinal>`. Readable, deterministic, and **it changes whenever the chunk's own text changes** (a document edit or a chunker change), so stale vectors are never mixed with new text. *(Phase 5: the design hashed the document instead; that let a chunker change keep the same ID with different text.)* |
 | `doc_id`, `ordinal` | Position in the parent document. Neighbouring chunks can be fetched for more context. |
 | `heading_path`, `context_header` | The section breadcrumb. The **text that gets embedded is `context_header + "\n\n" + text`**. That embed text isn't stored, because it can be derived. |
 | `text` | The chunk body. It never contains a partial code fence. |
@@ -399,3 +399,23 @@ ballerina-llm-pipeline/
 **Option B: merge into one package with optional extras** (`pip install -e .[collect]`, `.[generate]`). Simpler imports, but it means renaming both projects and changing more of the existing structure.
 
 Either way, the two existing folder names stay as they are, as agreed.
+
+---
+
+## 9. Additions made during implementation (Phase 5)
+
+These were needed to build the approved design. Each one adds a field or a value; nothing approved was removed or changed in meaning.
+
+| Where | Addition | Why |
+|---|---|---|
+| `RawRecord.git.blob_sha` | Git blob SHA of the file | Lets the GitHub collector skip downloading files that haven't changed between commits. |
+| `Document.bbe` | `{name, verify_build, verify_output, need_central}` from `examples/index.json` | Carries the upstream flags for each BBE through to `CodeExample.upstream_flags`. |
+| `CodeExample.validation.compile_status` | Adds the value `timeout` | A build that hangs is different from a compile error. |
+| `SFTMeta.construction` | Adds the value `seed_verified` | `complete_code` answers are the verified original code itself: no LLM, no mutation. |
+| `SFTMeta.decision.status` | Adds the value `pending` | Candidates that passed validate but haven't been judged yet. |
+| `LLMCall.cached` | `true` if served from the response cache | Cost accounting, and an honest record of what was actually called. |
+| Working files `candidates.jsonl`, `validated.jsonl`, `judged.jsonl` | `SFTCandidate` = `SFTMeta` + `messages` | Checkpoints between generate, validate and judge. Export splits them into the training files and `metadata.jsonl`. |
+| `Document.doc_type` value `spec` | From the `spec_html` extractor | The 2024R1 language spec, converted with a structure-preserving HTML→Markdown converter (grammar blocks become ```ebnf). |
+| Manifest file names | `_manifest.<stage>.json` when stages share a directory (`clean/`, `sft/<run>/`) | Each stage's manifest stays separate. |
+
+The Pydantic models in `shared/balpipe_common/schemas.py` are the source of truth for every schema.

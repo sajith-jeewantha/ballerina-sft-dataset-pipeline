@@ -78,7 +78,7 @@ footer{padding:36px 0 48px;color:var(--muted);font-size:13px}
     <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
     <h1>Ballerina SFT Data Pipeline</h1>
     <p>A pipeline that builds a traceable, compiler-checked fine-tuning dataset for a Ballerina small language model. It takes upstream sources through collect, clean, extract, chunk, embed, generate, validate, judge and export.</p>
-    <span class="status">Target design (Phases 2–3 approved), being implemented in Phase 5</span>
+    <span class="status">Implemented in Phase 5; see CHANGELOG.md</span>
   </div>
 </header>
 
@@ -166,7 +166,7 @@ sequenceDiagram
   B-->>G: compile status + errors (cached)
   Note over G,J: judge (only if checks passed)
   G->>J: question + answer + exact context
-  J-->>G: 5 scores + reasons, written to metadata.jsonl
+  J-->>G: 5 scores + reasons, written to judged.jsonl
   </pre></div>
 </div></section>
 
@@ -202,6 +202,7 @@ erDiagram
 ├── chroma/                       # derived index, safe to delete and rebuild
 ├── sft/{run_id}/
 │   ├── candidates.jsonl          # generate checkpoint (append-only)
+│   ├── validated.jsonl · judged.jsonl
 │   ├── metadata.jsonl            # all candidates + checks + scores + decision
 │   ├── train.jsonl · eval.jsonl  # {id, messages} only
 │   └── _manifest.json
@@ -255,10 +256,11 @@ erDiagram
 
 <section id="run"><div class="wrap">
   <h2>How to run</h2>
-  <p class="lead">Planned commands (implemented in Phase 5). <code>--limit N</code> runs a small test, and <code>--dry-run</code> shows the plan without calling any model.</p>
+  <p class="lead"><code>--limit N</code> runs a small test, and <code>--dry-run</code> shows the plan without calling any model.</p>
   <div class="card">
     <div class="cmd-row"><div class="n">1</div><div class="body"><p>Set up once</p><pre class="block">python3.11 -m venv .venv &amp;&amp; source .venv/bin/activate
-pip install -e shared -r scraper/requirements.txt -r sft-dataset-generator/requirements.txt
+pip install -e shared -r scraper/requirements.txt -e scraper \
+  -r sft-dataset-generator/requirements.txt -e sft-dataset-generator
 cp .env.example .env &amp;&amp; bal version</pre></div></div>
     <div class="cmd-row"><div class="n">2</div><div class="body"><p>Collect</p><pre class="block">python -m ballerinascraper.collect github
 python -m ballerinascraper.collect central
@@ -323,13 +325,13 @@ const STAGES = [
    cmd:"sftgen generate", inputs:"chunks, code examples, Chroma", outputs:"data/sft/{run}/candidates.jsonl",
    logic:"Fills task-type quotas. Grounded LLM answers; mutation for debug_fix; back-translation for convert_from_language. Retrieval limited to the seed's split."},
   {id:"validate", name:"Validate", color:"--s-gen", module:"sftgen.validate",
-   cmd:"sftgen validate", inputs:"candidates.jsonl", outputs:"candidates + checks",
+   cmd:"sftgen validate", inputs:"candidates.jsonl", outputs:"validated.jsonl",
    logic:"Sandboxed bal build --offline in a process pool, cached. Flags answers that mention 'the context'. Flags unknown module:symbol references."},
   {id:"judge", name:"Judge", color:"--s-gen", module:"sftgen.judge",
-   cmd:"sftgen judge", inputs:"validated candidates", outputs:"data/sft/{run}/metadata.jsonl",
+   cmd:"sftgen judge", inputs:"validated.jsonl", outputs:"judged.jsonl",
    logic:"Judge model from a different family. Scores 1–5 for faithfulness, correctness, helpfulness, instruction following and code quality, with reasons."},
   {id:"export", name:"Export", color:"--s-out", module:"sftgen.export",
-   cmd:"sftgen export", inputs:"metadata + candidates", outputs:"train.jsonl · eval.jsonl ({id, messages})",
+   cmd:"sftgen export", inputs:"judged.jsonl", outputs:"train.jsonl · eval.jsonl ({id, messages}) + metadata.jsonl",
    logic:"Applies thresholds from config. Near-duplicate filter. 13-gram decontamination against eval. Writes the chat messages format."}
 ];
 const btnWrap = document.getElementById("stageButtons");

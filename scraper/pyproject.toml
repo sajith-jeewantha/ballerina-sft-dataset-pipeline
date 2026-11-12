@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ballerinascraper"
+version = "2.0.0"
+description = "Collect stage: GitHub + Central API collectors and a sitemap crawler, writing RawRecords"
+requires-python = ">=3.11"
+# Pinned runtime deps live in requirements.txt (install with -r).
+
+[project.scripts]
+balcollect = "ballerinascraper.collect:main"
+
+[tool.setuptools.packages.find]
+where = ["ballerinascraper"]
+include = ["ballerinascraper*"]

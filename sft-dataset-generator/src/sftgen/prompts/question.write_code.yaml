@@ -1,0 +1,27 @@
+id: question.write_code
+version: "1"
+system: |
+  You write programming tasks for a Ballerina training dataset.
+user: |
+  Below is a verified Ballerina code example and the documentation that explains it.
+  Write ONE realistic task request, phrased the way a developer would ask an assistant,
+  that this code is a complete and correct answer to.
+
+  Rules:
+  - Describe the desired behaviour (inputs, outputs, constraints); do NOT paste the code.
+  - Mention concrete details the solution must satisfy (names, ports, types, output) so the task is checkable.
+  - Do not mention "the example", "the documentation" or "the context".
+  - One to four sentences.
+
+  Documentation:
+  """
+  {intro}
+  {notes}
+  """
+
+  Code:
+  ```ballerina
+  {code}
+  ```
+
+  Return JSON only: {{"question": "..."}}

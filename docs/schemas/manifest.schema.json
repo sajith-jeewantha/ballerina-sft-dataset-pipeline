@@ -1,0 +1,152 @@
+{
+  "$defs": {
+    "FileRef": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "records": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Records"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "FileRef",
+      "type": "object"
+    },
+    "ItemError": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "error": {
+          "title": "Error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "error"
+      ],
+      "title": "ItemError",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "manifest/1",
+      "default": "manifest/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "stage": {
+      "title": "Stage",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "running",
+        "completed",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "started_at": {
+      "title": "Started At",
+      "type": "string"
+    },
+    "finished_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finished At"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/FileRef"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/FileRef"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "config_sha256": {
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "config_snapshot": {
+      "additionalProperties": true,
+      "title": "Config Snapshot",
+      "type": "object"
+    },
+    "versions": {
+      "additionalProperties": true,
+      "title": "Versions",
+      "type": "object"
+    },
+    "counts": {
+      "additionalProperties": true,
+      "title": "Counts",
+      "type": "object"
+    },
+    "errors": {
+      "items": {
+        "$ref": "#/$defs/ItemError"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "stage",
+    "status",
+    "started_at",
+    "config_sha256"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

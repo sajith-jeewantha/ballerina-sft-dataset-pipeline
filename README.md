@@ -1,55 +1,95 @@
 # Ballerina LLM Pipeline
 
-Tools to build a RAG-grounded supervised fine-tuning (SFT) dataset for Ballerina.
+Builds a **traceable, compiler-verified supervised fine-tuning (SFT) dataset** for a Ballerina
+small language model. It collects official Ballerina sources, cleans them into Markdown, pairs
+code with its explanation, and generates and filters chat-format training data.
 
-Structure
-- scraper/ballerinascraper: Scrapy crawler that collects Ballerina-related pages and writes JSONL to data/scraper/ballerina_corpus.jsonl
-- sft-dataset-generator: RAG + LLM pipeline that ingests the corpus, generates Q/A pairs grounded in retrieved chunks, verifies faithfulness and compile-checks code, and writes SFT JSONL to data/supervised/
-- data/: local corpus and generated datasets
+* Architecture: [ARCHITECTURE.md](ARCHITECTURE.md) (or open [architecture.html](architecture.html))
+* Design rationale: [docs/recommendations.md](docs/recommendations.md) · Record schemas: [docs/schemas.md](docs/schemas.md)
+* What changed: [CHANGELOG.md](CHANGELOG.md)
 
-Prerequisites
-- Python 3.10+ (3.11 recommended)
-- Optional: Ballerina CLI (`bal`) on PATH for compile checks
-- Git
+```
+collect (GitHub · Central API · blog sitemap) → data/raw
+  → clean → extract → chunk → index → generate → validate → judge → export → data/sft/<run>/{train,eval}.jsonl
+```
 
-Environment
-Copy the .env.example files in each component and set values.
-Important env vars (sft-dataset-generator):
-- OPENAI_API_KEY - API key for LLM calls
-- QUESTION_GEN_MODEL, ANSWER_GEN_MODEL, JUDGE_MODEL - model names
-- EMBEDDING_MODEL - model used for embeddings (sentence-transformers)
-- CHROMADB_PATH - optional path for chroma persistent DB (defaults to ./chroma_db)
-- CHROMADB_COLLECTION_NAME - collection name
-- BUCKET_NAME - GCS bucket (optional)
+## Repository layout
 
-Quickstart
-1) Scraper
+| Path | What it is |
+|---|---|
+| `shared/` | `balpipe_common`: schemas, config, logging, JSONL I/O, manifests, IDs (used by both projects) |
+| `scraper/` | **collect** stage: GitHub + Central API collectors, Scrapy sitemap crawler → `data/raw/` |
+| `sft-dataset-generator/` | `sftgen` CLI: clean, extract, chunk, index, generate, validate, judge, export |
+| `config/pipeline.yaml` | All non-secret settings (sources, politeness, chunking, quotas, thresholds) |
+| `.env` | Secrets + model names (copy from `.env.example`; never committed) |
+| `data/` | All pipeline data (gitignored; reproducible from upstream) |
 
-- Create and activate a venv inside scraper/ (or use system venv)
-  cd scraper/ballerinascraper
-  python -m venv .venv && source .venv/bin/activate
-  pip install scrapy trafilatura beautifulsoup4 google-cloud-storage
+## Setup
 
-- Run the crawler (will use seeds/common_crawl_urls.txt):
-  scrapy crawl ballerinascraper -L DEBUG
+Requirements: Python 3.11+, and the Ballerina CLI (`bal`, validated with 2201.14.x) for compile checks.
 
-- Output (local): data/scraper/ballerina_corpus.jsonl
+```bash
+python3.11 -m venv .venv && source .venv/bin/activate
+pip install -e shared -r scraper/requirements.txt -e scraper \
+            -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
+cp .env.example .env    # then fill in OPENROUTER_API_KEY and the model names
+bal version
+```
 
-2) SFT dataset generator (RAG + LLM)
+> **Migrating from the old layout:** the pipeline still reads `sft-dataset-generator/.env` and
+> `scraper/ballerinascraper/.env` (with a warning), and still accepts the old `API_KEY` /
+> `BUCKET_NAME` names. Move those keys into the root `.env` when convenient.
 
-- Create and activate a venv inside sft-dataset-generator/:
-  cd sft-dataset-generator
-  python -m venv .venv && source .venv/bin/activate
-  pip install openai chromadb sentence-transformers numpy tqdm trafilatura
+Choose `JUDGE_MODEL` from a **different model family** than `ANSWER_GEN_MODEL` (a warning is
+logged otherwise; set `judge.strict_family_check: true` to make it an error).
 
-- Populate .env with OPENAI_API_KEY and model names.
-- Local run (the script expects a local corpus JSONL at ../../data/scraper/ballerina_corpus.jsonl by default):
-  python src/main.py
+## Run
 
-- The pipeline will:
-  - build a Chroma persistent collection (CHROMADB_PATH)
-  - generate questions per chunk
-  - retrieve context and generate grounded answers
-  - verify faithfulness and (optionally) compile code blocks
-  - deduplicate and write final SFT JSONL to data/supervised/sft-dataset.jsonl
+```bash
+# 1. collect (polite: robots.txt, one honest User-Agent, rate limits; unchanged content is skipped)
+python -m ballerinascraper.collect github
+python -m ballerinascraper.collect central
+(cd scraper/ballerinascraper && scrapy crawl web)
 
+# 2. process
+sftgen clean && sftgen extract && sftgen chunk && sftgen index
+
+# 3. generate → validate → judge → export
+sftgen generate --dry-run          # shows the task plan, no model calls
+sftgen generate                    # prints the run id; data/sft/<run_id>/
+sftgen validate && sftgen judge && sftgen export     # default to the latest run
+
+# or all of step 2 + 3:
+sftgen all
+```
+
+Useful flags: `--limit N` (small test), `--run-id <id>` (resume / target a run), `--force`
+(index: rebuild), `--log-format text` (human-readable logs; default is JSON).
+
+Outputs: `data/sft/<run_id>/train.jsonl` and `eval.jsonl` (`{"id", "messages"}` — directly
+loadable by TRL, Axolotl and Unsloth) and `metadata.jsonl` (full provenance, scores, checks and
+the accept/reject decision for every candidate).
+
+## Resuming after a failure
+
+Just re-run the same command. Every stage writes a `_manifest*.json` (status, inputs, config
+hash, versions, counts, item errors); generate/validate/judge append one fsync'ed line per item
+and skip IDs already done; LLM responses and compile results are cached under `data/cache/`.
+Batch stages write atomically. See ARCHITECTURE.md §9.
+
+## Configuration
+
+`config/pipeline.yaml` is documented inline. Any key can be overridden by environment variable,
+e.g. `BALPIPE__GENERATE__TARGET_RECORDS=50 sftgen generate`. Precedence:
+environment > `.env` > `pipeline.yaml` > defaults. Secrets are never logged or written to manifests.
+
+## Tests
+
+```bash
+pytest shared/tests scraper/ballerinascraper/tests sft-dataset-generator/tests
+```
+
+Covers cleaning (extractors, code-fence language labelling, relevance, dedup), chunking (fences
+never split, token budgets, heading paths, overlap), code/description pairing, Ballerina
+heuristics, compiler helpers (plus a real `bal` round-trip when installed), mutations, task
+planning, static checks, export decisions, config precedence, JSONL durability and manifests.

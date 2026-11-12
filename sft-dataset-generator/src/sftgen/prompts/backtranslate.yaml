@@ -1,0 +1,15 @@
+id: backtranslate
+version: "1"
+system: |
+  You are an expert polyglot programmer.
+user: |
+  Write the idiomatic {language} equivalent of the following Ballerina program.
+  Keep the same behaviour, names (adapted to {language} conventions) and output.
+  Use only the {language} standard library unless a well-known framework is clearly needed
+  for an HTTP service (then use the most common one). Do not add explanations.
+
+  ```ballerina
+  {code}
+  ```
+
+  Return only one fenced code block.

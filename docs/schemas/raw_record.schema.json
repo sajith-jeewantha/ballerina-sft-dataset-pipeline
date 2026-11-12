@@ -1,0 +1,302 @@
+{
+  "$defs": {
+    "CentralInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "org": {
+          "title": "Org",
+          "type": "string"
+        },
+        "package": {
+          "title": "Package",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "ballerina_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ballerina Version"
+        },
+        "api_doc_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Doc Url"
+        },
+        "source_code_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Code Location"
+        }
+      },
+      "required": [
+        "org",
+        "package",
+        "version"
+      ],
+      "title": "CentralInfo",
+      "type": "object"
+    },
+    "FetchInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_url": {
+          "title": "Requested Url",
+          "type": "string"
+        },
+        "final_url": {
+          "title": "Final Url",
+          "type": "string"
+        },
+        "http_status": {
+          "title": "Http Status",
+          "type": "integer"
+        },
+        "content_type_header": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Type Header"
+        },
+        "etag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Etag"
+        },
+        "last_modified": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Modified"
+        },
+        "fetched_at": {
+          "title": "Fetched At",
+          "type": "string"
+        },
+        "fetcher": {
+          "title": "Fetcher",
+          "type": "string"
+        },
+        "fetcher_version": {
+          "title": "Fetcher Version",
+          "type": "string"
+        },
+        "user_agent": {
+          "title": "User Agent",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requested_url",
+        "final_url",
+        "http_status",
+        "fetched_at",
+        "fetcher",
+        "fetcher_version",
+        "user_agent"
+      ],
+      "title": "FetchInfo",
+      "type": "object"
+    },
+    "GitInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "repo": {
+          "title": "Repo",
+          "type": "string"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "commit_sha": {
+          "title": "Commit Sha",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "blob_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Blob Sha"
+        }
+      },
+      "required": [
+        "repo",
+        "ref",
+        "commit_sha",
+        "path"
+      ],
+      "title": "GitInfo",
+      "type": "object"
+    },
+    "License": {
+      "additionalProperties": false,
+      "properties": {
+        "spdx": {
+          "default": "NOASSERTION",
+          "title": "Spdx",
+          "type": "string"
+        },
+        "basis": {
+          "default": "unknown",
+          "enum": [
+            "repo_license",
+            "package_metadata",
+            "site_terms",
+            "unknown"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "License",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "raw/1",
+      "default": "raw/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "raw_id": {
+      "title": "Raw Id",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "source": {
+      "enum": [
+        "github",
+        "central",
+        "web"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "source_uri": {
+      "title": "Source Uri",
+      "type": "string"
+    },
+    "media_type": {
+      "title": "Media Type",
+      "type": "string"
+    },
+    "body": {
+      "title": "Body",
+      "type": "string"
+    },
+    "raw_sha256": {
+      "title": "Raw Sha256",
+      "type": "string"
+    },
+    "fetch": {
+      "$ref": "#/$defs/FetchInfo"
+    },
+    "git": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GitInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "central": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CentralInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "license": {
+      "$ref": "#/$defs/License"
+    }
+  },
+  "required": [
+    "raw_id",
+    "run_id",
+    "source",
+    "source_uri",
+    "media_type",
+    "body",
+    "raw_sha256",
+    "fetch"
+  ],
+  "title": "RawRecord",
+  "type": "object"
+}

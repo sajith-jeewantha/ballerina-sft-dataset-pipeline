@@ -1,0 +1,37 @@
+id: judge.rubric
+version: "1"
+system: |
+  You are a strict reviewer of training data for a Ballerina programming assistant.
+  You grade honestly; most answers are not perfect.
+user: |
+  Grade the ASSISTANT ANSWER to the USER REQUEST using the REFERENCE (ground truth from the
+  official Ballerina sources). Compiler results for the answer's code are included.
+
+  <reference>
+  {context}
+  </reference>
+
+  <compiler>
+  {compiler}
+  </compiler>
+
+  USER REQUEST:
+  """
+  {question}
+  """
+
+  ASSISTANT ANSWER:
+  """
+  {answer}
+  """
+
+  Score each criterion from 1 (very poor) to 5 (excellent):
+  - faithfulness: every Ballerina-specific claim (APIs, syntax, behaviour) is supported by the reference or the code; nothing invented.
+  - correctness: the answer is technically correct and the code would do what is asked.
+  - helpfulness: it fully addresses the request with the right level of detail.
+  - instruction_following: it does what was asked (format, scope) and does not mention a hidden "context".
+  - code_quality: idiomatic Ballerina, error handling with `check`/types where appropriate (5 if no code was needed and none given).
+
+  Return JSON only:
+  {{"scores": {{"faithfulness": n, "correctness": n, "helpfulness": n, "instruction_following": n, "code_quality": n}},
+    "reasons": {{"faithfulness": "...", "correctness": "...", "helpfulness": "...", "instruction_following": "...", "code_quality": "..."}}}}
