@@ -381,7 +381,7 @@ Both projects need to share the schemas, config loading, logging and JSONL I/O. 
 **Option A (recommended): two projects plus one small shared package.**
 
 ```
-ballerina-llm-pipeline/
+ballerina-sft-dataset-pipeline/
 ├── README.md  ARCHITECTURE.md  architecture.html  CHANGELOG.md
 ├── config/pipeline.yaml              # non-secret settings (sources, thresholds, quotas)
 ├── .env.example                      # secrets + model names only

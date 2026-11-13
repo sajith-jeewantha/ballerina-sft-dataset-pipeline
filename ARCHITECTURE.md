@@ -168,8 +168,8 @@ data/
 ## 6. Repo folder structure (Option A, approved)
 
 ```
-ballerina-llm-pipeline/
-├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md
+ballerina-sft-dataset-pipeline/
+├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md · LICENSE
 ├── .env.example                       # secrets + model names only
 ├── config/pipeline.yaml               # non-secret settings
 ├── docs/
@@ -186,7 +186,7 @@ ballerina-llm-pipeline/
 │   └── ballerinascraper/
 │       ├── scrapy.cfg
 │       ├── ballerinascraper/
-│       │   ├── settings.py  items.py  pipelines.py   # RawRecord writer
+│       │   ├── settings.py  pipelines.py  raw_sink.py   # RawRecord writer
 │       │   ├── spiders/web.py                        # SitemapSpider
 │       │   ├── collectors/github.py  collectors/central.py
 │       │   └── collect.py                            # CLI entry
@@ -269,7 +269,7 @@ Useful flags: `--limit N` for a small test run, `--dry-run` to show the plan wit
 | **Atomic batch outputs** | Batch stages (clean, chunk, export) write to `*.jsonl.tmp` and `rename` it when done, so a half-written file is never read. |
 | **Deterministic IDs + `upsert`** | Re-running index or extract produces identical IDs, so there are no duplicate vectors or records. |
 | **Caches** | LLM responses (keyed by model, prompt and params) and compile results (keyed by code hash and Ballerina version) are cached on disk. A resumed or repeated run pays for no work that's already been done. |
-| **Item-level failures** | One failed item (an LLM error after retries, a compile timeout) is recorded under `manifest.errors` with its ID and skipped. It doesn't stop the run. `sftgen <stage> --retry-errors` retries only those items. |
+| **Item-level failures** | One failed item (an LLM error after retries, a compile timeout) is recorded under `manifest.errors` with its ID and skipped. It doesn't stop the run. Re-running the stage retries them, because only finished items are skipped. |
 | **Raw is immutable** | Any later stage can be deleted and rebuilt from `data/raw`. Chroma can always be rebuilt with `sftgen index --force`. |
 
 ---

@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballerina SFT Pipeline</title>
+<meta name="description" content="Architecture of a pipeline that builds a traceable, compiler-verified fine-tuning dataset for a Ballerina language model.">
+<link rel="canonical" href="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ballerina SFT Dataset Pipeline: Architecture">
+<meta property="og:description" content="Collect → clean → extract → chunk → embed → generate → validate → judge → export. Source code and docs on GitHub.">
+<meta property="og:url" content="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">
 <style>
 :root{
   --bg:#f7f7f5;--surface:#ffffff;--surface-2:#f0efec;--text:#1d1d1b;--muted:#5f5e5a;--border:#e2e0db;
@@ -68,17 +74,27 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 .cmd-row .body{flex:1;min-width:0}
 .cmd-row .body p{margin:0 0 6px;font-size:14px}
 footer{padding:36px 0 48px;color:var(--muted);font-size:13px}
-.theme-toggle{float:right;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
-@media (max-width:600px){header h1{font-size:23px}.theme-toggle{float:none;margin-bottom:10px}}
+.header-actions{float:right;display:flex;gap:8px;align-items:center}
+.theme-toggle,.repo-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.repo-btn:hover,.theme-toggle:hover{border-color:var(--accent)}
+.repo-btn svg{width:14px;height:14px;fill:currentColor}
+.repo-url{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+.repo-url a{word-break:break-all}
+footer .links a{margin-right:4px}
+@media (max-width:600px){header h1{font-size:23px}.header-actions{float:none;margin-bottom:12px}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
-    <h1>Ballerina SFT Data Pipeline</h1>
+    <div class="header-actions">
+      <a class="repo-btn" href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a>
+      <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
+    </div>
+    <h1>Ballerina SFT Dataset Pipeline</h1>
     <p>A pipeline that builds a traceable, compiler-checked fine-tuning dataset for a Ballerina small language model. It takes upstream sources through collect, clean, extract, chunk, embed, generate, validate, judge and export.</p>
-    <span class="status">Implemented in Phase 5; see CHANGELOG.md</span>
+    <span class="repo-url">Repository: <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline">github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline</a></span>
+    <span class="status">Implemented; see the <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md" style="color:inherit">changelog</a></span>
   </div>
 </header>
 
@@ -172,7 +188,7 @@ sequenceDiagram
 
 <section id="lineage"><div class="wrap">
   <h2>Lineage of records</h2>
-  <p class="lead">Every field is defined in <a href="docs/schemas.md">docs/schemas.md</a>. The train/eval split is set once on each Document, and everything derived from it inherits it.</p>
+  <p class="lead">Every field is defined in <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">docs/schemas.md</a>. The train/eval split is set once on each Document, and everything derived from it inherits it.</p>
   <div class="card diagram"><pre class="mermaid">
 erDiagram
   RAW_RECORD ||--o| DOCUMENT : "cleaned into"
@@ -211,14 +227,14 @@ erDiagram
 
 <section id="repo"><div class="wrap">
   <h2>Repo folder structure</h2>
-  <p class="lead">Option A (approved): the two existing projects plus a small shared package for schemas, config, logging, I/O and manifests.</p>
-<pre class="block">ballerina-llm-pipeline/
-├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md
+  <p class="lead">Two projects plus a small shared package for schemas, config, logging, I/O and manifests.</p>
+<pre class="block">ballerina-sft-dataset-pipeline/
+├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md · LICENSE
 ├── .env.example · config/pipeline.yaml
 ├── docs/  recommendations.md · schemas.md · schemas/*.json
 ├── shared/balpipe_common/  schemas · config · logging · jsonl_io · manifest · ids · tests/
 ├── scraper/ballerinascraper/
-│   ├── ballerinascraper/  settings · items · pipelines · spiders/web.py
+│   ├── ballerinascraper/  settings · pipelines · raw_sink · spiders/web.py
 │   │                      collectors/github.py · collectors/central.py · collect.py
 │   └── tests/
 ├── sft-dataset-generator/
@@ -258,9 +274,11 @@ erDiagram
   <h2>How to run</h2>
   <p class="lead"><code>--limit N</code> runs a small test, and <code>--dry-run</code> shows the plan without calling any model.</p>
   <div class="card">
-    <div class="cmd-row"><div class="n">1</div><div class="body"><p>Set up once</p><pre class="block">python3.11 -m venv .venv &amp;&amp; source .venv/bin/activate
+    <div class="cmd-row"><div class="n">1</div><div class="body"><p>Set up once</p><pre class="block">git clone https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline.git
+cd ballerina-sft-dataset-pipeline
+python3.11 -m venv .venv &amp;&amp; source .venv/bin/activate
 pip install -e shared -r scraper/requirements.txt -e scraper \
-  -r sft-dataset-generator/requirements.txt -e sft-dataset-generator
+  -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
 cp .env.example .env &amp;&amp; bal version</pre></div></div>
     <div class="cmd-row"><div class="n">2</div><div class="body"><p>Collect</p><pre class="block">python -m ballerinascraper.collect github
 python -m ballerinascraper.collect central
@@ -280,7 +298,7 @@ python -m ballerinascraper.collect central
       <tr><td>Atomic outputs</td><td>Batch stages write <code>*.tmp</code> and rename it when done. A half-written file is never read.</td></tr>
       <tr><td>Deterministic IDs + upsert</td><td>Re-runs never duplicate records or vectors.</td></tr>
       <tr><td>Caches</td><td>LLM responses and compile results are cached on disk, so repeated work costs nothing.</td></tr>
-      <tr><td>Item failures</td><td>Recorded in <code>manifest.errors</code>; the run continues. <code>--retry-errors</code> retries only those items.</td></tr>
+      <tr><td>Item failures</td><td>Recorded in <code>manifest.errors</code>; the run continues. Re-running the stage retries them, because only finished items are skipped.</td></tr>
     </tbody></table></div>
 </div></section>
 
@@ -300,7 +318,11 @@ python -m ballerinascraper.collect central
 </div></section>
 </main>
 
-<footer><div class="wrap">Source: <a href="ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="docs/recommendations.md">recommendations</a> · <a href="docs/schemas.md">schemas</a></div></footer>
+<footer><div class="wrap">
+  <p class="links"><strong>Source code:</strong> <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline">github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline</a></p>
+  <p class="links">Docs: <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/README.md">README</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/recommendations.md">Design rationale</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">Record schemas</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/LICENSE">Apache-2.0 license</a></p>
+  <p>This page: <a href="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html</a></p>
+</div></footer>
 
 <script>
 const STAGES = [
