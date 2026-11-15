@@ -1,49 +1,40 @@
-"""Source-specific extractors: RawRecord(s) -> clean Markdown + metadata.
+"""Turn a stored raw page into a title + clean Markdown.
 
-Each extractor has a name and version recorded on the Document, so a fix to
-one extractor only requires re-cleaning the documents it produced.
+One extractor per page shape:
+
+* BBE bundle (GitHub `examples/<name>/`): the `.md` explanation with each
+  `::: code x.bal :::` / `::: out x.out :::` directive replaced by the file,
+  verbatim, so code and explanation stay together and in order.
+* ballerina.io learn pages: Next.js embeds the page's Markdown source in
+  `__NEXT_DATA__` (exact text and code fences); enterprise-integration-pattern
+  pages embed their fields and code. Other HTML falls back to trafilatura.
+* the language spec: a structure-preserving HTML -> Markdown walk.
+* Central packages: README + API reference rendered from the docs API.
+* GitHub module files: Markdown as is; `.bal` files as one fenced block.
 """
 
 from __future__ import annotations
 
+import html as html_mod
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import PurePosixPath
-
-import yaml
-
-from balpipe_common.schemas import BBEInfo, RawRecord
+from typing import Any
 
 from sftgen import markdown as md
 
-DOC_TYPES_BY_PATH = [
-    (re.compile(r"(^|/)spec(/|$)"), "spec"),
-    (re.compile(r"release-notes"), "release_notes"),
-    (re.compile(r"development-tutorials|integration-tutorials|get-started|tutorial"), "tutorial"),
-]
 DIRECTIVE_RE = re.compile(r"^:::\s*(code|out)\s+([\w.\-/]+)\s*:::\s*$", re.MULTILINE)
 NEXT_DATA_RE = re.compile(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', re.DOTALL)
 TAG_RE = re.compile(r"<[^>]+>")
-MODULE_SPEC_RE = re.compile(r"^public/spec/([\w.-]+)/spec\.md$")
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 
 
 @dataclass
 class Extracted:
-    """What an extractor produces; the stage turns it into a Document."""
-
-    raw: RawRecord
-    markdown: str
     title: str
-    doc_type: str
+    markdown: str
     extractor: str
-    version: str = "1.0.0"
-    canonical_url: str | None = None
-    description: str | None = None
-    category: str | None = None
-    ballerina_version: str | None = None
-    bbe: BBEInfo | None = None
-    extra_raw_ids: list[str] = field(default_factory=list)
 
 
 def _first_heading(markdown: str) -> str | None:
@@ -51,155 +42,122 @@ def _first_heading(markdown: str) -> str | None:
     return m.group(1).strip() if m else None
 
 
-def _strip_html_noise(markdown: str) -> str:
+def _clean(markdown: str) -> str:
     markdown = re.sub(r"<!--.*?-->", "", markdown, flags=re.DOTALL)
     markdown = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", markdown)  # images carry no text signal
+    markdown = md.relabel_fences(markdown)
     return re.sub(r"\n{3,}", "\n\n", markdown).strip() + "\n"
 
 
+def _with_title(title: str, body: str, description: str | None = None) -> str:
+    body = body.strip()
+    if description and description.strip() not in body:
+        body = f"{description.strip()}\n\n{body}"
+    if not body.startswith("# "):
+        body = f"# {title}\n\n{body}"
+    return body
+
+
+def next_data(html: str) -> dict[str, Any] | None:
+    m = NEXT_DATA_RE.search(html)
+    if not m:
+        return None
+    try:
+        props = json.loads(m.group(1))["props"]["pageProps"]
+    except (ValueError, KeyError, TypeError):
+        return None
+    return props if isinstance(props, dict) else None
+
+
+def _html_title(html: str) -> str | None:
+    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.DOTALL | re.IGNORECASE)
+    if not m:
+        return None
+    title = html_mod.unescape(TAG_RE.sub("", m.group(1)))
+    return re.split(r"\s+[-|]\s+(?:The Ballerina|Ballerina)\b", title)[0].strip() or None
+
+
+def _strip_tags(code_html: str) -> str:
+    return html_mod.unescape(TAG_RE.sub("", code_html)).strip("\n")
+
+
 # --------------------------------------------------------------------------- #
-# Ballerina-by-Example (ballerina-distribution/examples/<name>/...)
+# Ballerina by Example
 # --------------------------------------------------------------------------- #
-def parse_metatags(text: str) -> dict[str, str]:
-    out = {}
-    for line in text.splitlines():
-        if ":" in line:
-            k, v = line.split(":", 1)
-            out[k.strip().lower()] = v.strip()
-    return out
-
-
-def parse_bbe_index(index_json: str) -> dict[str, dict]:
-    """examples/index.json -> {folder_name: {category, title, flags}}"""
-    out: dict[str, dict] = {}
-    for group in json.loads(index_json):
-        for sample in group.get("samples", []):
-            out[sample["url"]] = {
-                "category": group.get("category"),
-                "group": group.get("title"),
-                "name": sample.get("name"),
-                "verify_build": sample.get("verifyBuild"),
-                "verify_output": sample.get("verifyOutput"),
-                "need_central": sample.get("needCentral"),
-            }
-    return out
-
-
-def extract_bbe(name: str, files: dict[str, RawRecord], index: dict[str, dict]) -> Extracted | None:
-    """Inline `::: code x.bal :::` / `::: out x.out :::` directives as labelled fences."""
-    md_files = [f for f in files if f.endswith(".md")]
+def extract_bbe_bundle(bundle_json: str) -> Extracted | None:
+    files: dict[str, str] = json.loads(bundle_json)
+    md_files = sorted(f for f in files if f.endswith(".md"))
     if not md_files:
         return None
-    main_md = files[md_files[0]]
 
     def inline(m: re.Match[str]) -> str:
         kind, fname = m.group(1), PurePosixPath(m.group(2)).name
-        rec = files.get(fname)
-        if rec is None:
+        if fname not in files:
             return ""
-        lang = "ballerina" if kind == "code" else "output"
-        return f"```{lang}\n{rec.body.rstrip()}\n```"
+        return f"```{'ballerina' if kind == 'code' else 'output'}\n{files[fname].rstrip()}\n```"
 
-    body = DIRECTIVE_RE.sub(inline, main_md.body)
-    body = _strip_html_noise(md.relabel_fences(body))
-    meta = parse_metatags(next((r.body for f, r in files.items() if f.endswith(".metatags")), ""))
-    info = index.get(name, {})
-    return Extracted(
-        raw=main_md,
-        markdown=body,
-        title=_first_heading(body) or info.get("name") or name,
-        doc_type="bbe",
-        extractor="bbe_markdown",
-        canonical_url=f"https://ballerina.io/learn/by-example/{name}/",
-        description=meta.get("description"),
-        category=info.get("category"),
-        bbe=BBEInfo(
-            name=name,
-            verify_build=info.get("verify_build"),
-            verify_output=info.get("verify_output"),
-            need_central=info.get("need_central"),
-        ),
-        extra_raw_ids=[r.raw_id for f, r in files.items() if r.raw_id != main_md.raw_id],
-    )
+    body = _clean(DIRECTIVE_RE.sub(inline, files[md_files[0]]))
+    meta = {k.strip().lower(): v.strip() for line in next((t for f, t in files.items() if f.endswith(".metatags")),
+                                                          "").splitlines() if ":" in line
+            for k, v in [line.split(":", 1)]}
+    title = _first_heading(body) or PurePosixPath(md_files[0]).stem.replace("-", " ").capitalize()
+    return Extracted(title, _with_title(title, body, meta.get("description")) + "\n", "bbe_bundle")
 
 
-# --------------------------------------------------------------------------- #
-# Enterprise Integration Patterns (ballerina-dev-website/pages/learn/enterprise-integration-patterns/...)
-# --------------------------------------------------------------------------- #
-def extract_eip(name: str, files: dict[str, RawRecord]) -> Extracted | None:
-    """One pattern folder: `<name>.yml` (tagline/desc/category/helps) + one or more `.bal` files."""
-    bals = sorted(f for f in files if f.endswith(".bal"))
-    if not bals:
+def extract_bbe_page(html: str) -> Extracted | None:
+    """Fallback for an example with no GitHub folder: the page carries only its code."""
+    props = next_data(html) or {}
+    codes = props.get("codes")
+    if not isinstance(codes, list) or not all(isinstance(c, str) for c in codes):
         return None
-    meta: dict = {}
-    yml = next((r for f, r in files.items() if f.endswith((".yml", ".yaml"))), None)
-    if yml:
-        try:
-            loaded = yaml.safe_load(yml.body)
-            meta = loaded if isinstance(loaded, dict) else {}
-        except yaml.YAMLError:
-            meta = {}
-    title = name.replace("-", " ").capitalize()
-    parts = [f"# {title}"]
-    intro = " ".join(str(meta[k]).strip().rstrip(".") + "." for k in ("tagline", "desc") if meta.get(k))
-    if intro:
-        parts.append(intro)
-    if meta.get("helps"):  # same section as the code, so pairing picks it up as the explanation
-        parts.append(str(meta["helps"]).strip())
-    for f in bals:
-        if len(bals) > 1:
-            parts.append(f"`{f}`:")
-        parts.append(f"```ballerina\n{files[f].body.rstrip()}\n```")
-    main = files[bals[0]]
-    return Extracted(
-        raw=main, markdown="\n\n".join(parts) + "\n", title=f"Enterprise integration pattern: {title}",
-        doc_type="guide", extractor="eip_bundle",
-        canonical_url=f"https://ballerina.io/learn/enterprise-integration-patterns/{name}/",
-        description=str(meta.get("desc")).strip() if meta.get("desc") else None,
-        category=str(meta.get("category")) if meta.get("category") else "Enterprise integration patterns",
-        extra_raw_ids=[r.raw_id for r in files.values() if r.raw_id != main.raw_id],
-    )
+    blocks = [c for c in (_strip_tags(c) for c in codes) if len(c.strip()) > 1]
+    if not blocks:
+        return None
+    fm = props.get("frontmatter") or {}
+    title = _strip_tags(fm.get("title") or _html_title(html) or "Ballerina by Example")
+    parts = [f"# {title}", (fm.get("description") or "").strip()] + [f"```ballerina\n{c}\n```" for c in blocks]
+    return Extracted(title, "\n\n".join(p for p in parts if p) + "\n", "bbe_page_codes")
 
 
 # --------------------------------------------------------------------------- #
-# Generic GitHub Markdown (dev-website docs, module READMEs, module specs)
+# ballerina.io learn pages
 # --------------------------------------------------------------------------- #
-def extract_github_markdown(raw: RawRecord) -> Extracted:
-    assert raw.git is not None
-    meta, body = md.split_front_matter(raw.body)
-    intro = meta.get("intro")
-    if intro and str(intro).strip() not in body:
-        body = f"{str(intro).strip()}\n\n{body}"
-    title = str(meta.get("title") or _first_heading(body) or PurePosixPath(raw.git.path).stem)
-    if not body.lstrip().startswith("# "):
-        body = f"# {title}\n\n{body.lstrip()}"
-    path = raw.git.path
-    name = PurePosixPath(path).name
-    if name in ("Module.md", "Package.md", "README.md") and raw.git.repo.split("/")[-1].startswith("module-"):
-        doc_type = "api_readme"
-    else:
-        doc_type = next((t for rx, t in DOC_TYPES_BY_PATH if rx.search(path)), "guide")
-    permalink = meta.get("permalink")
-    spec_m = MODULE_SPEC_RE.match(path)
-    if spec_m and "ballerina-dev-website" in raw.git.repo and not permalink:
-        permalink = f"/spec/{spec_m.group(1)}/"
-    return Extracted(
-        raw=raw,
-        markdown=_strip_html_noise(md.relabel_fences(body)),
-        title=title,
-        doc_type=doc_type,
-        extractor="github_markdown",
-        canonical_url=f"https://ballerina.io{permalink}" if permalink and "ballerina-dev-website" in raw.git.repo else None,
-        description=(str(meta["description"]).strip() if meta.get("description") else None),
-    )
+def extract_learn(html: str, url: str) -> Extracted | None:
+    props = next_data(html)
+    if props and isinstance(props.get("content"), str) and props["content"].strip():
+        fm = props.get("frontmatter") or {}
+        title = str(fm.get("title") or _first_heading(props["content"]) or _html_title(html) or url)
+        intro = fm.get("intro") or fm.get("description")
+        body = _clean(md.split_front_matter(props["content"])[1])
+        return Extracted(title, _with_title(title, body, str(intro) if intro else None) + "\n", "nextjs_markdown")
+    if props and isinstance(props.get("content"), list) and props.get("name"):  # integration pattern page
+        title = str(props["name"])
+        parts = [f"# {title}"]
+        parts += [str(props[k]).strip() for k in ("tagline", "desc", "helps") if props.get(k)]
+        for item in props["content"]:
+            code = item.get("raw") if isinstance(item, dict) else None
+            if isinstance(code, str) and code.strip():
+                if item.get("name"):
+                    parts.append(f"`{item['name']}`:")
+                parts.append(f"```ballerina\n{code.strip()}\n```")
+        return Extracted(title, _clean("\n\n".join(parts)), "nextjs_pattern")
+    return extract_html(html, url)
+
+
+def extract_html(html: str, url: str) -> Extracted | None:
+    import trafilatura
+
+    text = trafilatura.extract(html, output_format="markdown", include_formatting=True, include_tables=True,
+                               include_comments=False, favor_recall=True, url=url)
+    if not text:
+        return None
+    title = _html_title(html) or _first_heading(text) or url
+    return Extracted(title, _with_title(title, _clean(text)) + "\n", "trafilatura")
 
 
 # --------------------------------------------------------------------------- #
-# Language specification (well-structured HTML in ballerina-dev-website/public/spec)
+# Language specification
 # --------------------------------------------------------------------------- #
-EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
-
-
 _INLINE_SKIP = {"p", "pre", "ul", "ol", "table", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "dl", "div",
                 "li", "script", "style"}
 _HEADINGS = ("h1", "h2", "h3", "h4", "h5", "h6")
@@ -276,119 +234,132 @@ def html_to_markdown_structured(html: str, *, skip_sections: tuple[str, ...] = (
     return EMAIL_RE.sub("[email removed]", text) + "\n"
 
 
-def extract_spec_html(raw: RawRecord) -> Extracted:
-    assert raw.git is not None
-    markdown = html_to_markdown_structured(raw.body)
-    title = _first_heading(markdown) or "Ballerina Language Specification"
-    rel = raw.git.path.removeprefix("public/").removesuffix("index.html")
-    return Extracted(raw=raw, markdown=markdown, title=title, doc_type="spec", extractor="spec_html",
-                     canonical_url=f"https://ballerina.io/{rel}")
+def extract_spec(html: str) -> Extracted | None:
+    markdown = html_to_markdown_structured(html)
+    if not markdown.strip():
+        return None
+    return Extracted(_first_heading(markdown) or "Ballerina Language Specification", markdown, "spec_html")
 
 
 # --------------------------------------------------------------------------- #
-# Ballerina source files from module repos
+# Ballerina Central
 # --------------------------------------------------------------------------- #
-def extract_bal_source(raw: RawRecord) -> Extracted:
-    assert raw.git is not None
-    module = raw.git.repo.split("/")[-1].removeprefix("module-").replace("ballerinax-", "ballerinax/").replace(
-        "ballerina-", "ballerina/"
-    )
-    fname = PurePosixPath(raw.git.path).name
-    body = f"# {module}: {fname}\n\nSource of `{fname}` in the `{module}` module.\n\n```ballerina\n{raw.body.rstrip()}\n```\n"
-    return Extracted(raw=raw, markdown=body, title=f"{module}: {fname}", doc_type="module_source",
-                     extractor="bal_source")
+def _signature(f: dict[str, Any]) -> str:
+    params = ", ".join(f"{p['type']} {p['name']}" + (f" = {p['default']}" if p.get("default") else "")
+                       for p in f.get("parameters") or [])
+    rets = "|".join(r["type"] for r in f.get("returns") or [] if r.get("type"))
+    quals = " ".join(f.get("qualifiers") or [])
+    name = f.get("name") or ""
+    if f.get("accessor"):
+        name = f"{f['accessor']} {f.get('resourcePath') or name}"
+    return f"{quals + ' ' if quals else ''}function {name}({params}){' returns ' + rets if rets else ''}"
+
+
+def _render_function(f: dict[str, Any], level: str) -> list[str]:
+    out = [f"{level} {f.get('name')}", f"```ballerina\n{_signature(f)}\n```"]
+    if f.get("description"):
+        out.append(f["description"])
+    params = [f"- `{p['name']}` (`{p['type']}`): {p['description']}".rstrip(": ") for p in f.get("parameters") or []]
+    if params:
+        out.append("Parameters:\n" + "\n".join(params))
+    rets = [f"- `{r['type']}`: {r['description']}".rstrip(": ") for r in f.get("returns") or [] if r.get("type")]
+    if rets:
+        out.append("Returns:\n" + "\n".join(rets))
+    return out
+
+
+KIND_TITLES = {
+    "clients": "Clients", "listeners": "Listeners", "functions": "Functions", "classes": "Classes",
+    "objectTypes": "Object types", "records": "Records", "enums": "Enums", "errors": "Errors", "types": "Types",
+    "unionTypes": "Union types", "constants": "Constants", "annotations": "Annotations",
+    "serviceTypes": "Service types",
+}
+
+
+def render_api_docs(modules: list[dict[str, Any]], readme: str = "") -> str:
+    out: list[str] = []
+    readme_words = " ".join(re.findall(r"\w+", readme.lower()))
+    for mod in modules:
+        out.append(f"## API reference: module `{mod.get('id')}`")
+        desc = str(mod.get("description") or "").strip()
+        # the default module's description is usually the package README again: keep it once
+        if desc and " ".join(re.findall(r"\w+", desc.lower()))[:2000] not in readme_words:
+            out.append(md.demote_headings(desc, min_level=3))
+        for kind, label in KIND_TITLES.items():
+            for it in mod.get(kind) or []:
+                if kind == "functions":
+                    out.extend(_render_function(it, "###"))
+                    continue
+                out.append(f"### {label[:-1] if label.endswith('s') else label}: {it.get('name')}")
+                if it.get("type"):
+                    out.append(f"Type: `{it['type']}`")
+                if it.get("description"):
+                    out.append(it["description"])
+                if it.get("fields"):
+                    out.append("Fields:\n" + "\n".join(
+                        f"- `{f['name']}` (`{f['type']}`): {f['description']}".rstrip(": ") for f in it["fields"]))
+                for m in it.get("methods") or []:
+                    out.extend(_render_function(m, "####"))
+    return "\n\n".join(out)
+
+
+def extract_central(body_json: str) -> Extracted | None:
+    data = json.loads(body_json)
+    pkg = data.get("package") or {}
+    title = f"{pkg.get('organization')}/{pkg.get('name')}"
+    parts = [f"# {title}"]
+    if pkg.get("summary"):
+        parts.append(str(pkg["summary"]).strip())
+    readme = md.demote_headings(str(pkg.get("readme") or "").strip(), min_level=2)
+    if readme:
+        parts.append(readme)
+    api = render_api_docs(data.get("api_docs") or [], readme)
+    if api:
+        parts.append(api)
+    if len(parts) <= 2 and not readme and not api:
+        return None
+    return Extracted(title, _clean("\n\n".join(parts)), "central_api")
 
 
 # --------------------------------------------------------------------------- #
-# Central package README
+# GitHub module repo files
 # --------------------------------------------------------------------------- #
-def extract_central(raw: RawRecord) -> Extracted | None:
-    pkg = json.loads(raw.body)
-    readme = (pkg.get("readme") or "").strip()
-    if not readme:
-        return None
-    title = f"{pkg['organization']}/{pkg['name']}"
-    body = f"# {title}\n\n{readme}\n"
-    return Extracted(
-        raw=raw,
-        markdown=_strip_html_noise(md.relabel_fences(body)),
-        title=title,
-        doc_type="api_readme",
-        extractor="central_readme",
-        canonical_url=raw.source_uri,
-        description=pkg.get("summary"),
-        ballerina_version=pkg.get("ballerinaVersion"),
-    )
+def module_name(repo: str) -> str:
+    """'ballerina-platform/module-ballerinax-kafka' -> 'ballerinax/kafka'."""
+    name = repo.split("/")[-1].removeprefix("module-")
+    for org in ("ballerinax", "ballerina"):
+        if name.startswith(org + "-"):
+            return f"{org}/{name[len(org) + 1:]}"
+    return name
+
+
+def extract_github_file(text: str, meta: dict[str, Any]) -> Extracted | None:
+    path, repo = str(meta.get("path", "")), str(meta.get("repo", ""))
+    module = module_name(repo)
+    fname = PurePosixPath(path).name
+    if fname.endswith(".bal"):
+        if not text.strip():
+            return None
+        title = f"{module}: {fname}"
+        return Extracted(title, f"# {title}\n\nSource of `{fname}` in the `{module}` module.\n\n"
+                                f"```ballerina\n{text.rstrip()}\n```\n", "bal_source")
+    front, body = md.split_front_matter(text)
+    title = str(front.get("title") or _first_heading(body) or f"{module}: {fname}")
+    if not title.startswith(module):
+        title = f"{module}: {title}"
+    return Extracted(title, _with_title(title, _clean(body)) + "\n", "github_markdown")
 
 
 # --------------------------------------------------------------------------- #
-# HTML pages
-# --------------------------------------------------------------------------- #
-def _html_title(html: str) -> str | None:
-    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.DOTALL | re.IGNORECASE)
-    if not m:
-        return None
-    import html as html_mod
-
-    title = html_mod.unescape(TAG_RE.sub("", m.group(1)))
-    return re.split(r"\s+[-|]\s+(?:The Ballerina|Ballerina)\b", title)[0].strip() or None
-
-
-def extract_nextjs(raw: RawRecord) -> Extracted | None:
-    """ballerina.io by-example pages keep code only in __NEXT_DATA__ (not in the HTML body)."""
-    import html as html_mod
-
-    m = NEXT_DATA_RE.search(raw.body)
-    if not m:
-        return None
-    try:
-        props = json.loads(m.group(1))["props"]["pageProps"]
-    except (ValueError, KeyError):
-        return None
-    raw_codes = props.get("codes")
-    # Only BBE pages carry a *list* of highlighted code strings; other Next.js pages
-    # (e.g. the blog) use the same key for unrelated string data.
-    if not isinstance(raw_codes, list) or not all(isinstance(c, str) for c in raw_codes):
-        return None
-    codes = [html_mod.unescape(TAG_RE.sub("", c)).strip("\n") for c in raw_codes]
-    codes = [c for c in codes if c.strip() and len(c.strip()) > 1]
-    if not codes:
-        return None
-    fm = props.get("frontmatter") or {}
-    title = html_mod.unescape(TAG_RE.sub("", fm.get("title") or _html_title(raw.body) or raw.source_uri)).strip()
-    desc = (fm.get("description") or "").strip()
-    parts = [f"# {title}", desc] + [f"```ballerina\n{c}\n```" for c in codes]
-    return Extracted(raw=raw, markdown="\n\n".join(p for p in parts if p) + "\n", title=title,
-                     doc_type="bbe", extractor="nextjs_data", description=desc or None, canonical_url=raw.source_uri)
-
-
-def extract_html(raw: RawRecord) -> Extracted | None:
-    nxt = extract_nextjs(raw)
-    if nxt:
-        return nxt
-    import trafilatura
-
-    text = trafilatura.extract(
-        raw.body,
-        output_format="markdown",
-        include_formatting=True,
-        include_tables=True,
-        include_comments=False,
-        favor_recall=True,
-        url=raw.source_uri,
-    )
-    if not text:
-        return None
-    title = _html_title(raw.body) or _first_heading(text) or raw.source_uri
-    if not text.lstrip().startswith("# "):
-        text = f"# {title}\n\n{text}"
-    host = re.sub(r"^https?://", "", raw.source_uri).split("/")[0]
-    return Extracted(
-        raw=raw,
-        markdown=_strip_html_noise(md.relabel_fences(text)),
-        title=title,
-        doc_type="blog" if host.startswith("blog.") else "other",
-        extractor="trafilatura_md",
-        version=f"1.0.0+trafilatura{trafilatura.__version__}",
-        canonical_url=raw.source_uri,
-    )
+def extract(source: str, url: str, raw_body: str, meta: dict[str, Any]) -> Extracted | None:
+    if source == "bbe":
+        return extract_bbe_bundle(raw_body) if meta.get("origin") == "github" else extract_bbe_page(raw_body)
+    if source == "spec":
+        return extract_spec(raw_body)
+    if source == "learn":
+        return extract_learn(raw_body, url)
+    if source == "central":
+        return extract_central(raw_body)
+    if source == "github":
+        return extract_github_file(raw_body, meta)
+    raise ValueError(f"unknown source {source!r}")

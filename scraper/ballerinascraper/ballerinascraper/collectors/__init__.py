@@ -1,1 +1,1 @@
-"""Source collectors that fetch clean upstream content via APIs (no HTML scraping)."""
+"""Source collectors: ballerina.io (sitemap), GitHub API and Ballerina Central API."""

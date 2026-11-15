@@ -22,8 +22,10 @@ ENV/
 #.env.*
 *.key
 
-# --- Vector DB / local data stores ---
-chroma_db/
+# --- Local data stores ---
+*.db
+*.db-wal
+*.db-shm
 *.sqlite3
 *.faiss
 *.index
@@ -68,3 +70,4 @@ Dependencies.toml
 # --- Pipeline outputs (data/ is regenerated from upstream sources) ---
 .pytest_cache/
 httpcache/
+reports/

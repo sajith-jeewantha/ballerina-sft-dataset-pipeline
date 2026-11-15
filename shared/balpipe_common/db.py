@@ -1,0 +1,229 @@
+"""The pipeline's single SQLite store (data/pipeline.db).
+
+Tables, each with a `status` and `created_at`/`updated_at` timestamps:
+
+* runs       one row per command run: limits, item counts, duration, outcome
+* pages      one row per source page/file: raw cache, clean Markdown, hashes
+* chunks     heading-aware pieces of a page; the grounding for questions
+* questions  generated questions (pending -> answered | failed)
+* answers    one per answered question (not_checked -> valid | invalid)
+* llm_usage  tokens and cost of every model call, per phase
+
+Writes are committed immediately, so an interrupted command loses at most the
+item it was working on, and the next run picks up from the statuses.
+"""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+import time
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
+
+from balpipe_common.ids import utc_now_iso
+
+SCHEMA_VERSION = 1
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS runs (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    command      TEXT NOT NULL,
+    status       TEXT NOT NULL,             -- running | succeeded | failed
+    started_at   TEXT NOT NULL,
+    finished_at  TEXT,
+    duration_s   REAL,
+    limits       TEXT NOT NULL DEFAULT '{}', -- JSON
+    stats        TEXT NOT NULL DEFAULT '{}', -- JSON: items processed
+    error        TEXT,
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pages (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    source        TEXT NOT NULL,            -- bbe | spec | learn | central | github
+    url           TEXT NOT NULL UNIQUE,     -- public URL, cited in answers
+    fetch_url     TEXT,
+    title         TEXT,
+    status        TEXT NOT NULL,            -- fetched | chunked | empty | duplicate | blocked | failed
+    error         TEXT,
+    http_status   INTEGER,
+    version_key   TEXT,                     -- blob SHAs / package version: skip without downloading
+    etag          TEXT,
+    last_modified TEXT,
+    raw_body      TEXT,                     -- raw cache (HTML, Markdown, JSON bundle)
+    raw_hash      TEXT,
+    markdown      TEXT,                     -- clean Markdown
+    content_hash  TEXT,
+    license       TEXT,
+    meta          TEXT NOT NULL DEFAULT '{}',
+    fetch_count   INTEGER NOT NULL DEFAULT 0,
+    last_run_id   INTEGER,
+    fetched_at    TEXT,
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_pages_source ON pages(source, status);
+CREATE INDEX IF NOT EXISTS ix_pages_content ON pages(content_hash);
+
+CREATE TABLE IF NOT EXISTS chunks (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id        INTEGER NOT NULL REFERENCES pages(id),
+    source         TEXT NOT NULL,
+    source_url     TEXT NOT NULL,
+    ordinal        INTEGER NOT NULL,
+    heading_path   TEXT NOT NULL,
+    text           TEXT NOT NULL,
+    text_hash      TEXT NOT NULL,
+    token_estimate INTEGER NOT NULL,
+    has_code       INTEGER NOT NULL,
+    status         TEXT NOT NULL,           -- pending | questioned | too_small | failed | stale
+    attempts       INTEGER NOT NULL DEFAULT 0,
+    error          TEXT,
+    created_at     TEXT NOT NULL,
+    updated_at     TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_chunks_status ON chunks(status, source);
+CREATE INDEX IF NOT EXISTS ix_chunks_hash ON chunks(text_hash);
+CREATE INDEX IF NOT EXISTS ix_chunks_page ON chunks(page_id);
+
+CREATE TABLE IF NOT EXISTS questions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    chunk_id      INTEGER NOT NULL REFERENCES chunks(id),
+    source        TEXT NOT NULL,
+    source_url    TEXT NOT NULL,
+    question      TEXT NOT NULL,
+    question_hash TEXT NOT NULL UNIQUE,
+    category      TEXT NOT NULL,
+    difficulty    TEXT NOT NULL,
+    status        TEXT NOT NULL,            -- pending | answered | failed
+    error         TEXT,
+    model         TEXT,
+    run_id        INTEGER,
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_questions_status ON questions(status);
+
+CREATE TABLE IF NOT EXISTS answers (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_id       INTEGER NOT NULL UNIQUE REFERENCES questions(id),
+    answer            TEXT NOT NULL,
+    model             TEXT,
+    status            TEXT NOT NULL,        -- not_checked | valid | invalid
+    validation_detail TEXT,
+    run_id            INTEGER,
+    created_at        TEXT NOT NULL,
+    updated_at        TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_answers_status ON answers(status);
+
+CREATE TABLE IF NOT EXISTS llm_usage (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id            INTEGER,
+    phase             TEXT NOT NULL,        -- generate-questions | generate-answers
+    model             TEXT NOT NULL,
+    prompt_tokens     INTEGER,
+    completion_tokens INTEGER,
+    cost_usd          REAL,
+    cached            INTEGER NOT NULL DEFAULT 0,
+    status            TEXT NOT NULL,        -- ok | error
+    created_at        TEXT NOT NULL,
+    updated_at        TEXT NOT NULL
+);
+"""
+
+
+class Database:
+    def __init__(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.path = path
+        self.conn = sqlite3.connect(path, timeout=30)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA journal_mode=WAL")
+        self.conn.execute("PRAGMA foreign_keys=ON")
+        self.conn.executescript(SCHEMA)
+        self.conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+        self.conn.commit()
+
+    def close(self) -> None:
+        self.conn.close()
+
+    def __enter__(self) -> Database:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
+    # ------------------------------------------------------------------ #
+    def execute(self, sql: str, params: tuple | dict = ()) -> sqlite3.Cursor:
+        cur = self.conn.execute(sql, params)
+        self.conn.commit()
+        return cur
+
+    def query(self, sql: str, params: tuple | dict = ()) -> list[sqlite3.Row]:
+        return self.conn.execute(sql, params).fetchall()
+
+    def one(self, sql: str, params: tuple | dict = ()) -> sqlite3.Row | None:
+        return self.conn.execute(sql, params).fetchone()
+
+    def scalar(self, sql: str, params: tuple | dict = ()) -> Any:
+        row = self.conn.execute(sql, params).fetchone()
+        return row[0] if row else None
+
+    def insert(self, table: str, values: dict[str, Any]) -> int:
+        now = utc_now_iso()
+        values = {"created_at": now, "updated_at": now, **values}
+        cols = ", ".join(values)
+        marks = ", ".join("?" for _ in values)
+        cur = self.execute(f"INSERT INTO {table} ({cols}) VALUES ({marks})", tuple(values.values()))
+        return int(cur.lastrowid or 0)
+
+    def update(self, table: str, row_id: int, values: dict[str, Any]) -> None:
+        values = {**values, "updated_at": utc_now_iso()}
+        sets = ", ".join(f"{k} = ?" for k in values)
+        self.execute(f"UPDATE {table} SET {sets} WHERE id = ?", (*values.values(), row_id))
+
+    # ------------------------------------------------------------------ #
+    @contextmanager
+    def run(self, command: str, limits: dict[str, Any]) -> Iterator[RunTracker]:
+        """Record a command run: limits, counters, duration and outcome."""
+        start = time.monotonic()
+        now = utc_now_iso()
+        run_id = self.insert("runs", {"command": command, "status": "running", "started_at": now,
+                                      "limits": json.dumps(limits)})
+        tracker = RunTracker(self, run_id)
+        try:
+            yield tracker
+        except BaseException as exc:
+            self.update("runs", run_id, {
+                "status": "failed", "finished_at": utc_now_iso(), "duration_s": round(time.monotonic() - start, 2),
+                "stats": json.dumps(tracker.stats), "error": f"{type(exc).__name__}: {exc}"[:2000],
+            })
+            raise
+        self.update("runs", run_id, {
+            "status": "succeeded", "finished_at": utc_now_iso(), "duration_s": round(time.monotonic() - start, 2),
+            "stats": json.dumps(tracker.stats),
+        })
+
+
+class RunTracker:
+    """Counters for one run; flushed to the `runs` row as the run goes."""
+
+    def __init__(self, db: Database, run_id: int) -> None:
+        self.db = db
+        self.id = run_id
+        self.stats: dict[str, int] = {}
+
+    def count(self, key: str, n: int = 1) -> None:
+        self.stats[key] = self.stats.get(key, 0) + n
+
+    def flush(self) -> None:
+        self.db.update("runs", self.id, {"stats": json.dumps(self.stats)})
+
+
+def open_db(path: Path) -> Database:
+    return Database(path)

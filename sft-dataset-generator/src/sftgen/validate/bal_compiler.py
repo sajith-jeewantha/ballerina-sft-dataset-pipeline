@@ -5,8 +5,7 @@ Safety & determinism:
 * `--offline` first (after a one-time prewarm); online retry only when a
   module is not in the local cache,
 * hard timeout and JVM heap cap (`JAVA_OPTS=-Xmx…`),
-* generated code is only ever *compiled*; `run_and_compare` is used solely for
-  trusted upstream BBE programs,
+* generated code is only ever *compiled*, never run,
 * results cached on disk by sha256(code) + Ballerina version.
 """
 
@@ -25,7 +24,6 @@ from pathlib import Path
 
 from balpipe_common.config import ValidateCfg
 from balpipe_common.ids import sha256_text, utc_now_iso
-from balpipe_common.schemas import CompileError
 
 from sftgen import ballerina
 
@@ -60,9 +58,6 @@ class CompileOutcome:
     ballerina_version: str | None = None
     checked_at: str = ""
     cached: bool = False
-
-    def compile_errors(self) -> list[CompileError]:
-        return [CompileError(**e) for e in self.errors]
 
 
 def prepare(code: str, auto_imports: dict[str, str]) -> Prepared:
@@ -164,33 +159,3 @@ class BalCompiler:
     def compile_many(self, codes: list[str]) -> list[CompileOutcome]:
         with ThreadPoolExecutor(max_workers=self.cfg.workers) as pool:
             return list(pool.map(self.compile, codes))
-
-    def run_and_compare(self, code: str, expected_out: str) -> bool | None:
-        """Run a trusted program and compare stdout with a BBE `.out` file.
-
-        Returns None when the comparison is not meaningful (services, timeouts).
-        """
-        if ballerina.SERVICE_RE.search(ballerina.strip_comments_and_strings(code)):
-            return None
-        cache = self._cache_path("run/2", code + "\x1f" + expected_out)
-        if cache.is_file():
-            return json.loads(cache.read_text(encoding="utf-8"))["match"]
-        rc, out = self._bal(["run", "--offline"], code, self.cfg.timeout_s)
-        if rc is None:
-            return None
-        got = _normalize_output(_program_stdout(out))
-        want = _normalize_output("\n".join(ln for ln in expected_out.splitlines() if not ln.startswith("$ ")))
-        # concurrent BBEs (workers, strands) print in nondeterministic order: accept the same lines in any order
-        match = rc == 0 and (got == want or sorted(got.splitlines()) == sorted(want.splitlines()))
-        cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps({"match": match}), encoding="utf-8")
-        return match
-
-
-def _program_stdout(out: str) -> str:
-    noise = ("WARNING:", "Compiling source", "Running executable", "\tmain.bal", "Generating executable")
-    return "\n".join(ln for ln in out.splitlines() if not ln.startswith(noise) and ln.strip() != "main.bal")
-
-
-def _normalize_output(text: str) -> str:
-    return "\n".join(ln.rstrip() for ln in text.strip().splitlines() if ln.strip())

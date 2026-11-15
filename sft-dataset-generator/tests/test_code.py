@@ -1,4 +1,4 @@
-"""Code/description pairing, Ballerina heuristics and compiler helpers."""
+"""Ballerina heuristics, compiler helpers and answer code extraction."""
 
 from __future__ import annotations
 
@@ -7,51 +7,9 @@ import shutil
 import pytest
 
 from balpipe_common.config import ValidateCfg
-from balpipe_common.schemas import BBEInfo, Document, ExtractorInfo, License
 
 from sftgen import ballerina
-from sftgen.extract.pairing import extract_pairs
 from sftgen.validate.bal_compiler import parse_errors, prepare
-
-
-def _doc(markdown: str, doc_type: str = "guide", title: str = "T", **kw) -> Document:
-    return Document(doc_id="doc_1", raw_id="raw_1", run_id="r", source="github", source_uri="u", doc_type=doc_type,
-                    title=title, markdown=markdown, content_sha256="x", license=License(), split="train",
-                    extractor=ExtractorInfo(name="t", version="1"), created_at="t", **kw)
-
-
-# ---------------------------------------------------------------------- pairing
-def test_bbe_pairing_intro_notes_output() -> None:
-    md_text = ("# Hello world main\n\nLet's write the program.\n\n```ballerina\nimport ballerina/io;\n\n"
-               "public function main() {\n    io:println(\"Hi\");\n}\n```\n\nTo run this sample, use `bal run`.\n\n"
-               "```output\n$ bal run x.bal\nHi\n```\n")
-    pairs = extract_pairs(_doc(md_text, "bbe", "Hello world main", bbe=BBEInfo(name="hello-world")))
-    assert len(pairs) == 1
-    p = pairs[0]
-    assert p.method == "bbe_directive" and p.intro == "Let's write the program."
-    assert p.notes.startswith("To run this sample") and p.expected_output == "$ bal run x.bal\nHi"
-    assert p.code.startswith("import ballerina/io;")
-
-
-def test_md_adjacent_pairing_stays_in_section() -> None:
-    md_text = ("# Guide\n\n## A\n\nUnrelated text in A.\n\n## B\n\nFirst B paragraph.\n\nThe record below models a user.\n\n"
-               "```ballerina\ntype User record {|\n    string name;\n|};\n```\n\nIn this code, `name` is required.\n\n"
-               "Something else entirely.\n")
-    (p,) = extract_pairs(_doc(md_text, title="Guide"))
-    assert p.intro == "First B paragraph.\n\nThe record below models a user."
-    assert p.notes == "In this code, `name` is required."
-    assert p.heading_path == ["Guide", "B"] and "Unrelated" not in p.intro
-
-
-def test_doc_comment_pairing_from_source() -> None:
-    src = ("import ballerina/time;\n\n# Returns the current time.\n# + zone - the zone\n# + return - the time\n"
-           "public isolated function now(string zone) returns time:Utc {\n    return time:utcNow();\n}\n\n"
-           "function internal() {}\n")
-    doc = _doc(f"# io: x.bal\n\n```ballerina\n{src}```\n", "module_source")
-    (p,) = extract_pairs(doc)
-    assert p.method == "doc_comment" and p.intro == "Returns the current time."
-    assert p.code.startswith("import ballerina/time;\n\npublic isolated function now")
-    assert "+ zone - the zone" in p.notes
 
 
 # -------------------------------------------------------------------- heuristics
@@ -114,3 +72,10 @@ def test_unterminated_string_keeps_line_count() -> None:
     assert ballerina.strip_comments_and_strings(code).count("\n") == code.count("\n")
     assert len(ballerina.strip_comments_and_strings(code)) == len(code)
     assert [it.text for it in ballerina.split_top_level(code)][-1] == 'string t = "ok";'
+
+
+def test_ballerina_blocks_from_answer() -> None:
+    from sftgen.validate.stage import ballerina_blocks
+
+    answer = "Use this:\n\n```ballerina\nint x = 1;\n```\n\nRun it:\n\n```bash\nbal run\n```\n"
+    assert ballerina_blocks(answer) == ["int x = 1;"]

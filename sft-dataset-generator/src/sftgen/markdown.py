@@ -1,5 +1,5 @@
 """Markdown helpers built on markdown-it-py: fence discovery, language labelling,
-front matter parsing and block segmentation (used by clean, extract and chunk)."""
+front matter parsing and block segmentation (used by clean, chunk and validate)."""
 
 from __future__ import annotations
 
@@ -174,6 +174,22 @@ def segment_blocks(markdown: str, title: str | None = None) -> list[Block]:
             blocks.append(Block(kind, text, heading_path=_dedup_path(path)))
         i += 1
     return blocks
+
+
+def demote_headings(markdown: str, min_level: int = 2) -> str:
+    """Shift ATX headings down so the shallowest becomes `min_level` (code fences untouched)."""
+    lines = markdown.split("\n")
+    in_fence = {i for f in iter_fences(markdown) for i in range(f.start_line, f.end_line)}
+    levels = [len(m.group(1)) for i, ln in enumerate(lines) if i not in in_fence
+              for m in [re.match(r"^(#{1,6})\s", ln)] if m]
+    if not levels or min(levels) >= min_level:
+        return markdown
+    shift = min_level - min(levels)
+    for i, ln in enumerate(lines):
+        m = re.match(r"^(#{1,6})(\s.*)$", ln)
+        if m and i not in in_fence:
+            lines[i] = "#" * min(6, len(m.group(1)) + shift) + m.group(2)
+    return "\n".join(lines)
 
 
 def plain_words(markdown: str) -> int:

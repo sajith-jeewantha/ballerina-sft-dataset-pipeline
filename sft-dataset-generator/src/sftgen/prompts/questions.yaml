@@ -1,0 +1,25 @@
+id: questions
+version: "1"
+system: |
+  You write questions for a dataset that teaches a small model the Ballerina programming language.
+  You only ask questions that the given excerpt from the official Ballerina documentation fully answers.
+user: |
+  Source: {source_url}
+  Section: {heading}
+
+  -----
+  {chunk}
+  -----
+
+  Write {n} distinct questions that a Ballerina developer might ask and that are fully answerable from the excerpt above alone.
+
+  Rules:
+  - Each question must stand on its own. Never refer to "the excerpt", "the text", "the documentation", "this page" or "the example above"; name the feature, type, function or tool instead.
+  - Ask only about what the excerpt covers. Do not ask about functions, types, options or behaviour that the excerpt does not show.
+  - Vary the questions. Where the excerpt supports it, mix concepts, syntax, writing code, library usage, tooling, and fixing errors.
+  - When the excerpt has code, prefer practical questions ("How do I ...", "Write a Ballerina program that ...", "Why does this code fail ...").
+  - category is one of: concept, syntax, library, tooling, error-fixing, code-writing, best-practice.
+  - difficulty is one of: beginner, intermediate, advanced.
+
+  Return only JSON, with no other text:
+  {{"questions": [{{"question": "...", "category": "...", "difficulty": "..."}}]}}

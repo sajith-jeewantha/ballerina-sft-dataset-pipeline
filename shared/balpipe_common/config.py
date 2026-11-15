@@ -2,27 +2,25 @@
 
 Precedence (highest first): process environment > `.env` > `config/pipeline.yaml`
 > defaults. Any YAML key can be overridden with `BALPIPE__SECTION__KEY=value`.
-Secrets are `SecretStr`, so they never appear in logs, reprs or manifests.
+Secrets are `SecretStr`, so they never appear in logs or reprs. Empty values in
+`.env` (e.g. `GITHUB_TOKEN=`) are ignored instead of overriding other sources.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from pydantic import AliasChoices, BaseModel, Field, SecretStr, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, Field, SecretStr
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
     YamlConfigSettingsSource,
 )
-
-from balpipe_common.ids import sha256_text
 
 log = logging.getLogger(__name__)
 
@@ -55,103 +53,89 @@ def find_repo_root(start: Path | None = None) -> Path:
 # --------------------------------------------------------------------------- #
 # Sections (all overridable from YAML / BALPIPE__ env vars)
 # --------------------------------------------------------------------------- #
-class GithubRepoCfg(BaseModel):
-    repo: str
-    ref: str | None = None  # None = the repo's default branch
-    include: list[str]
-    exclude: list[str] = Field(default_factory=list)
+class BallerinaIoCfg(BaseModel):
+    sitemap: str = "https://ballerina.io/sitemap.xml"
+    include_prefixes: list[str] = Field(default_factory=lambda: ["/learn/", "/spec/lang/2024R1/"])
+    # regexes on the URL path; old-version and non-content paths
+    exclude_patterns: list[str] = Field(
+        default_factory=lambda: [r"/\d+\.\d+(\.\d+)?/", r"/v\d+-\d+/", r"/swan-lake/", r"/learn/api-docs/",
+                                 r"^/learn/$", r"^/learn/by-example/$"]
+    )
+
+
+class GithubCfg(BaseModel):
+    org: str = "ballerina-platform"
+    bbe_repo: str = "ballerina-distribution"  # BBE sources: examples/<name>/{.md,.bal,.out}
+    bbe_path: str = "examples"
+    module_repo_patterns: list[str] = Field(default_factory=lambda: [r"^module-ballerina-", r"^module-ballerinax-"])
+    # files collected from each module repo (globs on the repo path)
+    module_include: list[str] = Field(
+        default_factory=lambda: ["README.md", "ballerina/Module.md", "ballerina/Package.md", "ballerina/README.md",
+                                 "ballerina/*.bal"]
+    )
+    module_exclude: list[str] = Field(default_factory=lambda: ["ballerina/tests/**", "**/test*.bal"])
+    max_file_bytes: int = 300_000
+
+
+class CentralCfg(BaseModel):
+    api: str = "https://api.central.ballerina.io/2.0"
+    orgs: list[str] = Field(default_factory=lambda: ["ballerina", "ballerinax"])
+    page_size: int = 50
+    include_api_docs: bool = True
 
 
 class SourcesCfg(BaseModel):
-    github_repos: list[GithubRepoCfg] = Field(default_factory=list)
-    central_orgs: list[str] = Field(default_factory=lambda: ["ballerina"])
-    central_page_size: int = 50
-    central_max_packages: int | None = None
-    web_sitemaps: list[str] = Field(default_factory=list)
-    web_allowed_domains: list[str] = Field(default_factory=list)
-    web_sitemap_follow: list[str] = Field(default_factory=lambda: [".*"])
+    # processing order; BBE first (highest priority)
+    order: list[str] = Field(default_factory=lambda: ["bbe", "spec", "learn", "central", "github"])
+    ballerina_io: BallerinaIoCfg = Field(default_factory=BallerinaIoCfg)
+    github: GithubCfg = Field(default_factory=GithubCfg)
+    central: CentralCfg = Field(default_factory=CentralCfg)
 
 
 class CrawlCfg(BaseModel):
-    user_agent: str = "BallerinaCorpusBot/1.0 (+https://github.com/ballerina-platform; research corpus)"
-    concurrent_per_domain: int = 2
-    download_delay_s: float = 1.0
-    download_timeout_s: int = 60
-    retry_times: int = 3
-    http_cache: bool = True
-    collector_delay_s: float = 0.2
-
-
-class CleanCfg(BaseModel):
-    min_words: int = 30
-    near_dup_threshold: float = 0.8
-    minhash_num_perm: int = 128
-    shingle_size: int = 5
-    ballerina_signal_min: int = 2
-    exclude_url_patterns: list[str] = Field(
-        default_factory=lambda: [r"privacy-policy", r"cookie-policy", r"terms-of-(use|service)", r"/legal/", r"/careers/"]
+    user_agent: str = (
+        "BallerinaCorpusBot/2.1 (+https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline)"
     )
+    timeout_s: int = 60
+    retries: int = 3
+    respect_robots: bool = True
+    # Documented JSON APIs, used under their API terms; robots.txt governs crawling of web pages.
+    # Neither host serves a robots.txt today (404 = no restrictions), so this only skips a lookup.
+    robots_exempt_hosts: list[str] = Field(default_factory=lambda: ["api.github.com", "api.central.ballerina.io"])
+    listing_cache_hours: float = 24.0  # sitemap / repo list / tree / package list responses are reused this long
 
 
 class ChunkCfg(BaseModel):
-    name: str = "md_structural"
-    version: str = "1.0.0"
-    max_tokens: int = 300
-
-    @property
-    def slug(self) -> str:
-        return f"{self.name}-{self.version}"
-
-
-class IndexCfg(BaseModel):
-    collection_prefix: str = "bal"
-    batch_size: int = 64
+    max_tokens: int = 800  # approximate tokens (chars / 4); a chunk is the context for one LLM call
+    min_tokens: int = 40   # smaller chunks are kept but not used for questions
 
 
 class GenerateCfg(BaseModel):
-    target_records: int = 500
-    tasks: dict[str, float] = Field(
-        default_factory=lambda: {
-            "write_code": 0.25,
-            "explain_code": 0.2,
-            "debug_fix": 0.15,
-            "convert_from_language": 0.1,
-            "complete_code": 0.1,
-            "concept": 0.1,
-            "api_usage": 0.1,
-        }
-    )
-    top_k: int = 4
-    max_per_doc: int = 12
-    concurrency: int = 8
+    concurrency: int = 4
     requests_per_minute: int = 60
-    question_temperature: float = 0.8
+    question_temperature: float = 0.7
     answer_temperature: float = 0.2
+    max_question_tokens: int = 1024
     max_answer_tokens: int = 2048
     request_timeout_s: float = 120.0
     max_retries: int = 4
-    # Provider-specific request fields. The previous generator sent OpenRouter's
-    # {"reasoning": {"effort": "none"}}; kept as the default to preserve behaviour.
-    extra_body: dict[str, Any] = Field(default_factory=lambda: {"reasoning": {"effort": "none"}})
-    system_prompt: str = "You are an expert Ballerina programmer. Answer precisely and use idiomatic Ballerina."
-    source_languages: list[str] = Field(default_factory=lambda: ["Python", "Java", "Go"])
-
-    @field_validator("tasks")
-    @classmethod
-    def _tasks_sum(cls, v: dict[str, float]) -> dict[str, float]:
-        if not v or abs(sum(v.values()) - 1.0) > 1e-6:
-            raise ValueError(f"generate.tasks weights must sum to 1.0, got {sum(v.values()):.3f}")
-        return v
+    max_chunk_attempts: int = 3          # a chunk whose question call keeps failing is given up after this
+    near_duplicate_threshold: float = 0.85  # word-set Jaccard similarity between questions
+    # Provider-specific request fields. OpenRouter: no reasoning tokens, and return the cost of each call.
+    extra_body: dict[str, Any] = Field(
+        default_factory=lambda: {"reasoning": {"effort": "none"}, "usage": {"include": True}}
+    )
+    # Optional fallback prices (USD per 1M tokens) when the provider does not return a cost:
+    # {"qwen/qwen3.8-flash": {"input": 0.15, "output": 0.47}}
+    pricing: dict[str, dict[str, float]] = Field(default_factory=dict)
 
 
 class ValidateCfg(BaseModel):
-    enabled: bool = True
     bal_path: str = "bal"
-    workers: int = 4
+    workers: int = 2
     timeout_s: int = 60
     java_heap: str = "1g"
     offline: bool = True
-    run_bbe_output: bool = True
     prewarm_modules: list[str] = Field(default_factory=lambda: ["ballerina/io", "ballerina/http", "ballerina/log"])
     auto_imports: dict[str, str] = Field(
         default_factory=lambda: {
@@ -165,37 +149,35 @@ class ValidateCfg(BaseModel):
     )
 
 
-class JudgeCfg(BaseModel):
-    thresholds: dict[str, int] = Field(
-        default_factory=lambda: {
-            "faithfulness": 4,
-            "correctness": 4,
-            "helpfulness": 3,
-            "instruction_following": 3,
-            "code_quality": 3,
-        }
-    )
-    thresholds_version: str = "1"
-    strict_family_check: bool = False
-    concurrency: int = 8
-
-
-class SplitCfg(BaseModel):
-    eval_fraction: float = 0.05
-
-
 class ExportCfg(BaseModel):
-    near_dup_threshold: float = 0.92
-    ngram_size: int = 13
-    max_ngram_overlap: float = 0.2
-    allowed_licenses: list[str] = Field(default_factory=lambda: ["Apache-2.0", "MIT", "BSD-3-Clause"])
-    include_system_prompt: bool = True
-    reject_unknown_symbols: bool = False
+    path: str = "data/dataset.jsonl"
+    include_invalid: bool = False  # answers whose code failed to compile are left out by default
+
+
+class SftCfg(BaseModel):
+    """`export-sft`: chat-format (`messages`) files for supervised fine-tuning."""
+
+    dir: str = "data/sft"            # train.jsonl, eval.jsonl, metadata.jsonl
+    eval_fraction: float = Field(default=0.05, ge=0.0, lt=1.0)  # split by source page, never by row
+    strip_source_line: bool = True   # drop the trailing "Source: <url>" so the model does not learn to invent URLs
+    # Repeated in every training row; use exactly the same text at inference. "" = no system message.
+    system_prompt: str = (
+        "You are an expert Ballerina (Swan Lake) programmer. Answer questions about the Ballerina language, "
+        "its standard library, connectors and tools accurately and concisely. When code helps, give complete, "
+        "idiomatic Ballerina that compiles, with the imports it needs, in a ```ballerina code block. Use only "
+        "real Ballerina syntax and APIs; if you are not sure something exists or how it behaves, say so "
+        "instead of guessing."
+    )
+
+
+class ReportCfg(BaseModel):
+    path: str = "reports/report.html"
+    samples: int = 5
 
 
 class LoggingCfg(BaseModel):
     level: str = "INFO"
-    format: str = "json"
+    format: str = "text"
 
 
 # --------------------------------------------------------------------------- #
@@ -208,40 +190,35 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="BALPIPE__",
         env_nested_delimiter="__",
+        env_ignore_empty=True,
         extra="ignore",
         populate_by_name=True,
     )
 
-    # --- secrets & model choice (.env) ---
+    # --- secrets, models and run limits (.env) ---
     llm_api_key: SecretStr | None = Field(
         default=None, validation_alias=AliasChoices("OPENROUTER_API_KEY", "LLM_API_KEY", "API_KEY")
     )
     llm_base_url: str = Field(default="https://openrouter.ai/api/v1", validation_alias=AliasChoices("LLM_BASE_URL"))
-    llm_provider: str = Field(default="openrouter", validation_alias=AliasChoices("LLM_PROVIDER"))
     question_gen_model: str | None = Field(default=None, validation_alias=AliasChoices("QUESTION_GEN_MODEL"))
     answer_gen_model: str | None = Field(default=None, validation_alias=AliasChoices("ANSWER_GEN_MODEL"))
-    judge_model: str | None = Field(default=None, validation_alias=AliasChoices("JUDGE_MODEL"))
-    embedding_model: str = Field(
-        default="sentence-transformers/all-mpnet-base-v2", validation_alias=AliasChoices("EMBEDDING_MODEL")
-    )
     github_token: SecretStr | None = Field(default=None, validation_alias=AliasChoices("GITHUB_TOKEN"))
-    gcs_bucket: str | None = Field(
-        default=None, validation_alias=AliasChoices("GCS_BUCKET", "GCS_BUCKET_NAME", "BUCKET_NAME")
-    )
+    limit_generating: int = Field(default=10, ge=0, validation_alias=AliasChoices("LIMIT_GENERATING"))
+    limit_scrape_pages: int = Field(default=20, ge=0, validation_alias=AliasChoices("LIMIT_SCRAPE_PAGES"))
+    questions_per_chunk: int = Field(default=3, ge=1, le=20, validation_alias=AliasChoices("QUESTIONS_PER_CHUNK"))
+    request_delay_seconds: float = Field(default=1.0, ge=0, validation_alias=AliasChoices("REQUEST_DELAY_SECONDS"))
 
     # --- pipeline settings (pipeline.yaml) ---
     data_dir: str = "data"
-    gcs_mirror: bool = False  # opt-in: copy stage outputs to gs://$GCS_BUCKET/<same path>
+    db_file: str = "pipeline.db"
     sources: SourcesCfg = Field(default_factory=SourcesCfg)
     crawl: CrawlCfg = Field(default_factory=CrawlCfg)
-    clean: CleanCfg = Field(default_factory=CleanCfg)
     chunk: ChunkCfg = Field(default_factory=ChunkCfg)
-    index: IndexCfg = Field(default_factory=IndexCfg)
     generate: GenerateCfg = Field(default_factory=GenerateCfg)
     validate_: ValidateCfg = Field(default_factory=ValidateCfg, alias="validate")
-    judge: JudgeCfg = Field(default_factory=JudgeCfg)
-    split: SplitCfg = Field(default_factory=SplitCfg)
     export: ExportCfg = Field(default_factory=ExportCfg)
+    sft: SftCfg = Field(default_factory=SftCfg)
+    report: ReportCfg = Field(default_factory=ReportCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)
 
     # set by load_settings
@@ -261,53 +238,38 @@ class Settings(BaseSettings):
             sources.append(YamlConfigSettingsSource(settings_cls, yaml_file=_ACTIVE_YAML))
         return tuple(sources)
 
-    @model_validator(mode="after")
-    def _check_split(self) -> Settings:
-        if not 0.0 <= self.split.eval_fraction < 1.0:
-            raise ValueError("split.eval_fraction must be in [0, 1)")
-        return self
-
     # ------------------------------------------------------------------ #
-    @property
-    def data_root(self) -> Path:
-        p = Path(self.data_dir)
+    def path(self, rel: str) -> Path:
+        p = Path(rel)
         return p if p.is_absolute() else self.repo_root / p
 
-    def data_path(self, *parts: str) -> Path:
-        return self.data_root.joinpath(*parts)
+    @property
+    def data_root(self) -> Path:
+        return self.path(self.data_dir)
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_root / self.db_file
+
+    @property
+    def cache_dir(self) -> Path:
+        return self.data_root / "cache"
+
+    def limits(self) -> dict[str, Any]:
+        """The run limits, as printed at startup and stored on every run."""
+        return {
+            "LIMIT_SCRAPE_PAGES": self.limit_scrape_pages,
+            "LIMIT_GENERATING": self.limit_generating,
+            "QUESTIONS_PER_CHUNK": self.questions_per_chunk,
+            "REQUEST_DELAY_SECONDS": self.request_delay_seconds,
+        }
 
     def require(self, *fields: str) -> None:
-        """Fail fast when a stage needs settings that are unset."""
+        """Fail fast when a command needs settings that are unset."""
         missing = [f for f in fields if getattr(self, f) in (None, "")]
         if missing:
             env_names = ", ".join(f.upper() if f != "llm_api_key" else "OPENROUTER_API_KEY" for f in missing)
             raise ConfigError(f"Missing required settings: {env_names}. Set them in .env (see .env.example).")
-
-    def require_llm(self, *, judge: bool = False) -> None:
-        self.require("llm_api_key", "question_gen_model", "answer_gen_model", *(("judge_model",) if judge else ()))
-        if judge:
-            fam_a, fam_j = model_family(self.answer_gen_model or ""), model_family(self.judge_model or "")
-            if fam_a == fam_j:
-                msg = (
-                    f"JUDGE_MODEL ({self.judge_model}) is from the same family as ANSWER_GEN_MODEL "
-                    f"({self.answer_gen_model}); judges favour their own family. Use a different provider family."
-                )
-                if self.judge.strict_family_check:
-                    raise ConfigError(msg)
-                log.warning(msg, extra={"event": "config.judge_same_family"})
-
-    def redacted_snapshot(self) -> dict[str, Any]:
-        """JSON-safe config with secrets masked (SecretStr dumps as '**********')."""
-        return self.model_dump(mode="json", by_alias=True)
-
-    @property
-    def config_sha256(self) -> str:
-        return sha256_text(json.dumps(self.redacted_snapshot(), sort_keys=True))
-
-
-def model_family(model_id: str) -> str:
-    """'qwen/qwen3.8-flash' -> 'qwen'; 'anthropic/claude-x' -> 'anthropic'."""
-    return model_id.split("/", 1)[0].lower() if "/" in model_id else model_id.split("-", 1)[0].lower()
 
 
 def load_settings(config_path: str | Path | None = None, root: Path | None = None) -> Settings:
@@ -322,12 +284,7 @@ def load_settings(config_path: str | Path | None = None, root: Path | None = Non
     for legacy in LEGACY_ENV_FILES:  # lower priority; kept so existing setups keep working
         if (repo_root / legacy).is_file():
             env_files.append(repo_root / legacy)
-            log.warning(
-                "Reading legacy env file %s; move its keys to %s",
-                legacy,
-                repo_root / ".env",
-                extra={"event": "config.legacy_env_file"},
-            )
+            log.warning("Reading legacy env file %s; move its keys to %s", legacy, repo_root / ".env")
     if (repo_root / ".env").is_file():
         env_files.append(repo_root / ".env")  # last file wins
 

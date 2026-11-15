@@ -1,7 +1,7 @@
-"""Shared building blocks for the Ballerina SFT data pipeline.
+"""Shared building blocks for the Ballerina Q&A dataset pipeline.
 
 Both `scraper/` and `sft-dataset-generator/` depend on this package so that
-record schemas, IDs, config, logging and file I/O are defined exactly once.
+config, the SQLite store, hashing and logging are defined exactly once.
 """
 
-__version__ = "1.0.0"
+__version__ = "2.1.0"

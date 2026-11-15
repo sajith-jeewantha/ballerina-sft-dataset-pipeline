@@ -1,9 +1,6 @@
-# Direct dependencies only, pinned. Install with the shared package:
-#   pip install -e shared -r sft-dataset-generator/requirements.txt -e sft-dataset-generator
-trafilatura==2.3.1
+# Direct dependencies only, pinned. Install with the shared and scraper packages:
+#   pip install -e shared -r scraper/requirements.txt -e scraper -r sft-dataset-generator/requirements.txt -e sft-dataset-generator
+trafilatura==2.3.1      # HTML fallback for pages without embedded Markdown (brings lxml, used for the spec)
 markdown-it-py==4.3.0
-datasketch==2.0.0
-chromadb==1.5.9
-sentence-transformers==6.3.0
-openai==3.49.0
-numpy>=2.0,<3          # transitive via chromadb/sentence-transformers; range left to their resolver
+datasketch==2.0.0       # near-duplicate question detection
+openai==3.49.0          # OpenAI-compatible client (OpenRouter by default)
