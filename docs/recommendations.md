@@ -1,5 +1,23 @@
 # Phase 2: Research and recommendations
 
+> **Status (v2.1, 2026-11-15).** Sections 0–9 are the research behind v2.0 and are kept as written.
+> Version 2.1 changed parts of the design (see [CHANGELOG.md](../CHANGELOG.md) and
+> [ARCHITECTURE.md](../ARCHITECTURE.md)), and [section 10](#10-v21-additions-2026-11-15) records the
+> research behind those changes.
+
+| Section | Status in v2.1 |
+|---|---|
+| 0. Source first | **Applies, with changes.** BBE and module repos come from GitHub, and Central from its API. Learn pages and the spec now come from ballerina.io itself (section 10.1), not `ballerina-dev-website`. The blog and the Scrapy crawl are gone. |
+| 1. Storage format | **Partly superseded.** Markdown is still the clean format, but it lives in SQLite (`data/pipeline.db`) instead of JSONL files. The raw cache is a column on each page. |
+| 2. HTML to clean text | **Applies.** The `__NEXT_DATA__` extractor now reads whole Markdown pages, not just code (section 10.1). trafilatura is the fallback. Fence labelling is unchanged. |
+| 3. Pairing code with descriptions | **Superseded.** There is no separate pairing step. BBE code and its explanation stay together in one document, and chunks keep code next to its prose. |
+| 4. Chunking | **Applies, with a new budget.** With no embedding model, chunks go up to about 800 tokens, estimated as characters ÷ 4 (section 10.4). |
+| 5. Deduplication | **Partly applies.** Pages and chunks use exact content hashes. Questions use word-set Jaccard ≥ 0.85, with MinHash for speed (section 10.5). There is no document-level MinHash. |
+| 6. SFT quality | **Partly superseded.** The 7 task types, mutation, back-translation and the rubric judge were removed in favour of two phases: questions, then answers from the same chunk. Still in force: the ban on mentioning "context", grounding answers in the source, and splitting by source page. |
+| 7. Validating with `bal` | **Applies** (`sftgen validate`). The default is 2 workers instead of 4, to keep laptops cool. |
+| 8. Output format | **Applies again** through `sftgen export-sft`: `messages` in `train.jsonl`/`eval.jsonl` plus `metadata.jsonl`, linked by `id`. `sftgen export` also writes a flat review file. |
+| 9. Cross-cutting choices | **Partly superseded.** Resuming is now done by statuses in SQLite, not manifests. Chroma, sentence-transformers and Scrapy were dropped. The current pins are in each `requirements.txt`. |
+
 Date: 2026-11-12. Every claim marked **(tested)** was checked against live sources or the local toolchain (Ballerina 2201.14.1, trafilatura 2.2.0) during this phase.
 
 Decisions already made (Phase 1 Q&A):
@@ -252,3 +270,85 @@ Current versions on PyPI (2026-11-12), to pin in Phase 5:
 | pytest | 9.2.0 |
 | python-dotenv | 1.2.4 |
 | pyyaml | 6.0.3 |
+
+---
+
+## 10. v2.1 additions (2026-11-15)
+
+Research done for the Q&A pipeline. **(tested)** means it was checked against the live sites or
+the local toolchain on that date.
+
+### 10.1 ballerina.io pages carry their Markdown source
+
+- **Learn pages (tested).** Every learn page embeds its full Markdown source in
+  `__NEXT_DATA__.props.pageProps.content`, with `frontmatter.title` and `description`. Code blocks
+  are exact and fenced (for example, 46 fence markers on the coding-conventions page). This is
+  more faithful than any HTML-to-text conversion, so learn pages are read from it.
+- **Integration-pattern pages (tested)** embed `name`, `tagline`, `desc`, `helps` and a `content`
+  list whose `raw` field is the plain `.bal` code.
+- **By-example pages (tested)** embed only `frontmatter` and `codes` (syntax-highlighted HTML).
+  The explanation text is compiled into the page's JavaScript chunk and is not in the HTML or the
+  page data. Keeping code *with its explanation* therefore needs the source folder
+  (`ballerina-distribution/examples/<name>/`). The page URL from the sitemap is still what
+  answers cite. If an example has no folder, the page's code alone is used as a fallback.
+- **The spec (tested)** is static HTML, served from GitHub Pages with an ETag, so conditional
+  GETs work.
+
+### 10.2 The sitemap and robots.txt
+
+- **The sitemap (tested)** lists 1,151 URLs: 594 under `/learn/by-example/`, about 200 more under
+  `/learn/`, one `/spec/lang/2024R1/`, a draft spec, module specs and release notes. Only
+  `/learn/` and `/spec/lang/2024R1/` are kept. Old version paths and the `/learn/` and
+  `/learn/by-example/` index pages are dropped.
+- **ballerina.io's robots.txt (tested)** has **two** `User-agent: *` groups: an `Allow: /` group
+  and a group with the `Disallow` rules (`/1.2/`, `/learn/api-docs/`, `/swan-lake/learn/by-example/`
+  and others). Python's `urllib.robotparser` keeps only the first group, so it would wrongly allow
+  everything. RFC 9309 says the groups that apply should be merged. The pipeline therefore uses a
+  small matcher that merges them and lets the longest matching rule win.
+- **The API hosts (tested).** `api.github.com/robots.txt` and `api.central.ballerina.io/robots.txt`
+  both return 404, which means no restrictions. `central.ballerina.io/robots.txt` serves an HTML
+  page, also treated as no restrictions. The JSON APIs are used under their API terms and listed
+  in `crawl.robots_exempt_hosts`, which only saves the lookup.
+
+### 10.3 Central has a docs API
+
+- **The registry (tested).** `GET /2.0/registry/packages?org=<org>` returns each package's
+  `readme`, `summary`, `licenses` and `version` (for example, 88 packages in the `ballerina` org).
+- **The docs (tested).** `GET /2.0/docs/<org>/<package>/<version>` returns JSON with every module's
+  functions, classes, clients, records, enums, errors and constants. Each entry has a description,
+  typed parameters (with defaults) and return types. The versionless form returns 404. Rendering
+  it as an API reference gives answers real signatures to stay faithful to.
+- **Size and duplication.** The docs JSON can be megabytes (`ballerina/http`), so the collector
+  keeps only names, descriptions and rendered signatures. The default module's description repeats
+  the package README, so it is dropped when it does.
+- **Volume.** The API reference makes Central the largest chunk source: two packages gave 877
+  chunks. Questions are drawn round-robin across sources so it doesn't dominate.
+  `sources.central.include_api_docs: false` turns it off.
+- **No HTML fallback.** Since the API exists, Central HTML is never scraped.
+
+### 10.4 Chunk budget without an embedding model
+
+Section 4's budget was set by the embedder's 384-token limit. Without retrieval, a chunk is the
+whole context of one question call and one answer call. So the budget is about 800 tokens
+(`chunk.max_tokens`), estimated as characters ÷ 4, which needs no tokenizer dependency. Chunks
+under 40 tokens are kept but not used for questions. Heading-aware splitting and never splitting
+a code block are unchanged.
+
+### 10.5 Question deduplication threshold
+
+Word-set Jaccard at 0.8 is too aggressive for short questions. Two 9-word questions that differ in
+one word each way share 8 of 10 distinct words, which scores exactly 0.8, so they are flagged as
+duplicates even when that word changes the meaning. The default is **0.85**. "How do I read a
+file in Ballerina?" vs "How do I write a file in Ballerina?" (7 of 9 words, 0.78) stays distinct,
+while the same question with different spacing or case is caught.
+MinHash LSH only narrows the candidates; the exact Jaccard decides.
+
+### 10.6 Fine-tuning export choices
+
+- **Model-agnostic `messages`.** No model's template is baked in; the trainer applies the base
+  model's chat template. A base model has none of its own, so pick one (for example ChatML), use
+  it at inference too, and compute the loss on the assistant turn only.
+- **Drop the `Source:` line by default.** Training on answers that end with URLs teaches the model
+  to end answers with URLs, which it would then make up. The URL stays in `metadata.jsonl`.
+- **Split by source page** (hash of `source_url`), for the same reason as section 6: no page feeds
+  both train and eval. Small runs may have an empty eval file, because whole pages go to one side.

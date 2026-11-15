@@ -1,21 +1,40 @@
 # sft-dataset-generator — `sftgen`
 
-Turns collected raw records into a filtered, chat-format SFT dataset. Setup and the end-to-end
-run are in the [root README](../README.md); the design is in [../ARCHITECTURE.md](../ARCHITECTURE.md).
+The command-line tool for the whole pipeline. Setup and every command, step by step, are in the
+[root README: Quick start](../README.md#quick-start-step-by-step). The design is in
+[../ARCHITECTURE.md](../ARCHITECTURE.md).
 
-| Stage | Reads → writes | What it does |
+```bash
+sftgen run-all                    # everything, in order
+# or one phase at a time:
+sftgen scrape
+sftgen generate-questions
+sftgen generate-answers           # --retry-failed to retry failed ones
+sftgen validate                   # optional; --recheck to re-validate all
+sftgen export
+sftgen export-sft
+sftgen report
+```
+
+| Command | Module | What it does |
 |---|---|---|
-| `clean` | `data/raw` → `data/clean/documents.jsonl` | Per-source extractors (BBE folders, docs Markdown, `.bal` sources, Central READMEs, Next.js data, trafilatura Markdown); labels every code fence's language; relevance filter; exact + MinHash dedup (git > central > web); doc-level train/eval split |
-| `extract` | documents → `code_examples.jsonl` | Pairs code with its explanation; compiles each example; runs BBE programs against `.out` |
-| `chunk` | documents → `data/chunks/<chunker>/chunks.jsonl` | Heading-aware, token-budgeted chunks; fences never split |
-| `index` | chunks → `data/chroma/` | Embeds and upserts into `bal__<model>__<chunker>` |
-| `generate` | chunks + examples → `data/sft/<run>/candidates.jsonl` | 7 task types with quotas; grounded answers, mutation (debug_fix), back-translation (convert), seed-verified completions |
-| `validate` | → `validated.jsonl` | `bal build` on answer code, context-leak regex, unknown-symbol check |
-| `judge` | → `judged.jsonl` | 1–5 rubric on five criteria from a different-family judge |
-| `export` | → `train.jsonl`, `eval.jsonl`, `metadata.jsonl` | Thresholds, license allowlist, near-dup questions, 13-gram decontamination |
+| `scrape` | `ballerinascraper.scrape` → `clean/stage.py` → `chunk/stage.py` | Fetch new pages, extract clean Markdown (`clean/extractors.py`), chunk by headings (`chunk/markdown_chunker.py`) |
+| `generate-questions` | `generate/questions.py` | `QUESTIONS_PER_CHUNK` questions per new chunk, round-robin across sources, up to `LIMIT_GENERATING`; near-duplicates skipped (`clean/dedup.py`) |
+| `generate-answers` | `generate/answers.py` | Answer each `pending` question from its own chunk; citation enforced |
+| `validate` | `validate/stage.py` + `validate/bal_compiler.py` | `bal build` on answer code (fragments wrapped in `main`, common imports added) |
+| `export` | `export/stage.py` | `data/dataset.jsonl` (review format) |
+| `export-sft` | `export/sft.py` | `data/sft/train.jsonl`, `eval.jsonl` (chat `messages`), `metadata.jsonl`; split by page; `Source:` line removed |
+| `report` | `report.py` | Terminal summary + `reports/report.html` (also refreshed after every command) |
+| `run-all` | `cli.py` | All of the above in order |
 
-Prompts are versioned YAML files in `src/sftgen/prompts/`; their `id`/`version` are recorded on
-every generated record. Bump `version` when you change a prompt.
+Prompts are versioned YAML files in `src/sftgen/prompts/` (`questions.yaml`, `answer.yaml`).
+`generate/llm.py` is the OpenAI-compatible client:
+
+- rate limit and concurrency cap
+- retries
+- a disk cache of responses
+- token and cost capture per call (OpenRouter's `usage.cost`, or the optional
+  `generate.pricing` table)
 
 ```bash
 pytest sft-dataset-generator/tests

@@ -53,7 +53,7 @@ def setup_logging(level: str = "INFO", fmt: str = "json") -> None:
     root = logging.getLogger()
     root.handlers[:] = [handler]
     root.setLevel(level.upper())
-    for noisy in ("httpx", "httpcore", "urllib3", "chromadb", "sentence_transformers", "filelock", "trafilatura"):
+    for noisy in ("httpx", "httpcore", "urllib3", "filelock", "trafilatura"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
 

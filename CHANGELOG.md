@@ -1,5 +1,92 @@
 # Changelog
 
+## 2.1.0: Q&A pipeline on SQLite (2026-11-15, branch `feat/sqlite-qa-pipeline`)
+
+The pipeline now builds a grounded **question-and-answer** dataset in two LLM phases, tracks every
+step in one SQLite database and reports progress after every command. It is built for small local
+test runs before a full run.
+
+### Why
+
+- Each step needs to be visible: what was scraped, what failed and why, how many questions and
+  answers exist, and what the run cost.
+- Small, cheap test runs need to be easy, with limits set in `.env` and printed at startup.
+- The source list was narrowed to official sources only. The blog is no longer used.
+
+### New
+
+- **Commands:** `sftgen scrape`, `generate-questions`, `generate-answers`, `validate`, `export`,
+  `report` and `run-all`.
+- **Limits in `.env`:** `LIMIT_GENERATING`, `LIMIT_SCRAPE_PAGES` (per source), `QUESTIONS_PER_CHUNK`
+  and `REQUEST_DELAY_SECONDS`, printed at startup and stored on every run.
+- **Storage:** `data/pipeline.db`, with tables `pages`, `chunks`, `questions`, `answers`, `runs` and
+  `llm_usage`. Every row has a status and timestamps.
+- **Sources:**
+  - ballerina.io sitemap filtered to `/learn/`, `/learn/by-example/` and `/spec/lang/2024R1/`.
+  - Learn pages are read from their embedded Markdown source.
+  - BBE content comes from `ballerina-distribution` through the GitHub API, because the
+    ballerina.io page ships the explanation only inside compiled JavaScript.
+  - The Central **docs API** is now used alongside the registry API, so answers can be grounded
+    in real function and type signatures.
+  - All `module-ballerina-*` and `module-ballerinax-*` repos, through the GitHub API.
+- **Scraping:**
+  - robots.txt is checked for every web page, with a parser that merges repeated
+    `User-agent: *` groups (ballerina.io has two).
+  - Conditional GETs, plus a 24-hour cache for listings.
+  - Unchanged content is skipped by blob SHA, package version, HTTP 304 or content hash.
+  - Failures are recorded per page and never stop the run.
+- **Questions:**
+  - Generated round-robin across sources, so small runs cover every source.
+  - Each question is saved as it arrives.
+  - Near-duplicates are skipped, and questions that refer to "the excerpt" are rejected.
+  - Category and difficulty are normalized.
+- **Answers:** generated from the question plus its own saved chunk, and always end with
+  `Source: <url>`. A failure is recorded with its error message, and `--retry-failed` retries it.
+- **Validate:** answers are marked `valid`, `invalid` (with compiler errors) or `not_checked`.
+- **Report:** a terminal summary plus `reports/report.html`, a single file with tables, bar charts,
+  run history, token usage and cost per phase, and 5 random Q&A samples.
+- **`export-sft`:** writes `data/sft/train.jsonl`, `eval.jsonl` and `metadata.jsonl` in chat
+  `messages` format, ready for TRL, Axolotl and Unsloth.
+  - It is model-agnostic: the trainer applies the base model's chat template.
+  - The train/eval split is by source page.
+  - The `Source:` line is removed by default.
+  - The system prompt is configurable.
+  - It is included in `run-all`.
+- **Cost tracking:** the OpenRouter cost is requested per call (`usage.include`). An optional
+  `generate.pricing` table is the fallback.
+
+### Removed (approved before removal)
+
+- `index/` (embeddings + ChromaDB), the 7-task `generate/` (with mutation and back-translation),
+  `judge/`, the chat-format `export/`, `extract/` pairing.
+- The JSONL raw store, run manifests and Pydantic record schemas (`jsonl_io.py`, `manifest.py`,
+  `schemas.py`), and the generated `docs/schemas/*.json`.
+- The Scrapy web spider and its settings, pipelines and `scrapy.cfg`, the `balcollect` command,
+  the old prompts.
+- Dependencies: `scrapy`, `chromadb`, `sentence-transformers` (and with them torch and numpy),
+  plus the optional GCS extra.
+
+### Behaviour changes to know about
+
+- **Chunk size:** with no embedding model to fit, chunks are now up to about 800 tokens
+  (`chunk.max_tokens`, estimated as characters ÷ 4) instead of 300. That gives each question a
+  fuller context.
+- **No retrieval:** each answer is grounded only in the chunk its question came from.
+- **Removed settings:**
+  - `JUDGE_MODEL`, `EMBEDDING_MODEL` and `GCS_BUCKET` are no longer read.
+  - The judge and its thresholds are gone; validation by `bal` is the quality gate, and
+    `invalid` answers are left out of the export by default.
+- **Empty `.env` values are now ignored.** `OPENROUTER_API_KEY=` in the root `.env` no longer
+  hides a key set elsewhere.
+- **Logging and workers:** logs are plain text by default (`logging.format: text`), and
+  `validate.workers` defaults to 2 instead of 4, which keeps a laptop cooler.
+- **User-Agent:** now points to this repository.
+
+### Tests
+
+Shared, scraper and generator tests were rewritten for the new flow: 56 tests, including a real
+`bal` compile round trip when Ballerina is installed.
+
 ## 2.0.0: pipeline-v2 refactor (2026-11-12, branch `refactor/pipeline-v2`)
 
 A full refactor of both projects to match the approved design ([docs/recommendations.md](docs/recommendations.md), [docs/schemas.md](docs/schemas.md), [ARCHITECTURE.md](ARCHITECTURE.md)). The state before the refactor, including your uncommitted work, is saved in commit `60f142b`.

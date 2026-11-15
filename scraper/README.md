@@ -1,17 +1,41 @@
-# scraper — collect stage
+# scraper — the fetch half of `sftgen scrape`
 
-Writes immutable `RawRecord`s to `data/raw/<source>/<run_id>/part-*.jsonl.gz`
-(schema: [../docs/schemas.md](../docs/schemas.md) §1). Setup and the full pipeline are in the
-[root README](../README.md).
+Fetches official Ballerina sources into `data/pipeline.db` (`pages` table). It has no command of
+its own: `sftgen scrape` runs it, then converts and chunks the new pages.
 
-| Command | Source | Notes |
+Setup and every command, step by step, are in the
+[root README: Quick start](../README.md#quick-start-step-by-step). The scrape commands are:
+
+```bash
+sftgen scrape                     # up to LIMIT_SCRAPE_PAGES new pages per source
+sftgen scrape --source bbe        # one source only (bbe, spec, learn, central, github)
+sftgen scrape --refresh           # re-check stored pages for upstream changes
+```
+
+| Collector | Source | How |
 |---|---|---|
-| `python -m ballerinascraper.collect github` | Repos in `sources.github_repos` | GitHub API + raw files pinned to a commit SHA; files whose blob SHA is unchanged are not re-downloaded. `GITHUB_TOKEN` is optional but raises API limits. |
-| `python -m ballerinascraper.collect central` | `api.central.ballerina.io` registry | Package README + license + version; volatile fields (signed URLs, pull counts) are dropped before hashing. |
-| `scrapy crawl web` (from `scraper/ballerinascraper/`) | `sources.web_sitemaps` | Sitemap-only (no link following), robots.txt obeyed, AutoThrottle, ≤ 2 requests/domain, RFC 2616 HTTP cache (conditional GETs). |
+| `collectors/github.py` · `BbeCollector` | Ballerina by Example | Page list from the ballerina.io sitemap; `.md` + `.bal` + `.out` from `ballerina-distribution/examples/<name>/` via the GitHub blobs API. Skipped without a download when the folder's blob SHAs are unchanged. |
+| `collectors/ballerina_io.py` · `WebPageCollector` | Learn docs, spec 2024R1 | ballerina.io HTML pages listed in the sitemap; conditional GET (ETag / Last-Modified) on refresh |
+| `collectors/central.py` · `CentralCollector` | Ballerina Central | `/2.0/registry/packages` (README) + `/2.0/docs/<org>/<pkg>/<version>` (API docs, compacted); skipped when the version is unchanged |
+| `collectors/github.py` · `ModuleCollector` | `module-ballerina-*`, `module-ballerinax-*` repos | READMEs and `ballerina/*.bal` (tests excluded) via the GitHub API, most-starred repos first |
 
-Politeness and limits are configured in `config/pipeline.yaml` (`crawl:` section). There is no
-proxy or User-Agent rotation: the crawler identifies itself honestly.
+`scrape.py` drives them:
 
-Every run writes `_manifest.json` with counts (`written`, `unchanged`, errors). Content identical
-to an earlier run is skipped, so re-running is cheap and safe.
+- at most `LIMIT_SCRAPE_PAGES` downloads per source per run
+- pages already stored are skipped unless `--refresh` is passed
+- a failure is recorded on the page row (`failed` with the error) and the run goes on
+
+`collectors/http.py` is the polite session:
+
+- one honest User-Agent and `REQUEST_DELAY_SECONDS` between requests
+- retries with `Retry-After` and GitHub rate-limit handling
+- robots.txt checked before each web page, via `collectors/robots.py`, which merges repeated
+  `User-agent: *` groups. The documented JSON APIs (`api.github.com`, `api.central.ballerina.io`)
+  are exempt.
+- a 24-hour disk cache for listings (sitemap, repo lists, trees, package lists)
+
+There is no proxy or User-Agent rotation.
+
+```bash
+pytest scraper/ballerinascraper/tests
+```

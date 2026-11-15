@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballerina SFT Pipeline</title>
-<meta name="description" content="Architecture of a pipeline that builds a traceable, compiler-verified fine-tuning dataset for a Ballerina language model.">
+<meta name="description" content="Architecture of a pipeline that builds a grounded, source-cited question-and-answer dataset for fine-tuning a Ballerina language model.">
 <link rel="canonical" href="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Ballerina SFT Dataset Pipeline: Architecture">
-<meta property="og:description" content="Collect → clean → extract → chunk → embed → generate → validate → judge → export. Source code and docs on GitHub.">
+<meta property="og:description" content="scrape → generate-questions → generate-answers → validate → export, tracked in SQLite with an HTML report. Source code and docs on GitHub.">
 <meta property="og:url" content="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">
 <style>
 :root{
@@ -92,213 +92,241 @@ footer .links a{margin-right:4px}
       <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
     </div>
     <h1>Ballerina SFT Dataset Pipeline</h1>
-    <p>A pipeline that builds a traceable, compiler-checked fine-tuning dataset for a Ballerina small language model. It takes upstream sources through collect, clean, extract, chunk, embed, generate, validate, judge and export.</p>
+    <p>A pipeline that builds a grounded question-and-answer dataset for fine-tuning a Ballerina small language model. It scrapes official sources, generates questions from heading-aware chunks, answers each question from the same chunk with a source citation, compiles the code, and tracks every step in one SQLite database with an HTML report.</p>
     <span class="repo-url">Repository: <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline">github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline</a></span>
-    <span class="status">Implemented; see the <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md" style="color:inherit">changelog</a></span>
+    <span class="status">v2.1: Q&amp;A pipeline on SQLite; see the <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md" style="color:inherit">changelog</a></span>
   </div>
 </header>
 
 <nav class="toc" aria-label="Sections">
   <div class="wrap">
-    <a href="#principles">Principles</a><a href="#flow">Data flow</a><a href="#components">Components</a>
-    <a href="#lineage">Lineage</a><a href="#storage">Storage</a><a href="#repo">Repo layout</a>
-    <a href="#config">Config</a><a href="#run">Run</a><a href="#resume">Resume</a><a href="#safety">Reliability</a>
+    <a href="#principles">Principles</a><a href="#flow">Data flow</a><a href="#components">Phases</a>
+    <a href="#sources">Sources</a><a href="#storage">Storage</a><a href="#limits">Limits</a><a href="#report">Report</a>
+    <a href="#repo">Repo layout</a><a href="#config">Config</a><a href="#run">Run</a><a href="#resume">Resume</a><a href="#safety">Reliability</a>
   </div>
 </nav>
 
 <main>
 <section id="principles"><div class="wrap">
   <h2>Principles</h2>
-  <p class="lead">Data quality, correct code and traceability matter more than volume.</p>
+  <p class="lead">Grounded answers, visible progress and cheap test runs.</p>
   <div class="grid principles">
-    <div class="card"><h3>Source first</h3><p>Pull clean upstream files (GitHub repos, the Central API). The HTML crawl only covers sites with no source files.</p></div>
-    <div class="card"><h3>Raw is never modified</h3><p><code>data/raw</code> is append-only. Every other folder can be deleted and rebuilt from it.</p></div>
-    <div class="card"><h3>One stage, one output</h3><p>Stages communicate only through schema-checked files and a manifest.</p></div>
-    <div class="card"><h3>Idempotent and resumable</h3><p>IDs are computed from content, and work already done is skipped. A crash loses at most the item in progress.</p></div>
-    <div class="card"><h3>Verify, don't trust</h3><p>The compiler checks the code, and a judge from a different model family scores each answer. Every score is kept.</p></div>
-    <div class="card"><h3>Traceable</h3><p>Every training row links back to seed → chunk → document → raw → commit SHA or URL.</p></div>
+    <div class="card"><h3>Official sources only</h3><p>ballerina.io (learn, by-example, spec 2024R1), Ballerina Central and the ballerina-platform GitHub org. No blog.</p></div>
+    <div class="card"><h3>Grounded and cited</h3><p>Each answer is generated from its question plus the exact chunk the question came from, and ends with <code>Source: &lt;url&gt;</code>.</p></div>
+    <div class="card"><h3>Every record has a status</h3><p>Pages, chunks, questions, answers and runs move through explicit statuses with timestamps.</p></div>
+    <div class="card"><h3>Small runs first</h3><p>Limits in <code>.env</code> bound each run, are printed at startup and are stored with the run.</p></div>
+    <div class="card"><h3>Verify the code</h3><p>Ballerina code in answers is compiled with the real <code>bal</code> toolchain: valid, invalid or not checked.</p></div>
+    <div class="card"><h3>Simple to operate</h3><p>One CLI, one database file, one self-contained HTML report. Re-runs never repeat finished work.</p></div>
   </div>
 </div></section>
 
 <section id="flow"><div class="wrap">
   <h2>End-to-end data flow</h2>
-  <p class="lead">Collectors write raw records. Each stage after that reads the previous stage's file and writes its own.</p>
+  <p class="lead">Every phase reads from and writes to <code>data/pipeline.db</code>. The report is rebuilt from it after every command.</p>
   <div class="card diagram"><pre class="mermaid">
-flowchart LR
-  subgraph SRC["Upstream sources (allowlist)"]
-    GH[("GitHub: examples, dev-website, module repos")]
-    CEN[("Central registry API")]
-    WEB[("blog.ballerina.io sitemap")]
+flowchart TB
+  subgraph SRC["Official sources"]
+    SM[("ballerina.io sitemap")]
+    IO[("ballerina.io pages: learn, spec 2024R1")]
+    GHB[("GitHub API: BBE sources, module repos")]
+    CEN[("Central API: registry, docs")]
   end
-  subgraph SCRAPER["scraper: collect"]
-    C1[collect github]
-    C2[collect central]
-    C3[scrapy crawl web]
+  subgraph SCRAPE["sftgen scrape"]
+    F["fetch: robots.txt, delay, cache"] --> CL["clean: page to Markdown"] --> CH["chunk by headings"]
   end
-  subgraph GEN["sft-dataset-generator"]
-    CL[clean] --> EX[extract]
-    CL --> CH[chunk]
-    CH --> IX[index / embed]
-    GQ[generate] --> VA[validate] --> JU[judge] --> EP[export]
+  subgraph GEN["LLM phases"]
+    GQ[generate-questions] --> GA[generate-answers]
   end
-  GH --> C1
-  CEN --> C2
-  WEB --> C3
-  C1 & C2 & C3 --> RAW[/"data/raw · RawRecord"/]
-  RAW --> CL
-  CL --> DOC[/"documents.jsonl"/]
-  EX --> CE[/"code_examples.jsonl"/]
-  CH --> CK[/"chunks.jsonl"/]
-  IX --> VDB[("Chroma")]
-  CK --> GQ
-  CE --> GQ
-  VDB -- retrieve --> GQ
-  EP --> OUT[/"train.jsonl · eval.jsonl"/]
+  SM -.-> F
+  IO --> F
+  GHB --> F
+  CEN --> F
+  CH --> GQ
+  GA --> VA["validate: bal build"] --> EX[export]
+  VA --> ES[export-sft]
+  EX --> OUT[/"data/dataset.jsonl"/]
+  ES --> SFT[/"data/sft: train, eval (messages)"/]
+  DB[("data/pipeline.db")]
+  SCRAPE <--> DB
+  GEN <--> DB
+  DB --> RP[/"reports/report.html"/]
   </pre></div>
-  <div class="note"><strong>Changed order:</strong> the pipeline runs validate → judge, not judge → validate. The compiler and static checks are free and deterministic, so candidates that fail them are rejected before any judge tokens are spent. Both results are still stored on every record.</div>
+  <div class="note"><strong>Why BBE comes from GitHub:</strong> ballerina.io ships Ballerina-by-Example explanations only inside compiled JavaScript. The page list comes from the sitemap, but the explanation, code and output come from <code>ballerina-distribution/examples/&lt;name&gt;/</code>, exactly as written, and answers cite the ballerina.io URL.</div>
 </div></section>
 
 <section id="components"><div class="wrap">
-  <h2>Components</h2>
-  <p class="lead">Select a stage to see its inputs, outputs, command and main logic.</p>
-  <div class="stages" id="stageButtons" role="group" aria-label="Pipeline stages"></div>
+  <h2>Phases</h2>
+  <p class="lead">Select a phase to see its module, command, what it reads and writes, and its main logic.</p>
+  <div class="stages" id="stageButtons" role="group" aria-label="Pipeline phases"></div>
   <div class="card" id="stageDetail" aria-live="polite"></div>
-  <h3 style="margin:26px 0 10px;font-size:16px">One item through generate → validate → judge</h3>
+  <h3 style="margin:26px 0 10px;font-size:16px">One question, end to end</h3>
   <div class="card diagram"><pre class="mermaid">
 sequenceDiagram
-  participant G as generate
-  participant V as Chroma
+  participant DB as pipeline.db
+  participant Q as generate-questions
   participant L as LLM (OpenRouter)
-  participant B as bal worker pool
-  participant J as judge LLM
-  G->>L: question prompt (task_type, seed)
-  L-->>G: question
-  G->>V: retrieve top-k (same split as seed)
-  V-->>G: context chunks
-  G->>L: answer prompt
-  L-->>G: answer, appended to candidates.jsonl
-  Note over G,B: validate
-  G->>B: code blocks (wrapped if fragment)
-  B-->>G: compile status + errors (cached)
-  Note over G,J: judge (only if checks passed)
-  G->>J: question + answer + exact context
-  J-->>G: 5 scores + reasons, written to judged.jsonl
+  participant A as generate-answers
+  participant V as validate
+  Q->>DB: next pending chunk (round-robin by source)
+  Q->>L: chunk + source URL
+  L-->>Q: N questions (JSON) + usage and cost
+  Q->>DB: save each new question (pending)
+  A->>DB: pending question + its chunk
+  A->>L: question + chunk
+  L-->>A: answer + usage and cost
+  A->>DB: answer saved, question answered (or failed + error)
+  V->>DB: code compiled: valid / invalid / not_checked
   </pre></div>
 </div></section>
 
-<section id="lineage"><div class="wrap">
-  <h2>Lineage of records</h2>
-  <p class="lead">Every field is defined in <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">docs/schemas.md</a>. The train/eval split is set once on each Document, and everything derived from it inherits it.</p>
-  <div class="card diagram"><pre class="mermaid">
-erDiagram
-  RAW_RECORD ||--o| DOCUMENT : "cleaned into"
-  DOCUMENT ||--o{ CODE_EXAMPLE : contains
-  DOCUMENT ||--o{ CHUNK : "split into"
-  CHUNK }o--o{ CODE_EXAMPLE : "code_example_ids"
-  CHUNK ||--o{ SFT_META : "seed / context"
-  CODE_EXAMPLE ||--o{ SFT_META : seed
-  SFT_META ||--|| TRAIN_ROW : id
-  RAW_RECORD { string raw_id PK }
-  DOCUMENT { string doc_id PK }
-  CODE_EXAMPLE { string example_id PK }
-  CHUNK { string chunk_id PK }
-  SFT_META { string id PK }
-  TRAIN_ROW { string id PK }
-  </pre></div>
+<section id="sources"><div class="wrap">
+  <h2>Sources</h2>
+  <p class="lead">From the sitemap, only <code>/learn/</code>, <code>/learn/by-example/</code> and <code>/spec/lang/2024R1/</code> are kept. Old version paths, robots-disallowed paths, index pages and duplicates are skipped.</p>
+  <div class="card tbl"><table>
+    <thead><tr><th>Source</th><th>What</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Ballerina by Example</td><td>Explanation + code + output, verbatim (highest priority)</td><td>Sitemap list; files from <code>ballerina-distribution</code> via the GitHub blobs API</td></tr>
+      <tr><td>Learn docs</td><td>Guides, tools, packages, tutorials, integration patterns</td><td>ballerina.io page's embedded Markdown source</td></tr>
+      <tr><td>Language spec 2024R1</td><td>Whole spec, split by section headings; grammar as <code>ebnf</code></td><td>Structure-preserving HTML to Markdown</td></tr>
+      <tr><td>Ballerina Central</td><td>README + API docs (signatures)</td><td>Public JSON API: <code>/2.0/registry/packages</code>, <code>/2.0/docs/&lt;org&gt;/&lt;pkg&gt;/&lt;version&gt;</code></td></tr>
+      <tr><td>GitHub modules</td><td>READMEs + <code>.bal</code> API sources of <code>module-ballerina(x)-*</code></td><td>GitHub REST API with <code>GITHUB_TOKEN</code>, most-starred first</td></tr>
+    </tbody></table></div>
 </div></section>
 
 <section id="storage"><div class="wrap">
-  <h2>Where data is stored</h2>
-  <p class="lead">Everything under <code>data/</code> is gitignored. GCS can optionally mirror the same layout.</p>
-<pre class="block">data/
-├── raw/                          # immutable, append-only
-│   └── {github|central|web}/{run_id}/part-00000.jsonl.gz + _manifest.json
-├── clean/   documents.jsonl · code_examples.jsonl · _manifest.json
-├── chunks/{chunker-version}/   chunks.jsonl · _manifest.json
-├── chroma/                       # derived index, safe to delete and rebuild
-├── sft/{run_id}/
-│   ├── candidates.jsonl          # generate checkpoint (append-only)
-│   ├── validated.jsonl · judged.jsonl
-│   ├── metadata.jsonl            # all candidates + checks + scores + decision
-│   ├── train.jsonl · eval.jsonl  # {id, messages} only
-│   └── _manifest.json
-└── cache/  llm/ · compile/ · http/</pre>
+  <h2>Storage</h2>
+  <p class="lead">One SQLite file. Every row has a status and <code>created_at</code> / <code>updated_at</code>. Columns are documented in <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">docs/schemas.md</a>.</p>
+  <div class="card diagram"><pre class="mermaid">
+erDiagram
+  PAGES ||--o{ CHUNKS : "split into"
+  CHUNKS ||--o{ QUESTIONS : generates
+  QUESTIONS ||--o| ANSWERS : "answered by"
+  RUNS ||--o{ LLM_USAGE : records
+  PAGES { string url "fetched, chunked, empty, duplicate, blocked, failed" }
+  CHUNKS { string text "pending, questioned, too_small, failed, stale" }
+  QUESTIONS { string question "pending, answered, failed" }
+  ANSWERS { string answer "not_checked, valid, invalid" }
+  RUNS { string command "running, succeeded, failed" }
+  LLM_USAGE { float cost_usd "ok, error" }
+  </pre></div>
+<pre class="block" style="margin-top:12px">data/
+├── pipeline.db          # pages · chunks · questions · answers · runs · llm_usage
+├── dataset.jsonl        # export: question, answer, source_url, category, difficulty
+├── sft/                 # export-sft: train.jsonl · eval.jsonl (chat messages) · metadata.jsonl
+└── cache/  http/ (listings, 24 h) · llm/ (responses) · bal/ (compile results)
+reports/
+└── report.html          # rebuilt after every command</pre>
+</div></section>
+
+<section id="limits"><div class="wrap">
+  <h2>Limits for small runs</h2>
+  <p class="lead">Set in <code>.env</code>, printed at startup, stored on every run. The answer phase answers every pending question, so it is naturally limited by <code>LIMIT_GENERATING</code>.</p>
+  <div class="card tbl"><table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>LIMIT_SCRAPE_PAGES</code></td><td>20</td><td>Max pages to download per source per run (0 = no limit)</td></tr>
+      <tr><td><code>LIMIT_GENERATING</code></td><td>10</td><td>Max questions to generate per run (0 = no limit)</td></tr>
+      <tr><td><code>QUESTIONS_PER_CHUNK</code></td><td>3</td><td>Questions generated from each chunk</td></tr>
+      <tr><td><code>REQUEST_DELAY_SECONDS</code></td><td>1</td><td>Polite delay between requests</td></tr>
+      <tr><td><code>GITHUB_TOKEN</code></td><td>-</td><td>GitHub API: 5,000 requests/hour instead of 60</td></tr>
+    </tbody></table></div>
+</div></section>
+
+<section id="report"><div class="wrap">
+  <h2>The report</h2>
+  <p class="lead">A short terminal summary after every command, and <code>reports/report.html</code>: one file, no server, opens in any browser.</p>
+  <div class="two">
+    <div class="card"><h3 style="margin:0 0 8px;font-size:15px">Contents</h3><ul style="margin:0;padding-left:18px">
+      <li>Pages scraped: total, per source and status, failed URLs with errors</li>
+      <li>Chunks per source</li>
+      <li>Questions per source, category and difficulty</li>
+      <li>Answers: answered, pending, failed; validation results</li>
+      <li>Run history: start, duration, limits, items processed</li>
+      <li>Tokens and cost per phase</li>
+      <li>5 random Q&amp;A samples to spot-check</li></ul></div>
+    <div class="card"><h3 style="margin:0 0 8px;font-size:15px">Terminal summary</h3><pre class="block">── Summary ──────────────────────────────
+Pages      9 total, 0 failed  |  usable: bbe 2, ...
+Chunks     1272  |  bbe 6, spec 351, ...
+Questions  10  |  pending 0, answered 10, failed 0
+Validation valid 6, not_checked 3, invalid 1
+LLM usage  48,210 tokens, $0.0123
+Report     reports/report.html</pre></div>
+  </div>
 </div></section>
 
 <section id="repo"><div class="wrap">
   <h2>Repo folder structure</h2>
-  <p class="lead">Two projects plus a small shared package for schemas, config, logging, I/O and manifests.</p>
+  <p class="lead">Two projects plus a small shared package. <code>sftgen</code> is the single CLI.</p>
 <pre class="block">ballerina-sft-dataset-pipeline/
 ├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md · LICENSE
 ├── .env.example · config/pipeline.yaml
-├── docs/  recommendations.md · schemas.md · schemas/*.json
-├── shared/balpipe_common/  schemas · config · logging · jsonl_io · manifest · ids · tests/
+├── docs/  schemas.md · recommendations.md
+├── shared/balpipe_common/   config · db (SQLite) · ids · logging · tests/
 ├── scraper/ballerinascraper/
-│   ├── ballerinascraper/  settings · pipelines · raw_sink · spiders/web.py
-│   │                      collectors/github.py · collectors/central.py · collect.py
+│   ├── ballerinascraper/  scrape.py (fetch loop)
+│   │                      collectors/  base · http · robots · ballerina_io · github · central
 │   └── tests/
 ├── sft-dataset-generator/
-│   ├── src/sftgen/  cli · clean/ · extract/ · chunk/ · index/ · generate/
-│   │                validate/ · judge/ · export/ · prompts/*.yaml
+│   ├── src/sftgen/  cli · clean/ · chunk/ · generate/ (questions, answers, llm)
+│   │                validate/ · export/ (dataset, sft) · report.py · prompts/*.yaml
 │   └── tests/
-└── data/   (gitignored)</pre>
+├── data/      (gitignored)
+└── reports/   (gitignored)</pre>
 </div></section>
 
 <section id="config"><div class="wrap">
   <h2>Configuration</h2>
-  <p class="lead">Precedence: environment variable &gt; <code>.env</code> &gt; <code>config/pipeline.yaml</code> &gt; code default. Values are checked at startup, so a bad config fails before any work starts.</p>
+  <p class="lead">Precedence: environment variable &gt; <code>.env</code> &gt; <code>config/pipeline.yaml</code> &gt; code default. Empty values in <code>.env</code> are ignored. Values are checked at startup.</p>
   <div class="two">
     <div class="card"><h3 style="margin:0 0 8px;font-size:15px">.env (never committed)</h3>
       <div class="tbl"><table><tbody>
         <tr><td><code>OPENROUTER_API_KEY</code></td><td>LLM access</td></tr>
         <tr><td><code>LLM_BASE_URL</code></td><td>OpenRouter by default; any OpenAI-compatible endpoint works</td></tr>
         <tr><td><code>QUESTION_GEN_MODEL</code> · <code>ANSWER_GEN_MODEL</code></td><td>Generation models</td></tr>
-        <tr><td><code>JUDGE_MODEL</code></td><td>Must be a different model family from the answer model</td></tr>
-        <tr><td><code>EMBEDDING_MODEL</code></td><td>Its max length limits the chunk token budget</td></tr>
-        <tr><td><code>GITHUB_TOKEN</code> · <code>GCS_BUCKET</code></td><td>Optional</td></tr>
+        <tr><td><code>GITHUB_TOKEN</code></td><td>GitHub API rate limit</td></tr>
+        <tr><td><code>LIMIT_*</code> · <code>QUESTIONS_PER_CHUNK</code> · <code>REQUEST_DELAY_SECONDS</code></td><td>Run limits</td></tr>
       </tbody></table></div></div>
     <div class="card"><h3 style="margin:0 0 8px;font-size:15px">config/pipeline.yaml (committed)</h3>
       <div class="tbl"><table><tbody>
-        <tr><td><code>sources</code></td><td>Repo allowlist, Central orgs, sitemaps</td></tr>
-        <tr><td><code>crawl</code></td><td>User-agent, concurrency, delays</td></tr>
-        <tr><td><code>chunk</code></td><td><code>max_tokens</code>, chunker version</td></tr>
-        <tr><td><code>generate</code></td><td>Task quotas, top-k, requests per minute</td></tr>
-        <tr><td><code>judge.thresholds</code></td><td>faithfulness ≥ 4, correctness ≥ 4, others ≥ 3</td></tr>
-        <tr><td><code>split.eval_fraction</code></td><td>Held-out documents, e.g. 0.05</td></tr>
-        <tr><td><code>validate</code></td><td>Ballerina version, pool size, timeout, heap</td></tr>
+        <tr><td><code>sources</code></td><td>Order, sitemap filters, GitHub repo patterns and file globs, Central orgs</td></tr>
+        <tr><td><code>crawl</code></td><td>User-Agent, robots.txt, exempt API hosts, listing cache</td></tr>
+        <tr><td><code>chunk</code></td><td><code>max_tokens</code> (800), <code>min_tokens</code></td></tr>
+        <tr><td><code>generate</code></td><td>Concurrency, requests per minute, temperatures, dedup threshold, pricing</td></tr>
+        <tr><td><code>validate</code></td><td><code>bal</code> path, workers, timeout, heap</td></tr>
+        <tr><td><code>export</code> · <code>report</code></td><td>Output paths, include invalid answers, sample count</td></tr>
+        <tr><td><code>sft</code></td><td>Output dir, eval share (split by page), strip <code>Source:</code> line, system prompt</td></tr>
       </tbody></table></div></div>
   </div>
 </div></section>
 
 <section id="run"><div class="wrap">
   <h2>How to run</h2>
-  <p class="lead"><code>--limit N</code> runs a small test, and <code>--dry-run</code> shows the plan without calling any model.</p>
+  <p class="lead">Start with the default limits (10 questions), check the report, then raise them.</p>
   <div class="card">
     <div class="cmd-row"><div class="n">1</div><div class="body"><p>Set up once</p><pre class="block">git clone https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline.git
 cd ballerina-sft-dataset-pipeline
 python3.11 -m venv .venv &amp;&amp; source .venv/bin/activate
 pip install -e shared -r scraper/requirements.txt -e scraper \
   -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
-cp .env.example .env &amp;&amp; bal version</pre></div></div>
-    <div class="cmd-row"><div class="n">2</div><div class="body"><p>Collect</p><pre class="block">python -m ballerinascraper.collect github
-python -m ballerinascraper.collect central
-(cd scraper/ballerinascraper &amp;&amp; scrapy crawl web)</pre></div></div>
-    <div class="cmd-row"><div class="n">3</div><div class="body"><p>Process, generate and export (each stage can also run on its own)</p><pre class="block">sftgen all
-# or: sftgen clean · extract · chunk · index · generate · validate · judge · export</pre></div></div>
+cp .env.example .env   # API key, models, GITHUB_TOKEN, limits</pre></div></div>
+    <div class="cmd-row"><div class="n">2</div><div class="body"><p>Run all phases, or one at a time</p><pre class="block">sftgen run-all
+# or: sftgen scrape · generate-questions · generate-answers · validate · export · export-sft</pre></div></div>
+    <div class="cmd-row"><div class="n">3</div><div class="body"><p>Check progress</p><pre class="block">sftgen report
+open reports/report.html</pre></div></div>
   </div>
 </div></section>
 
 <section id="resume"><div class="wrap">
-  <h2>Resuming after a failure</h2>
+  <h2>Re-running and resuming</h2>
   <div class="card tbl"><table>
-    <thead><tr><th>Mechanism</th><th>How it works</th></tr></thead>
+    <thead><tr><th>Phase</th><th>Picks up</th></tr></thead>
     <tbody>
-      <tr><td>Stage manifest</td><td><code>status: running → completed | failed</code>. Re-running a stage that didn't complete resumes the same run, if its input hashes haven't changed.</td></tr>
-      <tr><td>Item checkpoints</td><td>generate, validate and judge append and flush one line per item. On resume, IDs already written are skipped.</td></tr>
-      <tr><td>Atomic outputs</td><td>Batch stages write <code>*.tmp</code> and rename it when done. A half-written file is never read.</td></tr>
-      <tr><td>Deterministic IDs + upsert</td><td>Re-runs never duplicate records or vectors.</td></tr>
-      <tr><td>Caches</td><td>LLM responses and compile results are cached on disk, so repeated work costs nothing.</td></tr>
-      <tr><td>Item failures</td><td>Recorded in <code>manifest.errors</code>; the run continues. Re-running the stage retries them, because only finished items are skipped.</td></tr>
+      <tr><td>scrape</td><td>Pages not yet stored, and failed ones. <code>--refresh</code> re-checks stored pages: unchanged by blob SHA or package version (no request), HTTP 304, or identical content hash.</td></tr>
+      <tr><td>clean + chunk</td><td>Pages with status <code>fetched</code>. Re-chunking keeps unchanged chunks and their questions; removed ones become <code>stale</code>.</td></tr>
+      <tr><td>generate-questions</td><td>Pending chunks without questions; failed calls retried up to 3 times.</td></tr>
+      <tr><td>generate-answers</td><td>Pending questions; <code>--retry-failed</code> adds failed ones.</td></tr>
+      <tr><td>validate</td><td>Answers not yet checked; <code>--recheck</code> re-validates all.</td></tr>
+      <tr><td>Caches</td><td>LLM responses and compile results on disk, so repeated work costs nothing.</td></tr>
     </tbody></table></div>
 </div></section>
 
@@ -307,54 +335,47 @@ python -m ballerinascraper.collect central
   <div class="card tbl"><table>
     <thead><tr><th>Concern</th><th>Approach</th></tr></thead>
     <tbody>
-      <tr><td>Scraping</td><td>Obeys robots.txt. One honest user-agent. AutoThrottle, ≤ 2 requests per domain, ETag. No proxies, no user-agent rotation.</td></tr>
+      <tr><td>Scraping</td><td>robots.txt checked before every web page (repeated <code>User-agent: *</code> groups merged). One honest User-Agent, <code>REQUEST_DELAY_SECONDS</code> between requests. No proxies, no User-Agent rotation. Documented JSON APIs are exempt from robots.txt.</td></tr>
+      <tr><td>Failures</td><td>Recorded on the page or question with the error, shown in the report, retried next run. One failure never stops a run.</td></tr>
       <tr><td>HTTP retries</td><td>Backoff that honours <code>Retry-After</code> and GitHub's rate-limit reset.</td></tr>
-      <tr><td>LLM calls</td><td>SDK retries with backoff; no retries on 400 or 401. Semaphore plus a requests-per-minute limit per model. JSON outputs checked against schemas.</td></tr>
-      <tr><td>Compiling generated code</td><td>Compile only, never run. Temp working folder, <code>--offline</code>, 60 s timeout, <code>-Xmx1g</code>, pool of 4.</td></tr>
-      <tr><td>Logging</td><td>JSON logs with run_id, stage and item ID. Funnel counts saved in manifests.</td></tr>
-      <tr><td>Secrets</td><td>Only in the environment. Redacted in logs and manifests.</td></tr>
-      <tr><td>License and contamination</td><td>SPDX license per record. Train/eval split per document. Retrieval limited to the seed's split. 13-gram overlap check.</td></tr>
+      <tr><td>LLM calls</td><td>Concurrency cap plus requests-per-minute limit; SDK retries; JSON output validated; tokens and cost stored per call.</td></tr>
+      <tr><td>Compiling generated code</td><td>Compile only, never run. Temp folder, <code>--offline</code> first, timeout, <code>-Xmx1g</code>, 2 workers, secrets removed from the environment.</td></tr>
+      <tr><td>Secrets</td><td>Only in the environment. Never logged or stored in the database.</td></tr>
     </tbody></table></div>
 </div></section>
 </main>
 
 <footer><div class="wrap">
   <p class="links"><strong>Source code:</strong> <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline">github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline</a></p>
-  <p class="links">Docs: <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/README.md">README</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/recommendations.md">Design rationale</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">Record schemas</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/LICENSE">Apache-2.0 license</a></p>
+  <p class="links">Docs: <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/README.md">README</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/schemas.md">Database schema</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/docs/recommendations.md">Design research</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline/blob/main/LICENSE">Apache-2.0 license</a></p>
   <p>This page: <a href="https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html">sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html</a></p>
 </div></footer>
 
 <script>
 const STAGES = [
-  {id:"collect", name:"Collect", color:"--s-collect", module:"scraper · collectors/github.py, collectors/central.py, spiders/web.py",
-   cmd:"python -m ballerinascraper.collect github|central · scrapy crawl web",
-   inputs:"GitHub API + shallow clones (pinned SHA), Central registry API, blog sitemap",
-   outputs:"data/raw/{source}/{run_id}/*.jsonl.gz (RawRecord)",
-   logic:"Allowlisted sources only. License recorded for each record. Conditional GET, robots.txt, one honest user-agent."},
-  {id:"clean", name:"Clean", color:"--s-process", module:"sftgen.clean",
-   cmd:"sftgen clean", inputs:"data/raw", outputs:"data/clean/documents.jsonl (Document)",
-   logic:"Extractor chosen per source (BBE Markdown, Next.js data, trafilatura Markdown, Central readme, .bal). Labels each code block's language. Exact and MinHash dedup. Assigns doc_type and split."},
-  {id:"extract", name:"Extract", color:"--s-process", module:"sftgen.extract",
-   cmd:"sftgen extract", inputs:"documents.jsonl", outputs:"data/clean/code_examples.jsonl (CodeExample)",
-   logic:"Pairs code with its prose (BBE directive, adjacent Markdown, doc comments). Compiles every example. Runs BBEs against .out where upstream flags say they should match."},
-  {id:"chunk", name:"Chunk", color:"--s-process", module:"sftgen.chunk",
-   cmd:"sftgen chunk", inputs:"documents + code examples", outputs:"data/chunks/{chunker}/chunks.jsonl (Chunk)",
-   logic:"Splits along headings with a token budget no larger than the embedder's max length. Never splits a code block. Adds a heading breadcrumb header."},
-  {id:"index", name:"Index", color:"--s-process", module:"sftgen.index",
-   cmd:"sftgen index", inputs:"chunks.jsonl", outputs:"Chroma collection bal__{model}__{chunker}",
-   logic:"Batched embedding. Upsert by chunk_id. Flat metadata used for filtering by split, doc_type and license."},
-  {id:"generate", name:"Generate", color:"--s-gen", module:"sftgen.generate",
-   cmd:"sftgen generate", inputs:"chunks, code examples, Chroma", outputs:"data/sft/{run}/candidates.jsonl",
-   logic:"Fills task-type quotas. Grounded LLM answers; mutation for debug_fix; back-translation for convert_from_language. Retrieval limited to the seed's split."},
-  {id:"validate", name:"Validate", color:"--s-gen", module:"sftgen.validate",
-   cmd:"sftgen validate", inputs:"candidates.jsonl", outputs:"validated.jsonl",
-   logic:"Sandboxed bal build --offline in a process pool, cached. Flags answers that mention 'the context'. Flags unknown module:symbol references."},
-  {id:"judge", name:"Judge", color:"--s-gen", module:"sftgen.judge",
-   cmd:"sftgen judge", inputs:"validated.jsonl", outputs:"judged.jsonl",
-   logic:"Judge model from a different family. Scores 1–5 for faithfulness, correctness, helpfulness, instruction following and code quality, with reasons."},
-  {id:"export", name:"Export", color:"--s-out", module:"sftgen.export",
-   cmd:"sftgen export", inputs:"judged.jsonl", outputs:"train.jsonl · eval.jsonl ({id, messages}) + metadata.jsonl",
-   logic:"Applies thresholds from config. Near-duplicate filter. 13-gram decontamination against eval. Writes the chat messages format."}
+  {id:"scrape", name:"scrape", color:"--s-collect", module:"ballerinascraper.scrape · sftgen.clean · sftgen.chunk",
+   cmd:"sftgen scrape [--refresh] [--source bbe]",
+   inputs:"ballerina.io sitemap and pages, GitHub API, Central API",
+   outputs:"pages (raw cache + Markdown), chunks",
+   logic:"Up to LIMIT_SCRAPE_PAGES new pages per source. robots.txt, polite delay, conditional GET, change detection by blob SHA / version / hash. One extractor per page shape; heading-aware chunks that never split code; duplicates and empty pages marked."},
+  {id:"questions", name:"generate-questions", color:"--s-gen", module:"sftgen.generate.questions",
+   cmd:"sftgen generate-questions", inputs:"chunks with status pending", outputs:"questions (pending), llm_usage",
+   logic:"Round-robin across sources (BBE first). QUESTIONS_PER_CHUNK per chunk until LIMIT_GENERATING are saved; each saved as it arrives. Answerable from the chunk; category and difficulty normalized; near-duplicates and questions that mention 'the excerpt' skipped."},
+  {id:"answers", name:"generate-answers", color:"--s-gen", module:"sftgen.generate.answers",
+   cmd:"sftgen generate-answers [--retry-failed]", inputs:"pending questions + their chunks", outputs:"answers (not_checked); question answered or failed",
+   logic:"Question + its own saved chunk. Accurate to the source, working Ballerina code when relevant, no invented APIs, ends with Source: url. Errors stored on the question."},
+  {id:"validate", name:"validate", color:"--s-process", module:"sftgen.validate",
+   cmd:"sftgen validate [--recheck]", inputs:"answers not yet checked", outputs:"answer status valid / invalid / not_checked",
+   logic:"Extract ballerina code blocks; bal build --offline in temp dirs with timeout, heap cap and cache. Fragments wrapped in main; common imports added. No bal installed: not_checked."},
+  {id:"export", name:"export", color:"--s-out", module:"sftgen.export",
+   cmd:"sftgen export", inputs:"answered questions", outputs:"data/dataset.jsonl",
+   logic:"One line per answer: question, answer, source_url, category, difficulty. Invalid answers left out by default. Atomic write."},
+  {id:"export-sft", name:"export-sft", color:"--s-out", module:"sftgen.export.sft",
+   cmd:"sftgen export-sft", inputs:"answered questions", outputs:"data/sft/train.jsonl · eval.jsonl (messages) · metadata.jsonl",
+   logic:"Chat messages (system, user, assistant) for TRL, Axolotl and Unsloth; the trainer applies the base model's chat template. Train/eval split by source page. Trailing Source line removed so the model does not learn to invent URLs. Invalid answers left out."},
+  {id:"report", name:"report", color:"--s-src", module:"sftgen.report",
+   cmd:"sftgen report (also after every command)", inputs:"pipeline.db", outputs:"terminal summary + reports/report.html",
+   logic:"Pages, failures, chunks, questions by source/category/difficulty, answer and validation status, run history, tokens and cost, 5 random Q&A samples."}
 ];
 const btnWrap = document.getElementById("stageButtons");
 const detail = document.getElementById("stageDetail");
@@ -374,7 +395,7 @@ STAGES.forEach(s=>{
   b.addEventListener("click",()=>show(s.id));
   btnWrap.appendChild(b);
 });
-show("collect");
+show("scrape");
 
 // theme
 const root=document.documentElement;

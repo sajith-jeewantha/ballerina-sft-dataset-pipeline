@@ -1,10 +1,12 @@
 """LLM access: versioned prompts, an OpenAI-compatible async client (OpenRouter by
-default), rate limiting, retries, a disk cache and JSON-output parsing.
+default), rate limiting, retries, a disk cache, usage/cost capture and JSON parsing.
 
 Retries: the OpenAI SDK retries 408/409/429/5xx and connection errors with
 exponential backoff and honours `Retry-After`; 400/401/403 are NOT retried.
-Cache: responses are stored by sha256(model, messages, params), so resuming or
-re-running a stage never pays twice for the same call.
+Cache: responses are stored by sha256(model, messages, params), so re-running a
+phase never pays twice for the same call (cached calls are recorded with cost 0).
+Cost: OpenRouter returns the cost of each call (`usage.cost`); otherwise the
+optional `generate.pricing` table is used; otherwise cost is unknown.
 """
 
 from __future__ import annotations
@@ -23,8 +25,7 @@ import yaml
 from pydantic import BaseModel, ValidationError
 
 from balpipe_common.config import Settings
-from balpipe_common.ids import sha256_text, utc_now_iso
-from balpipe_common.schemas import LLMCall
+from balpipe_common.ids import sha256_text
 
 T = TypeVar("T", bound=BaseModel)
 JSON_RE = re.compile(r"\{.*\}|\[.*\]", re.DOTALL)
@@ -33,6 +34,15 @@ FENCE_RE = re.compile(r"```[\w+#-]*\n(.*?)```", re.DOTALL)
 
 class LLMError(RuntimeError):
     pass
+
+
+@dataclass
+class Usage:
+    model: str
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    cost_usd: float | None = None
+    cached: bool = False
 
 
 # --------------------------------------------------------------------------- #
@@ -83,7 +93,7 @@ class RateLimiter:
 # Client
 # --------------------------------------------------------------------------- #
 class LLMClient:
-    def __init__(self, settings: Settings, cache_dir: Path, *, concurrency: int | None = None) -> None:
+    def __init__(self, settings: Settings, cache_dir: Path) -> None:
         from openai import AsyncOpenAI
 
         settings.require("llm_api_key")
@@ -95,7 +105,7 @@ class LLMClient:
             max_retries=g.max_retries,
             timeout=g.request_timeout_s,
         )
-        self.sem = asyncio.Semaphore(concurrency or g.concurrency)
+        self.sem = asyncio.Semaphore(max(1, g.concurrency))
         self.rate = RateLimiter(g.requests_per_minute)
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -103,20 +113,27 @@ class LLMClient:
     def _cache_path(self, key: str) -> Path:
         return self.cache_dir / key[:2] / f"{key}.json"
 
+    def _cost(self, model: str, usage: Any) -> float | None:
+        extra = getattr(usage, "model_extra", None) or {}
+        if isinstance(extra.get("cost"), (int, float)):
+            return float(extra["cost"])
+        price = self.settings.generate.pricing.get(model)
+        if price and usage is not None:
+            return (usage.prompt_tokens * price.get("input", 0) + usage.completion_tokens * price.get("output", 0)) / 1e6
+        return None
+
     async def chat(self, model: str, prompt: Prompt, *, temperature: float, max_tokens: int,
-                   **fmt: Any) -> tuple[str, LLMCall]:
+                   **fmt: Any) -> tuple[str, Usage]:
         messages = prompt.messages(**fmt)
         params: dict[str, Any] = {"temperature": temperature, "max_tokens": max_tokens}
         extra = self.settings.generate.extra_body
-        key = sha256_text(json.dumps({"model": model, "messages": messages, "params": params, "extra": extra},
-                                     sort_keys=True))
-        call = LLMCall(model=model, provider=self.settings.llm_provider, prompt_id=prompt.id,
-                       prompt_version=prompt.version, params=params, created_at=utc_now_iso())
+        key = sha256_text(json.dumps({"model": model, "messages": messages, "params": params,
+                                      "extra": {k: v for k, v in extra.items() if k != "usage"}}, sort_keys=True))
         cache = self._cache_path(key)
         if cache.is_file():
             data = json.loads(cache.read_text(encoding="utf-8"))
-            call.usage, call.cached, call.created_at = data.get("usage"), True, data.get("created_at", call.created_at)
-            return data["text"], call
+            u = data.get("usage") or {}
+            return data["text"], Usage(model, u.get("prompt_tokens"), u.get("completion_tokens"), 0.0, cached=True)
 
         async with self.sem:
             await self.rate.wait()
@@ -127,16 +144,19 @@ class LLMClient:
         text = (choice.message.content or "").strip() if choice else ""
         if not text:
             raise LLMError(f"empty response from {model} (finish_reason={getattr(choice, 'finish_reason', None)})")
+        usage = Usage(model)
         if resp.usage:
-            call.usage = {"prompt_tokens": resp.usage.prompt_tokens, "completion_tokens": resp.usage.completion_tokens}
+            usage = Usage(model, resp.usage.prompt_tokens, resp.usage.completion_tokens, self._cost(model, resp.usage))
         cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps({"text": text, "usage": call.usage, "created_at": call.created_at}), encoding="utf-8")
-        return text, call
+        cache.write_text(json.dumps({"text": text, "usage": {"prompt_tokens": usage.prompt_tokens,
+                                                             "completion_tokens": usage.completion_tokens}}),
+                         encoding="utf-8")
+        return text, usage
 
     async def chat_json(self, model: str, prompt: Prompt, schema: type[T], *, temperature: float, max_tokens: int,
-                        **fmt: Any) -> tuple[T, LLMCall]:
-        text, call = await self.chat(model, prompt, temperature=temperature, max_tokens=max_tokens, **fmt)
-        return parse_json(text, schema), call
+                        **fmt: Any) -> tuple[T, Usage]:
+        text, usage = await self.chat(model, prompt, temperature=temperature, max_tokens=max_tokens, **fmt)
+        return parse_json(text, schema), usage
 
 
 def parse_json(text: str, schema: type[T]) -> T:

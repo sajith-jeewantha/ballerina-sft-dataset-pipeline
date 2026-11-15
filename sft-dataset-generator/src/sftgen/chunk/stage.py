@@ -1,58 +1,57 @@
-"""`sftgen chunk`: documents (+ code examples) -> chunks.jsonl"""
+"""Chunk one page's Markdown into the `chunks` table.
+
+Re-chunking a changed page keeps chunks whose text is unchanged (and their
+questions), marks vanished chunks `stale`, and adds new ones as `pending`.
+A chunk whose text already exists on another page is skipped as a duplicate.
+"""
 
 from __future__ import annotations
 
-from balpipe_common.config import ConfigError, Settings
-from balpipe_common.ids import chunk_id
-from balpipe_common.jsonl_io import read_models, write_jsonl_atomic
-from balpipe_common.logging import get_logger
-from balpipe_common.manifest import StageRun
-from balpipe_common.schemas import Chunk, ChunkerInfo, CodeExample, Document
+import sqlite3
+
+from balpipe_common.config import Settings
+from balpipe_common.db import Database
+from balpipe_common.ids import content_hash
 
 from sftgen.chunk.markdown_chunker import chunk_markdown, context_header
-from sftgen.index.embedder import load_tokenizer
-from sftgen.paths import Paths
 
 
-def run(settings: Settings, *, limit: int | None = None) -> dict:
-    paths = Paths(settings)
-    count, max_seq = load_tokenizer(settings.embedding_model)
-    if settings.chunk.max_tokens > max_seq:
-        raise ConfigError(
-            f"chunk.max_tokens={settings.chunk.max_tokens} exceeds {settings.embedding_model} "
-            f"max_seq_length={max_seq}; text beyond that would be silently truncated when embedded."
-        )
-    info = ChunkerInfo(name=settings.chunk.name, version=settings.chunk.version,
-                       max_tokens=settings.chunk.max_tokens, tokenizer=settings.embedding_model)
-    with StageRun(settings, "chunk", paths.chunks_dir, inputs=[paths.documents, paths.code_examples]) as stage:
-        log = get_logger(__name__, run_id=stage.run_id, stage="chunk")
-        docs = [d for d in read_models(paths.documents, Document) if d.dedup.status == "unique"]
-        if limit:
-            docs = docs[:limit]
-        examples_by_doc: dict[str, list[CodeExample]] = {}
-        if paths.code_examples.exists():
-            for e in read_models(paths.code_examples, CodeExample):
-                examples_by_doc.setdefault(e.doc_id, []).append(e)
+def approx_tokens(text: str) -> int:
+    """~4 characters per token: close enough for budgeting LLM context, and dependency-free."""
+    return (len(text) + 3) // 4
 
-        chunks: list[Chunk] = []
-        over_budget = 0
-        for d in docs:
-            for i, draft in enumerate(chunk_markdown(d.markdown, d.title, settings.chunk.max_tokens, count)):
-                over_budget += draft.token_count > settings.chunk.max_tokens
-                ex_ids = [e.example_id for e in examples_by_doc.get(d.doc_id, []) if e.code.strip() and e.code.strip() in draft.text]
-                chunks.append(Chunk(
-                    chunk_id=chunk_id(d.doc_id, draft.text, i), doc_id=d.doc_id, run_id=stage.run_id,
-                    ordinal=i, heading_path=draft.heading_path, context_header=context_header(draft.heading_path),
-                    text=draft.text, token_count=draft.token_count, has_code=draft.has_code,
-                    code_example_ids=ex_ids, doc_type=d.doc_type, source_uri=d.source_uri, split=d.split,
-                    license_spdx=d.license.spdx, chunker=info,
-                ))
-        n = write_jsonl_atomic(paths.chunks, chunks)
-        stage.add_output(paths.chunks)
-        stage.count("documents", len(docs))
-        stage.count("chunks_written", n)
-        stage.count("chunks_over_budget", over_budget)
-        if over_budget:
-            log.warning("some chunks exceed the token budget", extra={"event": "chunk.over_budget", "n": over_budget})
-        log.info("chunk finished", extra={"event": "chunk.done", "chunks": n})
-        return dict(stage.counts)
+
+def chunk_page(s: Settings, db: Database, page: sqlite3.Row, title: str, markdown: str) -> dict[str, int]:
+    stats = {"chunks_new": 0, "chunks_kept": 0, "chunks_stale": 0, "chunks_duplicate": 0}
+    drafts = chunk_markdown(markdown, title, s.chunk.max_tokens, approx_tokens)
+    existing = {r["text_hash"]: r for r in db.query(
+        "SELECT c.id, c.text_hash, c.status, (SELECT COUNT(*) FROM questions q WHERE q.chunk_id = c.id) AS nq "
+        "FROM chunks c WHERE c.page_id = ?", (page["id"],))}
+    seen: set[str] = set()
+    for ordinal, d in enumerate(drafts):
+        h = content_hash(d.text)
+        if h in seen:
+            continue
+        seen.add(h)
+        small = d.token_count < s.chunk.min_tokens
+        values = {"ordinal": ordinal, "heading_path": context_header(d.heading_path), "text": d.text,
+                  "token_estimate": d.token_count, "has_code": int(d.has_code), "source_url": page["url"]}
+        if h in existing:
+            old = existing[h]
+            if old["status"] == "stale":
+                values["status"] = "questioned" if old["nq"] else ("too_small" if small else "pending")
+            db.update("chunks", old["id"], values)
+            stats["chunks_kept"] += 1
+            continue
+        if db.scalar("SELECT 1 FROM chunks WHERE text_hash = ? AND page_id != ? AND status != 'stale' LIMIT 1",
+                     (h, page["id"])):
+            stats["chunks_duplicate"] += 1
+            continue
+        db.insert("chunks", {"page_id": page["id"], "source": page["source"], "text_hash": h,
+                             "status": "too_small" if small else "pending", **values})
+        stats["chunks_new"] += 1
+    for h, old in existing.items():
+        if h not in seen and old["status"] != "stale":
+            db.update("chunks", old["id"], {"status": "stale"})
+            stats["chunks_stale"] += 1
+    return stats

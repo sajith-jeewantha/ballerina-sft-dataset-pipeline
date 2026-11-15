@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "balpipe-common"
-version = "1.0.0"
-description = "Shared schemas, config, logging and I/O for the Ballerina SFT data pipeline"
+version = "2.1.0"
+description = "Shared config, SQLite store, hashing and logging for the Ballerina Q&A dataset pipeline"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic==2.14.3",
@@ -14,8 +14,6 @@ dependencies = [
     "python-dotenv==1.2.4",
 ]
 
-[project.optional-dependencies]
-gcs = ["google-cloud-storage==3.13.1"]
 
 [tool.setuptools.packages.find]
 include = ["balpipe_common*"]

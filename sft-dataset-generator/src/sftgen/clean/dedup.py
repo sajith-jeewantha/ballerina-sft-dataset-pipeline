@@ -1,78 +1,53 @@
-"""Exact + near-duplicate detection (MinHash LSH over word shingles).
+"""Near-duplicate detection for questions (MinHash LSH over word sets).
 
-Duplicates are marked, not deleted, and the most canonical copy wins:
-github > central > web, then the longer document, then the smaller doc_id.
+MinHash finds candidates quickly; the exact Jaccard similarity then decides,
+so "How do I read a file?" and "How do I write a file?" stay distinct while
+rephrasings with the same words are caught.
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 
 from datasketch import MinHash, MinHashLSH
 
-from balpipe_common.ids import normalize_ws, sha256_text
-
-SOURCE_RANK = {"github": 0, "central": 1, "web": 2}
 _WORD_RE = re.compile(r"\w+")
+NUM_PERM = 128
 
 
-def content_sha256(markdown: str) -> str:
-    return sha256_text(normalize_ws(markdown))
+def word_set(text: str) -> set[str]:
+    return set(_WORD_RE.findall(text.lower()))
 
 
-def shingles(text: str, k: int) -> set[str]:
-    words = _WORD_RE.findall(text.lower())
-    if len(words) < k:
-        return {" ".join(words)} if words else set()
-    return {" ".join(words[i : i + k]) for i in range(len(words) - k + 1)}
+def jaccard(a: set[str], b: set[str]) -> float:
+    return len(a & b) / len(a | b) if a | b else 1.0
 
 
-def minhash(text: str, k: int, num_perm: int) -> MinHash:
-    m = MinHash(num_perm=num_perm)
-    for s in shingles(text, k):
-        m.update(s.encode("utf-8"))
+def minhash(words: set[str]) -> MinHash:
+    m = MinHash(num_perm=NUM_PERM)
+    for w in words:
+        m.update(w.encode("utf-8"))
     return m
 
 
-@dataclass
-class DedupResult:
-    status: str  # unique | exact_dup | near_dup
-    duplicate_of: str | None = None
-    cluster: str | None = None
+class QuestionDeduper:
+    def __init__(self, threshold: float = 0.8) -> None:
+        self.threshold = threshold
+        self.lsh = MinHashLSH(threshold=max(0.1, threshold - 0.1), num_perm=NUM_PERM)  # wider net, exact check after
+        self.words: dict[str, set[str]] = {}
 
+    def is_duplicate(self, text: str) -> bool:
+        words = word_set(text)
+        if not words:
+            return True
+        for key in self.lsh.query(minhash(words)):
+            if jaccard(words, self.words[key]) >= self.threshold:
+                return True
+        return False
 
-def dedup(
-    items: Sequence[object],
-    *,
-    key: Callable[[object], str],
-    text: Callable[[object], str],
-    rank: Callable[[object], tuple],
-    threshold: float,
-    shingle_size: int = 5,
-    num_perm: int = 128,
-) -> dict[str, DedupResult]:
-    """Return {key: DedupResult}. Items are visited in canonical order (best first)."""
-    ordered = sorted(items, key=rank)
-    results: dict[str, DedupResult] = {}
-    by_hash: dict[str, str] = {}
-    lsh = MinHashLSH(threshold=threshold, num_perm=num_perm)
-    ordered_index: dict[str, int] = {}
-    for it in ordered:
-        k, body = key(it), text(it)
-        h = content_sha256(body)
-        if h in by_hash:
-            results[k] = DedupResult("exact_dup", by_hash[h], by_hash[h])
-            continue
-        by_hash[h] = k
-        mh = minhash(body, shingle_size, num_perm)
-        hits = lsh.query(mh)
-        if hits:
-            canon = min(hits, key=lambda x: ordered_index[x])
-            results[k] = DedupResult("near_dup", canon, canon)
-            continue
-        lsh.insert(k, mh)
-        results[k] = DedupResult("unique")
-        ordered_index[k] = len(ordered_index)
-    return results
+    def add(self, text: str) -> None:
+        words = word_set(text)
+        key = str(len(self.words))
+        if words and key not in self.words:
+            self.words[key] = words
+            self.lsh.insert(key, minhash(words))

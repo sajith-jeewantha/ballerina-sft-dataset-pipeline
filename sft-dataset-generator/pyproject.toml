@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sftgen"
-version = "2.0.0"
-description = "Clean, extract, chunk, index, generate, validate, judge and export a Ballerina SFT dataset"
+version = "2.1.0"
+description = "Ballerina Q&A dataset pipeline: scrape, generate questions and answers, validate, export, report"
 requires-python = ">=3.11"
 # Pinned runtime deps live in requirements.txt (install with -r).
 

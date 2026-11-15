@@ -5,13 +5,13 @@
 ![Ballerina 2201.14](https://img.shields.io/badge/ballerina-2201.14.x-20b6b0.svg)
 [![Architecture](https://img.shields.io/badge/docs-architecture-2f6f5e.svg)](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html)
 
-Builds a **traceable, compiler-verified supervised fine-tuning (SFT) dataset** for a small
-language model specialised in the [Ballerina](https://ballerina.io) programming language.
+Builds a **grounded question-and-answer dataset** for fine-tuning a small language model on the
+[Ballerina](https://ballerina.io) programming language.
 
-It collects official Ballerina sources, cleans them into Markdown, pairs every code example with
-the prose that explains it, and generates chat-format training data. That data is filtered by the
-real `bal` compiler and a rubric-based LLM judge. Every training record can be traced back to the
-exact upstream file and commit it came from.
+It scrapes official Ballerina sources, splits them into heading-aware chunks, generates questions
+from each chunk, and answers every question from **the same chunk**, citing its source URL. The
+`bal` compiler can then check the code in the answers. Every step is tracked in one SQLite
+database, and an HTML report shows progress after every command.
 
 **🔗 Interactive architecture page:** https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html
 **📦 Repository:** https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline
@@ -20,82 +20,65 @@ exact upstream file and commit it came from.
 
 ## Contents
 
-- [Why this pipeline](#why-this-pipeline)
-- [Architecture](#architecture)
+- [How it works](#how-it-works)
 - [Data sources](#data-sources)
-- [Pipeline stages](#pipeline-stages)
-- [Training tasks](#training-tasks)
+- [Phases and commands](#phases-and-commands)
+- [Limits and small test runs](#limits-and-small-test-runs)
+- [The report](#the-report)
 - [Output format](#output-format)
+- [Storage](#storage)
 - [Repository structure](#repository-structure)
-- [Quick start](#quick-start)
+- [Quick start: step by step](#quick-start-step-by-step)
 - [Configuration](#configuration)
-- [Resuming after a failure](#resuming-after-a-failure)
-- [Quality and safety](#quality-and-safety)
+- [Re-running and resuming](#re-running-and-resuming)
 - [Tests](#tests)
 - [Documentation](#documentation)
 - [License](#license)
 
 ---
 
-## Why this pipeline
-
-| Problem with naïve scraping + RAG generation | What this pipeline does instead |
-|---|---|
-| Raw HTML full of scripts and navigation; by-example code isn't even in the page HTML | Reads the **upstream source files** (GitHub repos, Central API). It only crawls HTML where no source exists. |
-| Code flattened or split mid-block during chunking | Chunks along headings and never splits a code block |
-| Generated code that doesn't compile, or uses invented APIs | Every code block is compiled with `bal`, and unknown `module:symbol`s are flagged |
-| Answers that say "based on the provided context…" | Prompts forbid it and a regex filter rejects leaks |
-| No way to tell where a training example came from | Each record keeps seed → chunk → document → commit SHA/URL, plus the models, prompt versions and scores |
-| Train/eval contamination | Split per source document, retrieval limited to the same split, 13-gram decontamination |
-| A crash loses hours of LLM calls | Per-item checkpoints, run manifests and an on-disk LLM cache: just re-run |
-
----
-
-## Architecture
+## How it works
 
 ```mermaid
 flowchart LR
-    subgraph SRC["Upstream sources (allowlist)"]
-        GH[("GitHub<br/>examples · docs · spec<br/>module specs · stdlib")]
-        CEN[("Ballerina Central<br/>registry API")]
-        WEB[("blog.ballerina.io<br/>sitemap")]
+    subgraph SRC["Official sources"]
+        IO[("ballerina.io<br/>sitemap: learn · spec 2024R1")]
+        GH[("GitHub API<br/>BBE sources · module repos")]
+        CEN[("Ballerina Central API<br/>README · API docs")]
     end
 
-    subgraph COLLECT["scraper/ · collect"]
-        C1[GitHub collector]
-        C2[Central collector]
-        C3[Scrapy sitemap spider]
+    subgraph SCRAPE["sftgen scrape"]
+        F[fetch<br/>robots.txt · delay · cache] --> C[clean → Markdown] --> K[chunk by headings]
     end
 
-    subgraph SFTGEN["sft-dataset-generator/ · sftgen"]
-        CL[clean] --> EX[extract]
-        CL --> CH[chunk] --> IX[index]
-        GQ[generate] --> VA[validate] --> JU[judge] --> EP[export]
+    subgraph GEN["generation"]
+        Q[generate-questions] --> A[generate-answers] --> V[validate<br/>bal build]
     end
 
-    GH --> C1
-    CEN --> C2
-    WEB --> C3
-    C1 & C2 & C3 --> RAW[/"data/raw<br/>immutable"/]
-    RAW --> CL
-    EX --> GQ
-    CH --> GQ
-    IX -- retrieve --> GQ
-    EP --> OUT[/"train.jsonl · eval.jsonl<br/>metadata.jsonl"/]
+    IO & GH & CEN --> F
+    K --> Q
+    V --> E[export]
+    V --> ES[export-sft]
+    E --> OUT[/"data/dataset.jsonl"/]
+    ES --> SFT[/"data/sft/train.jsonl · eval.jsonl"/]
+
+    DB[("data/pipeline.db<br/>pages · chunks · questions<br/>answers · runs · llm_usage")]
+    SCRAPE <--> DB
+    GEN <--> DB
+    DB --> R[/"reports/report.html"/]
 ```
 
 ```mermaid
 flowchart LR
-    R[RawRecord] -->|cleaned into| D[Document]
-    D -->|contains| E[CodeExample]
-    D -->|split into| K[Chunk]
-    E -->|seed| S[SFT record]
-    K -->|seed / context| S
-    S -->|id| T["Training row<br/>{id, messages}"]
+    P[page] -->|clean + split| CH[chunk]
+    CH -->|QUESTIONS_PER_CHUNK| QN[question<br/>pending]
+    QN -->|question + same chunk| AN[answer]
+    AN --> S{{"question: answered / failed<br/>answer: valid / invalid / not_checked"}}
 ```
 
-**Principles:** source first · raw data is never modified · one stage, one output, one manifest ·
-idempotent and resumable · verify instead of trusting · traceable end to end.
+**Principles:** official sources only · answers are grounded in the chunk the question came from
+and cite its URL · every record has a status and timestamps · small runs are cheap and
+re-runs never repeat finished work.
 
 Full design: [ARCHITECTURE.md](ARCHITECTURE.md) · [interactive page](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html)
 
@@ -103,68 +86,174 @@ Full design: [ARCHITECTURE.md](ARCHITECTURE.md) · [interactive page](https://sa
 
 ## Data sources
 
+Only these sources are used. The blog is **not** used.
+
 | Source | What is collected | How |
 |---|---|---|
-| [Ballerina by Example](https://ballerina.io/learn/by-example/) | ~600 examples: `.bal` code + `.md` explanation + `.out` expected output | GitHub `ballerina-distribution/examples`, pinned to a commit |
-| [Learn docs](https://ballerina.io/learn/) | Guides and tutorials | Markdown sources in `ballerina-dev-website` |
-| [Language spec 2024R1](https://ballerina.io/spec/lang/2024R1/) | The full specification, with grammar kept as ```` ```ebnf ```` | Structure-preserving HTML → Markdown |
-| Stdlib module specs (`/spec/http`, `/spec/sql`, …) | ~48 module specifications | `public/spec/*/spec.md` |
-| [Enterprise integration patterns](https://ballerina.io/learn/enterprise-integration-patterns/) | Integration code + pattern descriptions | `.bal` + `.yml` bundles |
-| [Ballerina Central](https://central.ballerina.io/) | Package READMEs, licenses, versions | Registry API (`ballerina`, `ballerinax` orgs) |
-| Stdlib modules (`http`, `io`; add more in config) | Public API source + doc comments | Module repos |
-| [Blog](https://blog.ballerina.io/) | Technical posts with code | Sitemap crawl (no source repo exists) |
+| [Ballerina by Example](https://ballerina.io/learn/by-example/) (highest priority) | Each example's explanation, code and expected output, **exactly as written** | Page list from the ballerina.io sitemap; content from `ballerina-distribution/examples/<name>/` through the GitHub API. The ballerina.io page only ships the explanation inside compiled JavaScript, so the source files are the faithful copy. |
+| [Learn docs](https://ballerina.io/learn/) | Guides, tools, packages, tutorials, integration patterns | ballerina.io sitemap → each page's embedded Markdown source (exact text and code fences) |
+| [Language spec 2024R1](https://ballerina.io/spec/lang/2024R1/) | The full spec, split by section headings, grammar kept as ```` ```ebnf ```` | One HTML page → structure-preserving Markdown |
+| [Ballerina Central](https://central.ballerina.io/) | Package READMEs and API docs (function, client and type signatures) | Central's public JSON API: `/2.0/registry/packages` and `/2.0/docs/<org>/<pkg>/<version>`. No HTML scraping is needed. |
+| [GitHub modules](https://github.com/orgs/ballerina-platform/repositories) | Module READMEs and `.bal` API source files from `module-ballerina-*` and `module-ballerinax-*` repos | GitHub REST API with `GITHUB_TOKEN`, most-starred repos first |
 
-Excluded on purpose: marketing, events, release-note announcements, and Stack Overflow (its
-robots.txt disallows all bots). Crawling uses one honest User-Agent, obeys robots.txt and rate
-limits, and uses no proxies.
+From the sitemap, only `/learn/`, `/learn/by-example/` and `/spec/lang/2024R1/` are kept. Old
+version paths, robots-disallowed paths, index pages and duplicate URLs are skipped.
 
----
-
-## Pipeline stages
-
-| Stage | Command | Reads → writes | What it does |
-|---|---|---|---|
-| Collect | `python -m ballerinascraper.collect github\|central`, `scrapy crawl web` | upstream → `data/raw/` | Fetch with license and provenance; skip unchanged content |
-| Clean | `sftgen clean` | raw → `documents.jsonl` | Per-source extractors → Markdown; label every code block's language; relevance filter; exact + MinHash dedup; train/eval split per document |
-| Extract | `sftgen extract` | documents → `code_examples.jsonl` | Pair code with its explanation; compile every example; run by-example programs against `.out` |
-| Chunk | `sftgen chunk` | documents → `chunks.jsonl` | Split by headings within a token budget; never split a code block |
-| Index | `sftgen index` | chunks → Chroma | Embed and upsert, in a collection named after the model and chunker |
-| Generate | `sftgen generate` | seeds → `candidates.jsonl` | 7 task types with quotas (below) |
-| Validate | `sftgen validate` | → `validated.jsonl` | `bal build` on answer code, context-leak and unknown-symbol checks (runs **before** the paid judge) |
-| Judge | `sftgen judge` | → `judged.jsonl` | 1–5 scores for faithfulness, correctness, helpfulness, instruction following and code quality, from a judge of a different model family |
-| Export | `sftgen export` | → `train/eval/metadata.jsonl` | Thresholds, license allowlist, near-duplicate filter, decontamination |
+**Scraping rules:** one honest User-Agent, robots.txt respected for web pages,
+`REQUEST_DELAY_SECONDS` between requests, raw pages cached in the database, unchanged content
+skipped by blob SHA, package version, HTTP 304 or content hash, and failures logged per page
+without stopping the run.
 
 ---
 
-## Training tasks
+## Phases and commands
 
-| Task | How the answer is made trustworthy |
-|---|---|
-| `write_code` | LLM answer grounded in a verified example + retrieved docs; must compile |
-| `explain_code` | Explanation grounded in the example's own human-written docs |
-| `complete_code` | The answer **is** the original verified code |
-| `debug_fix` | Verified code with an injected bug; the question shows the **real compiler error**; the answer is the original code |
-| `convert_from_language` | An LLM writes the Python/Java/Go equivalent; the answer is the original verified Ballerina |
-| `concept`, `api_usage` | Grounded in docs chunks, judged for faithfulness; `api_usage` must include compiling code |
+| Command | What it does | Status it sets |
+|---|---|---|
+| `sftgen scrape` | Fetch up to `LIMIT_SCRAPE_PAGES` new pages per source, convert them to clean Markdown and split them into heading-aware chunks | page: `chunked` · `empty` · `duplicate` · `blocked` · `failed` |
+| `sftgen generate-questions` | For chunks with no questions yet, generate `QUESTIONS_PER_CHUNK` each, until `LIMIT_GENERATING` questions are saved. Each question is saved as soon as it is generated, with its chunk, source URL, category and difficulty. Near-duplicates are skipped. | question: `pending` |
+| `sftgen generate-answers` | Answer every `pending` question using the question **and its saved chunk**. Answers include working Ballerina code when relevant, must not invent APIs, and cite the source URL. | question: `answered` · `failed` (with error) |
+| `sftgen validate` *(optional)* | Compile the ```` ```ballerina ```` blocks in each answer with `bal` if it is installed | answer: `valid` · `invalid` · `not_checked` |
+| `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid` are left out) | — |
+| `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` | — |
+| `sftgen report` | Rebuild `reports/report.html` and print the summary | — |
+| `sftgen run-all` | `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` → `export-sft` | — |
+
+Flags: `scrape --refresh` (re-check downloaded pages for changes) · `scrape --source bbe` (one
+source, repeatable) · `generate-answers --retry-failed` · `validate --recheck` ·
+`--log-format text|json`.
+
+Question categories: `concept`, `syntax`, `library`, `tooling`, `error-fixing`, `code-writing`,
+`best-practice`. Difficulties: `beginner`, `intermediate`, `advanced`.
+
+---
+
+## Limits and small test runs
+
+Set these in `.env`. Every command prints them at startup, so you can confirm what will run:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `LIMIT_SCRAPE_PAGES` | `20` | Max pages to download **per source** per run. `0` = no limit. |
+| `LIMIT_GENERATING` | `10` | Max questions to generate per run. `0` = no limit. |
+| `QUESTIONS_PER_CHUNK` | `3` | Questions generated from each chunk |
+| `REQUEST_DELAY_SECONDS` | `1` | Polite delay between requests |
+| `GITHUB_TOKEN` | — | GitHub API token: 5,000 requests/hour instead of 60 |
+
+The answer phase answers every saved question that has no answer yet, so it is naturally limited
+by `LIMIT_GENERATING`. With the defaults, one `run-all` downloads up to 100 pages (20 × 5
+sources), generates 10 questions and answers them. Chunks are taken round-robin across sources,
+so even 10 questions cover several sources. Each run continues where the last one stopped.
+
+```
+sftgen scrape
+  database               data/pipeline.db
+  LIMIT_SCRAPE_PAGES     20 pages per source per run
+  LIMIT_GENERATING       10 questions per run
+  QUESTIONS_PER_CHUNK    3
+  REQUEST_DELAY_SECONDS  1
+  GITHUB_TOKEN           set
+  question model         qwen/qwen3.8-flash
+  answer model           deepseek/deepseek-v4.1-flash
+```
+
+---
+
+## The report
+
+After every command a short summary is printed, and `reports/report.html` is rewritten. It's a
+single file with no server needed:
+
+```bash
+open reports/report.html          # macOS
+xdg-open reports/report.html      # Linux
+start reports\report.html         # Windows
+```
+
+It shows:
+
+- pages scraped: total, per source and per status, plus failed pages with their URLs and errors
+- chunks created per source
+- questions: total, and per source, category and difficulty
+- answers: answered, pending and failed
+- validation results
+- run history: start time, duration, limits used and items processed
+- token usage and cost per phase (OpenRouter returns the cost of each call)
+- 5 random Q&A samples, so you can spot-check quality
+
+Terminal summary (illustrative numbers):
+
+```
+── Summary ─────────────────────────────────────────────────
+Pages      9 total, 0 failed  |  usable: bbe 2, spec 1, learn 2, central 2, github 2
+Chunks     1272  |  bbe 6, spec 351, learn 7, central 877, github 31
+Questions  10  |  pending 0, answered 10, failed 0
+Validation valid 6, not_checked 3, invalid 1
+LLM usage  48,210 tokens, $0.0123
+Report     reports/report.html
+```
 
 ---
 
 ## Output format
 
-`data/sft/<run_id>/train.jsonl`. This loads directly in **TRL**, **Axolotl** (`type: chat_template`) and **Unsloth**:
+### `data/dataset.jsonl` (review format, from `export`)
+
+One object per line:
 
 ```json
-{"id": "sft_7c2e90a1b4d35f68",
- "messages": [
-   {"role": "system", "content": "You are an expert Ballerina programmer. ..."},
-   {"role": "user", "content": "Write a Ballerina HTTP service that ..."},
-   {"role": "assistant", "content": "Here's a service that ...\n\n```ballerina\nimport ballerina/http;\n...\n```"}]}
+{"question": "How do I access a nested field of a json value in Ballerina?",
+ "answer": "Field access works directly on `json` because it is a lax type ...\n\n```ballerina\nimport ballerina/io;\n...\n```\n\nSource: https://ballerina.io/learn/by-example/access-json-elements/",
+ "source_url": "https://ballerina.io/learn/by-example/access-json-elements/",
+ "category": "code-writing",
+ "difficulty": "beginner"}
 ```
 
-`metadata.jsonl` holds the full record for every candidate, accepted or rejected, linked by `id`:
-task type, seed, retrieved chunks, source URLs and licenses, models and prompt versions, judge
-scores with reasons, compile results, checks, and the decision with its reasons.
-See [docs/schemas.md](docs/schemas.md).
+### `data/sft/` (fine-tuning format, from `export-sft`)
+
+`train.jsonl` and `eval.jsonl` hold chat `messages`. They load directly in **TRL**
+`SFTTrainer`, **Axolotl** (`type: chat_template`) and **Unsloth**:
+
+```json
+{"id": "q42",
+ "messages": [
+   {"role": "system", "content": "You are an expert Ballerina (Swan Lake) programmer. Answer questions about ... say so instead of guessing."},
+   {"role": "user", "content": "How do I access a nested field of a json value in Ballerina?"},
+   {"role": "assistant", "content": "Field access works directly on `json` because it is a lax type ...\n\n```ballerina\n...\n```"}]}
+```
+
+- **Any base model:** the files hold no model-specific template. The trainer applies the model's
+  chat template (`tokenizer.apply_chat_template`). A base model has no template of its own, so
+  set one (for example ChatML or its instruct sibling's), use the same one at inference, and
+  compute the loss on the assistant turn only.
+- **Train/eval split:** by source page (`sft.eval_fraction`, default 5%), so no page feeds both
+  sides.
+- **Citations removed:** the trailing `Source: <url>` line is dropped by default
+  (`sft.strip_source_line`), so the model doesn't learn to end answers with URLs it would invent.
+- **Metadata:** `metadata.jsonl` keeps `id`, `split`, `source_url`, `category`, `difficulty`
+  and `validation` for filtering and analysis.
+- **System prompt:** set by `sft.system_prompt`; use `""` for none. It tells the model to answer
+  accurately and concisely, write complete Ballerina that compiles with its imports, and say when it
+  is unsure instead of inventing APIs. It's in every training row, so **use exactly the same text
+  at inference**. If you change it, re-run `sftgen export-sft`; nothing else needs regenerating.
+
+---
+
+## Storage
+
+A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at` and `updated_at`.
+
+| Table | One row per | Statuses |
+|---|---|---|
+| `pages` | source page or file: raw cache, clean Markdown, hashes, errors | `fetched` · `chunked` · `empty` · `duplicate` · `blocked` · `failed` |
+| `chunks` | heading-aware piece of a page | `pending` · `questioned` · `too_small` · `failed` · `stale` |
+| `questions` | generated question, with chunk, source URL, category, difficulty | `pending` · `answered` · `failed` |
+| `answers` | answer to a question | `not_checked` · `valid` · `invalid` |
+| `runs` | command run: limits, items processed, duration | `running` · `succeeded` · `failed` |
+| `llm_usage` | model call: phase, tokens, cost | `ok` · `error` |
+
+Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
+Column reference: [docs/schemas.md](docs/schemas.md).
 
 ---
 
@@ -173,69 +262,168 @@ See [docs/schemas.md](docs/schemas.md).
 ```
 ballerina-sft-dataset-pipeline/
 ├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md · LICENSE
-├── .env.example                  # secrets + model names template
+├── .env.example                  # secrets, models and run limits template
 ├── config/pipeline.yaml          # all non-secret settings
 ├── docs/
-│   ├── recommendations.md        # design rationale (formats, chunking, dedup, judging, ...)
-│   ├── schemas.md                # every record and field explained
-│   └── schemas/*.json            # generated JSON Schemas
-├── shared/balpipe_common/        # schemas · config · logging · jsonl_io · manifest · ids
-├── scraper/ballerinascraper/     # collect stage
-│   └── ballerinascraper/         # collectors/{github,central}.py · spiders/web.py · raw_sink.py
+│   ├── recommendations.md        # design research (v2; partly superseded, see note inside)
+│   └── schemas.md                # SQLite tables and columns
+├── shared/balpipe_common/        # config · db (SQLite) · ids · logging
+├── scraper/ballerinascraper/
+│   └── ballerinascraper/
+│       ├── scrape.py             # fetch loop: limits, caching, change detection, failures
+│       └── collectors/           # ballerina_io (sitemap) · github · central · http · robots
 ├── sft-dataset-generator/
-│   ├── src/sftgen/               # clean · extract · chunk · index · generate · validate · judge · export
-│   │   └── prompts/*.yaml        # versioned prompts
+│   ├── src/sftgen/
+│   │   ├── cli.py                # the commands
+│   │   ├── clean/                # extractors (page → Markdown) · question dedup
+│   │   ├── chunk/                # heading-aware chunker
+│   │   ├── generate/             # questions · answers · LLM client
+│   │   ├── validate/             # bal compiler wrapper
+│   │   ├── export/               # dataset.jsonl · sft (chat messages)
+│   │   ├── report.py
+│   │   └── prompts/              # questions.yaml · answer.yaml
 │   └── tests/
-└── data/                         # gitignored; everything here can be rebuilt
-    ├── raw/<source>/<run>/       # immutable raw records
-    ├── clean/                    # documents.jsonl · code_examples.jsonl
-    ├── chunks/<chunker>/         # chunks.jsonl
-    ├── chroma/                   # vector index
-    ├── sft/<run>/                # candidates → validated → judged → train/eval/metadata
-    └── cache/                    # LLM responses · compile results · HTTP
+├── data/                         # gitignored: pipeline.db · dataset.jsonl · sft/ · cache/
+└── reports/                      # gitignored: report.html
 ```
 
 ---
 
-## Quick start
+## Quick start: step by step
 
-**Requirements:** Python 3.11+, and the [Ballerina CLI](https://ballerina.io/downloads/) (`bal`,
-tested with 2201.14.x) for compile checks.
+Everything from an empty machine to a fine-tuning dataset. Run the commands from the repo root.
+
+### 0. Requirements
+
+- **Python 3.11+**
+- **An [OpenRouter](https://openrouter.ai) API key**, or any OpenAI-compatible endpoint
+- **A GitHub token** (recommended): a fine-grained token with read-only access to public
+  repositories is enough
+- **Optional:** the [Ballerina CLI](https://ballerina.io/downloads/) (`bal`, tested with
+  2201.14.x), needed only for `validate`
+
+### 1. Get the code
 
 ```bash
 git clone https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline.git
 cd ballerina-sft-dataset-pipeline
-
-python3.11 -m venv .venv && source .venv/bin/activate
-pip install -e shared -r scraper/requirements.txt -e scraper \
-            -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
-
-cp .env.example .env      # add OPENROUTER_API_KEY and model names
-bal version
 ```
 
-Run the pipeline:
+Already cloned? Update it instead:
 
 ```bash
-# 1. collect: unchanged content is skipped on re-runs
-python -m ballerinascraper.collect github
-python -m ballerinascraper.collect central
-(cd scraper/ballerinascraper && scrapy crawl web)
-
-# 2. process
-sftgen clean && sftgen extract && sftgen chunk && sftgen index
-
-# 3. generate → validate → judge → export
-sftgen generate --dry-run     # show the task plan; no model calls
-sftgen generate --limit 20    # small paid smoke test first
-sftgen validate && sftgen judge && sftgen export
-
-# or run steps 2 + 3 in one go
-sftgen all
+git pull
 ```
 
-Flags: `--limit N` (small test) · `--run-id <id>` (target or resume a run) · `--dry-run` ·
-`--force` (rebuild the index) · `--log-format text|json`.
+### 2. Create a virtual environment and install
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -e shared -r scraper/requirements.txt -e scraper \
+            -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
+```
+
+> If you renamed or moved the project folder, delete `.venv` and run this step again: the
+> virtual environment stores absolute paths.
+
+### 3. Configure `.env`
+
+```bash
+cp .env.example .env
+```
+
+Open `.env`, fill these in and **save the file**:
+
+```env
+OPENROUTER_API_KEY=sk-or-...
+QUESTION_GEN_MODEL=qwen/qwen3.8-flash
+ANSWER_GEN_MODEL=deepseek/deepseek-v4.1-flash
+GITHUB_TOKEN=github_pat_...
+
+LIMIT_GENERATING=10        # small first run
+LIMIT_SCRAPE_PAGES=20
+QUESTIONS_PER_CHUNK=3
+REQUEST_DELAY_SECONDS=1
+```
+
+### 4. Check the setup
+
+```bash
+sftgen report       # prints the limits, models and whether GITHUB_TOKEN is set; creates data/pipeline.db
+bal version         # optional, for validate
+pytest shared/tests scraper/ballerinascraper/tests sft-dataset-generator/tests
+```
+
+The startup block must show your models and `GITHUB_TOKEN set`. If it says `not set`, the `.env`
+file wasn't saved or the value is empty.
+
+### 5. Run everything with one command
+
+```bash
+sftgen run-all
+```
+
+This runs `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` →
+`export-sft`, then prints the summary and writes the report. With the limits above it downloads
+up to 100 pages and generates and answers 10 questions, for a few cents of model calls.
+
+### 6. Or run each phase yourself
+
+Use this when you want to check each step before the next one:
+
+```bash
+sftgen scrape                # 1. fetch pages → clean Markdown → chunks
+sftgen generate-questions    # 2. up to LIMIT_GENERATING new questions
+sftgen generate-answers      # 3. answer every pending question from its chunk
+sftgen validate              # 4. optional: compile the Ballerina code in answers
+sftgen export                # 5. data/dataset.jsonl (review format)
+sftgen export-sft            # 6. data/sft/train.jsonl, eval.jsonl, metadata.jsonl (fine-tuning)
+```
+
+Each command prints its limits first and a summary at the end, and refreshes the report.
+
+### 7. Check the results
+
+```bash
+open reports/report.html             # macOS; Linux: xdg-open; Windows: start
+head -n 3 data/dataset.jsonl
+head -n 1 data/sft/train.jsonl
+sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"
+```
+
+In the report, read the **Sample Q&A** section and check the **Failed pages** table before you
+scale up.
+
+### 8. Scale up
+
+When the samples look good, raise the limits in `.env` (for example `LIMIT_GENERATING=200`, or
+`0` for no limit) and run again:
+
+```bash
+sftgen run-all
+```
+
+Every run continues where the last one stopped. Pages already downloaded aren't fetched again,
+chunks that already have questions are skipped, and only `pending` questions are answered.
+
+### 9. Fine-tune
+
+Point your trainer at `data/sft/train.jsonl` and `data/sft/eval.jsonl`: TRL `SFTTrainer`,
+Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
+
+### Useful extra commands
+
+| Command | When |
+|---|---|
+| `sftgen scrape --source bbe` | Scrape one source only (`bbe`, `spec`, `learn`, `central`, `github`; repeatable) |
+| `sftgen scrape --refresh` | Re-check pages you already have for upstream changes |
+| `sftgen generate-answers --retry-failed` | Retry questions whose answer call failed |
+| `sftgen validate --recheck` | Re-compile all answers, e.g. after installing a new `bal` |
+| `sftgen report` | Rebuild the report and summary at any time |
+| `sftgen <command> --log-format json` | Machine-readable logs |
+| `LIMIT_GENERATING=5 sftgen generate-questions` | Override a limit for one command |
+| `rm -rf data reports` | Start over from scratch. This deletes the database, so any generated questions and answers are lost. The model response cache in `data/cache/llm` is deleted too. |
 
 ---
 
@@ -243,37 +431,27 @@ Flags: `--limit N` (small test) · `--run-id <id>` (target or resume a run) · `
 
 | Where | What | Committed? |
 |---|---|---|
-| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `JUDGE_MODEL`, `EMBEDDING_MODEL`, optional `GITHUB_TOKEN`, `GCS_BUCKET` | ❌ never |
-| `config/pipeline.yaml` | sources, crawl politeness, chunk budget, task quotas, judge thresholds, eval fraction, compiler limits | ✅ |
+| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `GITHUB_TOKEN`, and the run limits above | ❌ never |
+| `config/pipeline.yaml` | source filters, crawl politeness, chunk size, concurrency, temperatures, compiler settings, export, SFT export (eval share, system prompt, citation stripping) and report paths | ✅ |
 
-- Precedence: **environment > `.env` > `pipeline.yaml` > defaults**. Override any YAML key with
-  `BALPIPE__SECTION__KEY`, e.g. `BALPIPE__GENERATE__TARGET_RECORDS=50`.
-- Choose `JUDGE_MODEL` from a **different model family** than `ANSWER_GEN_MODEL`, so the judge
-  isn't rating answers from its own family.
-- Secrets are never logged or written to manifests. GCS mirroring is opt-in (`gcs_mirror: true`).
-
----
-
-## Resuming after a failure
-
-Just re-run the same command.
-
-- Every stage writes a manifest: status, input hashes, config hash, versions, counts and errors.
-- generate, validate and judge append one durable line per finished item and skip the ones already done.
-- Batch stages write their files atomically.
-- LLM responses and compile results are cached in `data/cache/`, so repeated work costs nothing.
+- Precedence: **environment > `.env` > `pipeline.yaml` > defaults**. Empty values in `.env` are
+  ignored. Override any YAML key with `BALPIPE__SECTION__KEY`, e.g. `BALPIPE__GENERATE__CONCURRENCY=2`.
+- Secrets are never logged or stored in the database.
+- To keep a laptop cool during `validate`, lower `validate.workers` (default 2).
 
 ---
 
-## Quality and safety
+## Re-running and resuming
 
-- **Compiler-verified code:** `bal build --offline` runs in an isolated temp dir with a timeout,
-  a JVM heap cap, parallel workers and a cache. Generated code is compiled, **never run**.
-- **Dedup:** exact (normalized hash) and near-duplicate (MinHash LSH) for documents. Code is
-  deduplicated across documents and near-duplicate questions are removed at export.
-- **Licensing:** every record carries an SPDX license and how it was determined. Export applies
-  an allowlist (Apache-2.0, MIT, BSD-3-Clause by default).
-- **Privacy:** email addresses are stripped from the spec, and manifests store repo-relative paths.
+Just run the command again. Every write is committed immediately, and each phase picks up from
+the statuses:
+
+- `scrape` skips pages it already has (`--refresh` re-checks them). The sitemap, repo lists and
+  trees are cached for 24 hours. Failed pages are retried.
+- `generate-questions` only takes chunks with no questions. A chunk whose call fails is retried
+  up to 3 times.
+- `generate-answers` only takes `pending` questions (`--retry-failed` adds the failed ones).
+- Model responses and compile results are cached in `data/cache/`, so repeated work costs nothing.
 
 ---
 
@@ -285,12 +463,16 @@ pytest shared/tests scraper/ballerinascraper/tests sft-dataset-generator/tests
 
 The tests cover:
 
-- extractors, code-block language labelling, relevance and dedup
-- chunking (code blocks never split, token budgets)
-- code/description pairing and the Ballerina heuristics
-- compiler helpers, including a real `bal` round trip when installed
-- mutations, task planning, static checks and export decisions
-- config precedence, durable JSONL I/O and manifests
+- config and limits
+- the SQLite store and run tracking
+- robots.txt and sitemap filtering
+- the fetch loop: caching, change detection, failures and per-source limits
+- every extractor: BBE code kept verbatim, embedded Markdown, the spec, Central API docs
+- chunking (code blocks never split, budgets)
+- question limits, round-robin, filters and dedup
+- answers with citations and failure recording
+- export filtering, the SFT `messages` export (split by page, citation removed) and the HTML report
+- a real `bal` compile round trip when Ballerina is installed
 
 ---
 
@@ -298,10 +480,10 @@ The tests cover:
 
 | Document | Contents |
 |---|---|
-| [Architecture page](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html) | Interactive diagrams and stage explorer |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Components, storage, running, resuming, reliability |
-| [docs/recommendations.md](docs/recommendations.md) | Research and reasoning behind each design choice |
-| [docs/schemas.md](docs/schemas.md) | Every record type and field |
+| [Architecture page](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html) | Interactive diagrams and phase explorer |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Components, data flow, storage, reliability |
+| [docs/schemas.md](docs/schemas.md) | SQLite tables, columns and statuses |
+| [docs/recommendations.md](docs/recommendations.md) | Research behind the v2 design choices |
 | [CHANGELOG.md](CHANGELOG.md) | What changed and why |
 | [scraper/README.md](scraper/README.md) · [sft-dataset-generator/README.md](sft-dataset-generator/README.md) | Per-project details |
 
@@ -312,5 +494,5 @@ The tests cover:
 The code is licensed under the [Apache License 2.0](LICENSE).
 
 Datasets you generate with it are a separate matter. Their licensing depends on the upstream
-sources (recorded per record in `metadata.jsonl`) and on the terms of the LLMs you use to
-generate them.
+sources (the license of each GitHub repo and Central package is stored per page) and on the
+terms of the LLMs you use to generate them.

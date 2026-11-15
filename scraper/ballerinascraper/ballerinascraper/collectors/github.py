@@ -1,34 +1,35 @@
-"""Collect files from allowlisted GitHub repos, pinned to a commit SHA.
+"""GitHub REST API collectors (authenticated with GITHUB_TOKEN when set).
 
-Uses the REST API for repo metadata (license, default branch, commit SHA,
-recursive tree with blob SHAs) and raw.githubusercontent.com for file bodies.
-Files whose blob SHA was already collected are skipped without downloading.
+* `BbeCollector`: Ballerina by Example. The page list comes from the
+  ballerina.io sitemap; each example's sources (`.md` explanation, `.bal`
+  code, `.out` output) come from `ballerina-distribution/examples/<name>/`,
+  so code is kept exactly as written, with its explanation. If an example has
+  no folder there, the ballerina.io page itself is used (code only).
+* `ModuleCollector`: READMEs and `.bal` API source files from the org's
+  `module-ballerina-*` / `module-ballerinax-*` repos, most-starred first.
+
+File bodies are read through the blobs API; a file whose blob SHA has not
+changed since the last run is never downloaded again.
 """
 
 from __future__ import annotations
 
+import base64
+import json
 import re
+from collections.abc import Iterator
 from functools import lru_cache
+from pathlib import PurePosixPath
 
-from balpipe_common.config import GithubRepoCfg, Settings
-from balpipe_common.schemas import GitInfo, License
+from balpipe_common.config import GithubCfg
+from balpipe_common.ids import short_hash
 
+from ballerinascraper.collectors.ballerina_io import BBE_RE, Sitemap, fetch_page
+from ballerinascraper.collectors.base import Candidate, Fetched
 from ballerinascraper.collectors.http import PoliteSession
-from ballerinascraper.raw_sink import RawSink
 
 API = "https://api.github.com"
-RAW = "https://raw.githubusercontent.com"
-MAX_FILE_BYTES = 1_000_000
-
-MEDIA_TYPES = {
-    ".md": "text/markdown",
-    ".bal": "text/x-ballerina",
-    ".metatags": "text/x-metatags",
-    ".out": "text/plain",
-    ".json": "application/json",
-    ".toml": "application/toml",
-    ".html": "text/html",
-}
+BBE_FILE_EXTS = (".md", ".bal", ".out", ".metatags")
 
 
 @lru_cache(maxsize=256)
@@ -55,96 +56,118 @@ def path_selected(path: str, include: list[str], exclude: list[str]) -> bool:
     )
 
 
-def media_type_for(path: str) -> str:
-    for ext, mt in MEDIA_TYPES.items():
-        if path.endswith(ext):
-            return mt
-    return "text/plain"
+class GithubApi:
+    def __init__(self, http: PoliteSession, ttl_hours: float) -> None:
+        self.http = http
+        self.ttl_hours = ttl_hours
 
-
-class GithubCollector:
-    def __init__(self, settings: Settings, *, limit: int | None = None) -> None:
-        self.settings = settings
-        self.limit = limit
-        headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
-        if settings.github_token:
-            headers["Authorization"] = f"Bearer {settings.github_token.get_secret_value()}"
-        self.api = PoliteSession(
-            settings.crawl.user_agent, delay_s=settings.crawl.collector_delay_s,
-            timeout_s=settings.crawl.download_timeout_s, headers=headers,
-        )
-        # raw.githubusercontent.com must not receive the API token
-        self.raw = PoliteSession(
-            settings.crawl.user_agent, delay_s=settings.crawl.collector_delay_s,
-            timeout_s=settings.crawl.download_timeout_s,
-        )
-
-    def _api_json(self, path: str) -> dict:
-        resp = self.api.get(f"{API}{path}")
-        resp.raise_for_status()
+    def json(self, path: str, *, cached: bool = True) -> object:
+        url = f"{API}{path}"
+        resp = self.http.get_cached(url, ttl_hours=self.ttl_hours) if cached else self.http.get(url)
         return resp.json()
 
-    def run(self) -> dict[str, int]:
-        with RawSink(self.settings, "github", fetcher="github_api") as sink:
-            for repo_cfg in self.settings.sources.github_repos:
-                try:
-                    self._collect_repo(sink, repo_cfg)
-                except Exception as exc:  # one bad repo must not stop the others
-                    sink.stage.error(repo_cfg.repo, exc)
-                    sink.log.exception("repo failed", extra={"event": "github.repo_failed", "repo": repo_cfg.repo})
-                if self.limit and sink.stage.counts["written"] >= self.limit:
-                    break
-            return dict(sink.stage.counts)
+    def tree(self, repo: str, ref: str) -> list[dict]:
+        data = self.json(f"/repos/{repo}/git/trees/{ref}?recursive=1")
+        assert isinstance(data, dict)
+        return [t for t in data.get("tree", []) if t.get("type") == "blob"]
 
-    def _collect_repo(self, sink: RawSink, cfg: GithubRepoCfg) -> None:
-        meta = self._api_json(f"/repos/{cfg.repo}")
-        ref = cfg.ref or meta["default_branch"]
-        commit_sha = self._api_json(f"/repos/{cfg.repo}/commits/{ref}")["sha"]
-        lic = meta.get("license") or {}
-        spdx = lic.get("spdx_id") or "NOASSERTION"
-        license_ = License(
-            spdx="NOASSERTION" if spdx == "NOASSERTION" or spdx == "OTHER" else spdx,
-            basis="repo_license" if lic else "unknown",
-            url=f"https://github.com/{cfg.repo}/blob/{commit_sha}/LICENSE" if lic else None,
-        )
-        tree = self._api_json(f"/repos/{cfg.repo}/git/trees/{commit_sha}?recursive=1")
-        if tree.get("truncated"):
-            sink.log.warning("tree listing truncated", extra={"event": "github.tree_truncated", "repo": cfg.repo})
-        files = [
-            t for t in tree["tree"]
-            if t["type"] == "blob" and path_selected(t["path"], cfg.include, cfg.exclude)
-        ]
-        sink.log.info(
-            "repo listed",
-            extra={"event": "github.repo_listed", "repo": cfg.repo, "commit": commit_sha, "files": len(files)},
-        )
-        for entry in files:
-            if self.limit and sink.stage.counts["written"] >= self.limit:
-                return
-            path = entry["path"]
-            if sink.blob_unchanged(cfg.repo, path, entry.get("sha")):
-                sink.stage.count("unchanged")
+    def blob_text(self, repo: str, sha: str) -> str:
+        data = self.json(f"/repos/{repo}/git/blobs/{sha}", cached=False)
+        assert isinstance(data, dict)
+        return base64.b64decode(data.get("content") or "").decode("utf-8", errors="replace")
+
+    def org_repos(self, org: str) -> list[dict]:
+        repos: list[dict] = []
+        page = 1
+        while True:
+            batch = self.json(f"/orgs/{org}/repos?per_page=100&type=public&page={page}")
+            if not isinstance(batch, list) or not batch:
+                return repos
+            repos.extend(batch)
+            if len(batch) < 100:
+                return repos
+            page += 1
+
+
+def repo_license(repo: dict) -> str | None:
+    spdx = (repo.get("license") or {}).get("spdx_id")
+    return None if spdx in (None, "NOASSERTION", "OTHER") else spdx
+
+
+# --------------------------------------------------------------------------- #
+class BbeCollector:
+    source = "bbe"
+
+    def __init__(self, api: GithubApi, cfg: GithubCfg, sitemap: Sitemap, web: PoliteSession) -> None:
+        self.api = api
+        self.cfg = cfg
+        self.sitemap = sitemap
+        self.web = web
+
+    def candidates(self) -> Iterator[Candidate]:
+        repo = f"{self.cfg.org}/{self.cfg.bbe_repo}"
+        meta = self.api.json(f"/repos/{repo}")
+        assert isinstance(meta, dict)
+        branch = meta["default_branch"]
+        lic = repo_license(meta)
+        folders: dict[str, dict[str, str]] = {}  # name -> {file name: blob sha}
+        prefix = self.cfg.bbe_path.rstrip("/") + "/"
+        for entry in self.api.tree(repo, branch):
+            parts = entry["path"].removeprefix(prefix).split("/") if entry["path"].startswith(prefix) else []
+            if len(parts) == 2 and parts[1].endswith(BBE_FILE_EXTS):
+                folders.setdefault(parts[0], {})[parts[1]] = entry["sha"]
+
+        for url in self.sitemap.urls("bbe"):
+            m = BBE_RE.match("/" + url.split("/", 3)[3])
+            name = m.group(1) if m else ""
+            files = folders.get(name)
+            if not files or not any(f.endswith(".md") for f in files):
+                yield Candidate(self.source, url, fetch=lambda row, u=url: self._fallback(u, row),
+                                meta={"origin": "ballerina.io", "name": name})
                 continue
-            if entry.get("size", 0) > MAX_FILE_BYTES:
-                sink.stage.count("skipped_too_large")
-                continue
-            url = f"{RAW}/{cfg.repo}/{commit_sha}/{path}"
-            try:
-                resp = self.raw.get(url)
-                resp.raise_for_status()
-            except Exception as exc:
-                sink.stage.error(f"{cfg.repo}:{path}", exc)
-                continue
-            sink.emit(
-                source_uri=f"https://github.com/{cfg.repo}/blob/{commit_sha}/{path}",
-                identity_uri=f"https://github.com/{cfg.repo}/blob/{ref}/{path}",
-                media_type=media_type_for(path),
-                body=resp.content.decode("utf-8", errors="replace"),
-                requested_url=url,
-                final_url=resp.url,
-                http_status=resp.status_code,
-                content_type_header=resp.headers.get("Content-Type"),
-                etag=resp.headers.get("ETag"),
-                git=GitInfo(repo=cfg.repo, ref=ref, commit_sha=commit_sha, path=path, blob_sha=entry.get("sha")),
-                license=license_,
+            version = short_hash(*(f"{f}:{s}" for f, s in sorted(files.items())))
+            yield Candidate(
+                self.source, url, version_key=version, license=lic,
+                fetch=lambda row, n=name, fs=files: self._bundle(repo, branch, n, fs),
+                meta={"origin": "github", "repo": repo, "folder": f"{prefix}{name}"},
             )
+
+    def _bundle(self, repo: str, branch: str, name: str, files: dict[str, str]) -> Fetched:
+        bundle = {fname: self.api.blob_text(repo, sha) for fname, sha in sorted(files.items())}
+        return Fetched(json.dumps(bundle, ensure_ascii=False, sort_keys=True), 200,
+                       f"https://github.com/{repo}/tree/{branch}/{self.cfg.bbe_path}/{name}")
+
+    def _fallback(self, url: str, row: object) -> Fetched:
+        return fetch_page(self.web, url, row)  # type: ignore[arg-type]
+
+
+# --------------------------------------------------------------------------- #
+class ModuleCollector:
+    source = "github"
+
+    def __init__(self, api: GithubApi, cfg: GithubCfg) -> None:
+        self.api = api
+        self.cfg = cfg
+
+    def repos(self) -> list[dict]:
+        pats = [re.compile(p) for p in self.cfg.module_repo_patterns]
+        repos = [r for r in self.api.org_repos(self.cfg.org)
+                 if any(p.search(r["name"]) for p in pats) and not r.get("archived") and not r.get("fork")]
+        return sorted(repos, key=lambda r: (-int(r.get("stargazers_count") or 0), r["name"]))
+
+    def candidates(self) -> Iterator[Candidate]:
+        for repo in self.repos():
+            full, branch, lic = repo["full_name"], repo["default_branch"], repo_license(repo)
+            for entry in self.api.tree(full, branch):
+                path = entry["path"]
+                if not path_selected(path, self.cfg.module_include, self.cfg.module_exclude):
+                    continue
+                if int(entry.get("size") or 0) > self.cfg.max_file_bytes:
+                    continue
+                url = f"https://github.com/{full}/blob/{branch}/{path}"
+                yield Candidate(
+                    self.source, url, version_key=entry["sha"], license=lic,
+                    title=f"{repo['name']}: {PurePosixPath(path).name}",
+                    fetch=lambda row, f=full, s=entry["sha"], u=url: Fetched(self.api.blob_text(f, s), 200, u),
+                    meta={"repo": full, "path": path},
+                )
