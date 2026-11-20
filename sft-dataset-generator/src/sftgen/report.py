@@ -38,6 +38,8 @@ class ReportData:
     usage: list[dict[str, Any]]
     samples: list[dict[str, Any]]
     limits: dict[str, Any] = field(default_factory=dict)
+    coverage: dict[str, Any] | None = None  # knowledge-graph coverage (graph/coverage.py)
+    swan_lake: str = ""
 
     @property
     def total_pages(self) -> int:
@@ -83,13 +85,20 @@ def collect(s: Settings, db: Database) -> ReportData:
         questions_by_source=by("source"), questions_by_category=by("category"),
         questions_by_difficulty=by("difficulty"), question_status=by("status"),
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
-        runs=runs, usage=usage, samples=samples, limits=s.limits(),
+        runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
+        swan_lake=s.sources.swan_lake,
     )
 
 
 # --------------------------------------------------------------------------- #
 # Terminal
 # --------------------------------------------------------------------------- #
+def _coverage(db: Database) -> dict[str, Any] | None:
+    from sftgen.graph.coverage import coverage_summary
+
+    return coverage_summary(db)
+
+
 def terminal_summary(d: ReportData, report_path: Path) -> str:
     def kv(m: dict[str, int]) -> str:
         return ", ".join(f"{k} {v}" for k, v in m.items()) or "none"
@@ -110,6 +119,10 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         f"Questions  {d.total_questions}  |  pending {qs.get('pending', 0)}, answered {qs.get('answered', 0)}, "
         f"failed {qs.get('failed', 0)}",
         f"Validation {kv(d.answer_status)}",
+        *([f"Graph      grounded {d.coverage['grounded']:,}/{d.coverage['items']:,} items "
+           f"(core {d.coverage['by_priority'].get('core', {}).get('grounded', 0)}/"
+           f"{d.coverage['by_priority'].get('core', {}).get('items', 0)}) · graph {d.coverage['graph_version']}"]
+          if d.coverage else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -181,6 +194,53 @@ def _fmt_stats(stats: dict[str, Any]) -> str:
     return ", ".join(f"{k} {v}" for k, v in stats.items() if not isinstance(v, (dict, list))) or "—"
 
 
+def _coverage_html(d: ReportData) -> list[str]:
+    c = d.coverage
+    if not c:
+        return ["<h2>Knowledge graph coverage</h2>",
+                '<div class="card"><p class="muted">Not synced yet: run <code>sftgen graph sync</code> '
+                "(it also runs after every scrape).</p></div>"]
+    pct = lambda a, b: f"{100 * a / b:.0f}%" if b else "—"  # noqa: E731
+    rows = []
+    for p, v in c["by_priority"].items():
+        n = v.get("items", 0)
+        rows.append([_e(p), str(n), f"{v.get('grounded', 0)} ({pct(v.get('grounded', 0), n)})",
+                     str(v.get("not_scraped", 0)), str(v.get("external_only", 0) + v.get("no_sources", 0)),
+                     str(v.get("no_own_sources", 0)), str(v.get("with_questions", 0))])
+    type_bars = {t: v["grounded"] for t, v in c["by_type"].items()}
+    type_totals = ", ".join(f"{t} {v['items']}" for t, v in c["by_type"].items())
+    missing = c["missing_core"]
+    scrape_next = ", ".join(f"{k} {n}" for k, n in c["not_scraped_urls"].items()) or "none"
+    return [
+        "<h2>Knowledge graph coverage</h2>",
+        f'<p class="muted">Graph {_e(c["graph_version"])} · Swan Lake pin {_e(d.swan_lake)}. An item is '
+        "<b>grounded</b> when one of its sources (or its node's, if it has none) is a scraped page, or for the "
+        "spec, a scraped section. <b>With questions</b> is approximate (questions from a grounding page or "
+        "section) until prompts are tagged by item.</p>",
+        '<div class="grid">' + "".join(
+            f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}</div></div>' for k, v in [
+                ("Items (active)", f"{c['items']:,}"), ("Grounded", f"{c['grounded']:,} ({pct(c['grounded'], c['items'])})"),
+                ("Core grounded", f"{c['by_priority'].get('core', {}).get('grounded', 0)}/"
+                                  f"{c['by_priority'].get('core', {}).get('items', 0)}"),
+                ("With questions (approx.)", f"{c['with_questions']:,}")]) + "</div>",
+        '<div class="card" style="margin-top:12px">' + _table(
+            ["Priority", "Items", "Grounded", "Not scraped yet", "External / none", "No own sources",
+             "With questions"], rows, numeric={1, 3, 4, 5, 6}) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Grounded items by node type</h3>{_bars(type_bars)}'
+        f'<p class="muted">Items per type: {_e(type_totals)}</p></div>',
+        f'<div class="card"><h3>Source pages to scrape next</h3><p>{_e(scrape_next)}</p><p class="muted">Distinct '
+        "item-source URLs not in the database yet, by kind. Raise <code>LIMIT_SCRAPE_PAGES</code> or widen the "
+        "sources (module repos beyond the current set arrive in M3).</p></div>",
+        "</div>",
+        f'<h3 style="margin-top:16px">Core items not grounded ({c["missing_core_total"]}; first {len(missing)})</h3>',
+        '<div class="card">' + (_table(["Item", "Node", "Status", "First scrapeable source"], [
+            [f"<code>{_e(m['ref'])}</code>", _e(m["node_title"]), _e(m["status"]),
+             f'<span class="url">{_e(m["url"] or "")}</span>'] for m in missing])
+            if missing else '<p class="muted">Every core item is grounded.</p>') + "</div>",
+    ]
+
+
 def render_html(d: ReportData) -> str:
     srcs = [x for x in d.sources if x in d.pages or x in d.chunks] + sorted(
         (set(d.pages) | set(d.chunks)) - set(d.sources))
@@ -216,6 +276,7 @@ def render_html(d: ReportData) -> str:
             [_e(f["source"]), f'<span class="url">{_e(f["url"])}</span>', _e(f["status"]),
              f'<span class="err">{_e(f["error"])}</span>', _e(f["fetched_at"])] for f in d.failed_pages])
             if d.failed_pages else '<p class="muted">None.</p>') + "</div>",
+        *_coverage_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

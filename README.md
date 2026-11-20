@@ -118,10 +118,38 @@ without stopping the run.
 | `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` | — |
 | `sftgen report` | Rebuild `reports/report.html` and print the summary | — |
 | `sftgen run-all` | `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` → `export-sft` | — |
+| `sftgen graph validate` | Check `graph/graph.json`: schema 0.2 and the graph rules from [ballerina-ecosystem](https://github.com/sajith-jeewantha/ballerina-ecosystem), plus the hash recorded in `graph/SOURCE.json` | — |
+| `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
+| `sftgen graph sync` | Load the graph into the database and match each item's sources to scraped pages (also runs after every `scrape`) | item: `grounded` · `not_scraped` · `external_only` · `retired` |
 
-Flags: `scrape --refresh` (re-check downloaded pages for changes) · `scrape --source bbe` (one
-source, repeatable) · `generate-answers --retry-failed` · `validate --recheck` ·
-`--log-format text|json`.
+Flags:
+- `scrape --refresh`: re-check downloaded pages for changes.
+- `scrape --update-lock`: re-resolve the pinned versions in `config/sources.lock.json`.
+- `scrape --source bbe`: one source only (repeatable).
+- `generate-answers --retry-failed`
+- `validate --recheck`
+- `--log-format text|json`
+
+### Pinned sources
+
+Everything is pinned to **one Swan Lake update**: `sources.swan_lake`, default `2201.14.1`.
+The resolved pins are written to **`config/sources.lock.json`** the first time each source is
+scraped, and reused on every later run:
+
+| Source | Pinned to |
+|---|---|
+| Ballerina by Example | The `ballerina-distribution` release tag `v<swan_lake>`, resolved to a commit |
+| Module repos | The commit seen on the first scrape |
+| Ballerina Central | Per package, the newest version built for the pinned update or earlier (`ballerinaVersion` ≤ pin) |
+| Spec | `2024R1` (the version is in the URL) |
+| Learn pages | Not pinnable (live site); each page's content hash is kept in the database |
+
+- **When a pin changes,** the page is downloaded again, even without `--refresh`.
+- **To move to a new Swan Lake update,** change `sources.swan_lake`. A fresh lock starts, and
+  the old one stays in git history.
+- **The teacher's provider is pinned too.** Models whose id starts with `deepseek/` are sent
+  to DeepSeek's own endpoint only (`generate.providers`), because DeepSeek's terms explicitly
+  allow distillation. Each call records the provider that served it in `llm_usage.provider`.
 
 Question categories: `concept`, `syntax`, `library`, `tooling`, `error-fixing`, `code-writing`,
 `best-practice`. Difficulties: `beginner`, `intermediate`, `advanced`.
@@ -179,6 +207,11 @@ It shows:
 - validation results
 - run history: start time, duration, limits used and items processed
 - token usage and cost per phase (OpenRouter returns the cost of each call)
+- **knowledge-graph coverage:**
+  - how many of the graph's 3,231 active items are grounded by a scraped page (or spec
+    section), by priority and node type
+  - which source pages to scrape next
+  - the core items that are not grounded yet
 - 5 random Q&A samples, so you can spot-check quality
 
 Terminal summary (illustrative numbers):
@@ -250,7 +283,9 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `questions` | generated question, with chunk, source URL, category, difficulty | `pending` · `answered` · `failed` |
 | `answers` | answer to a question | `not_checked` · `valid` · `invalid` |
 | `runs` | command run: limits, items processed, duration | `running` · `succeeded` · `failed` |
-| `llm_usage` | model call: phase, tokens, cost | `ok` · `error` |
+| `llm_usage` | model call: phase, tokens, cost, serving provider | `ok` · `error` |
+| `graph_items` | knowledge-graph item (`node#item`), with priority, difficulty and coverage | `grounded` · `not_scraped` · `external_only` · `retired` |
+| `item_sources` | an item's source URL matched to a scraped page (or spec section) | `matched` · `not_scraped` · `external` |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -418,6 +453,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 |---|---|
 | `sftgen scrape --source bbe` | Scrape one source only (`bbe`, `spec`, `learn`, `central`, `github`; repeatable) |
 | `sftgen scrape --refresh` | Re-check pages you already have for upstream changes |
+| `sftgen scrape --update-lock` | Re-resolve the pinned commits and Central versions in `config/sources.lock.json` |
+| `sftgen graph validate` | Check the knowledge graph before using it |
 | `sftgen generate-answers --retry-failed` | Retry questions whose answer call failed |
 | `sftgen validate --recheck` | Re-compile all answers, e.g. after installing a new `bal` |
 | `sftgen report` | Rebuild the report and summary at any time |

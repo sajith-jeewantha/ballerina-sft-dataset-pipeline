@@ -1,0 +1,9 @@
+{
+  "repo": "https://github.com/sajith-jeewantha/ballerina-ecosystem",
+  "commit": "64c8d80be237d20893934dc9b50055bba8f9a51d",
+  "committed_at": "2026-11-02T01:22:08+05:30",
+  "path": "ballerina-graph/build/graph.json",
+  "schema_version": "0.2",
+  "sha256": "5e5e2f5290fb05865949c9b1019d933b6fc3d1b007b6f6ec645f447b41e5e210",
+  "note": "Copied from the upstream export. Update with: copy the new build/graph.json here, then update commit, committed_at and sha256 (sftgen graph validate checks the hash)."
+}

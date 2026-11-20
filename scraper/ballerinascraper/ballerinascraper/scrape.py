@@ -1,10 +1,12 @@
 """The fetch half of `scrape`: walk every source's candidates and store raw pages.
 
 Per source, at most LIMIT_SCRAPE_PAGES pages are downloaded per run (0 = no
-limit). Pages already in the database are not downloaded again unless
-`refresh=True`; then unchanged pages are detected by version key (blob SHA /
-package version), HTTP 304, or an identical content hash. A failure is logged
-and recorded on the page row; it never stops the run.
+limit). Pages already in the database are not downloaded again unless their
+pinned version changed (version key: blob SHAs / package version, known without
+a request) or `refresh=True`, which also re-checks pages without a version key
+(HTTP 304 or an identical content hash means unchanged). Pins come from
+`config/sources.lock.json` (see `balpipe_common.lock`). A failure is logged and
+recorded on the page row; it never stops the run.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ from typing import Any
 from balpipe_common.config import Settings
 from balpipe_common.db import Database, RunTracker
 from balpipe_common.ids import sha256_text, utc_now_iso
+from balpipe_common.lock import SourceLock
 
 from ballerinascraper.collectors.ballerina_io import Sitemap, WebPageCollector
 from ballerinascraper.collectors.base import Candidate, Collector
@@ -30,7 +33,11 @@ SOURCES = ("bbe", "spec", "learn", "central", "github")
 DOWNLOADS = ("downloaded", "updated", "not_modified", "failed")
 
 
-def build_collectors(s: Settings) -> dict[str, Collector]:
+def open_lock(s: Settings) -> SourceLock:
+    return SourceLock(s.path(s.sources.lock_file), s.sources.swan_lake)
+
+
+def build_collectors(s: Settings, lock: SourceLock, *, update_lock: bool = False) -> dict[str, Collector]:
     c = s.crawl
     common: dict[str, Any] = dict(
         delay_s=s.request_delay_seconds, timeout_s=c.timeout_s, retries=c.retries,
@@ -47,11 +54,11 @@ def build_collectors(s: Settings) -> dict[str, Collector]:
     central = PoliteSession(c.user_agent, headers={"Accept": "application/json"}, **common)
     sitemap = Sitemap(web, s.sources.ballerina_io, c.listing_cache_hours)
     return {
-        "bbe": BbeCollector(github, s.sources.github, sitemap, web),
+        "bbe": BbeCollector(github, s.sources.github, sitemap, web, lock, update_lock=update_lock),
         "spec": WebPageCollector("spec", sitemap, web),
         "learn": WebPageCollector("learn", sitemap, web),
-        "central": CentralCollector(central, s.sources.central, c.listing_cache_hours),
-        "github": ModuleCollector(github, s.sources.github),
+        "central": CentralCollector(central, s.sources.central, c.listing_cache_hours, lock, update_lock=update_lock),
+        "github": ModuleCollector(github, s.sources.github, lock, update_lock=update_lock),
     }
 
 
@@ -70,7 +77,8 @@ def fetch_candidate(db: Database, cand: Candidate, run: RunTracker, *, refresh: 
     cached | unchanged (no request) | not_modified | downloaded | updated | failed | blocked."""
     row = db.one("SELECT * FROM pages WHERE url = ?", (cand.url,))
     ok_before = row is not None and row["status"] not in ("failed", "blocked") and row["raw_body"] is not None
-    if ok_before and not refresh:
+    pin_changed = ok_before and bool(cand.version_key) and row["version_key"] != cand.version_key
+    if ok_before and not refresh and not pin_changed:
         return "cached"
     if ok_before and cand.version_key and row["version_key"] == cand.version_key:
         return "unchanged"
@@ -104,8 +112,19 @@ def fetch_candidate(db: Database, cand: Candidate, run: RunTracker, *, refresh: 
 
 
 def scrape_sources(s: Settings, db: Database, run: RunTracker, *, refresh: bool = False,
-                   only: list[str] | None = None) -> dict[str, dict[str, int]]:
-    collectors = build_collectors(s)
+                   only: list[str] | None = None, update_lock: bool = False) -> dict[str, dict[str, int]]:
+    lock = open_lock(s)
+    try:
+        return _scrape(s, db, run, lock, refresh=refresh, only=only, update_lock=update_lock)
+    finally:
+        lock.save()  # keep pins resolved so far, even after a failure or interrupt
+        run.stats["lock"] = lock.counts()  # type: ignore[assignment]
+
+
+def _scrape(s: Settings, db: Database, run: RunTracker, lock: SourceLock, *, refresh: bool,
+            only: list[str] | None, update_lock: bool) -> dict[str, dict[str, int]]:
+    collectors = build_collectors(s, lock, update_lock=update_lock)
+    log.info("pinned to Swan Lake %s (lock: %s)", lock.swan_lake, s.sources.lock_file)
     limit = s.limit_scrape_pages
     per_source: dict[str, dict[str, int]] = {}
     for source in s.sources.order:

@@ -1,5 +1,50 @@
 # Changelog
 
+## Unreleased: plan v2, milestones M0 and M1 (branch `feat/pipeline-plan-v2`)
+
+The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
+[docs/licence-register.csv](docs/licence-register.csv).
+
+### M0: pinning
+
+- **One Swan Lake update** (`sources.swan_lake: 2201.14.1`). Resolved pins are kept in
+  `config/sources.lock.json`:
+  - BBE at the `ballerina-distribution` tag `v2201.14.1`, resolved to a commit
+  - module repos at a locked commit
+  - Central packages at the newest version whose `ballerinaVersion` ≤ the pin, found through
+    `/2.0/registry/packages/<org>/<pkg>`
+- **Pin changes trigger a re-download,** even without `--refresh`. `scrape --update-lock`
+  re-resolves the pins.
+- **Teacher provider pin:** `generate.providers` sends `deepseek/*` models to DeepSeek's own
+  endpoint only (`allow_fallbacks: false`, `data_collection: deny`), because DeepSeek's terms
+  explicitly allow distillation.
+  - The routing is part of the LLM cache key, so a pinned call never reuses a response from an
+    unpinned one.
+  - The serving host is stored in the new `llm_usage.provider` column, added to existing
+    databases automatically.
+- **The knowledge graph is tracked in git:** `graph/graph.json`, plus `graph/SOURCE.json` with
+  the upstream commit `64c8d80` and the file's sha256.
+
+### M1: graph integration and coverage
+
+- **`sftgen graph validate | stats | sync`.**
+  - Validation uses the `ballerina_graph` package from ballerina-ecosystem, pinned to the same
+    commit: strict schema 0.2 models and graph rules.
+  - It also checks the schema version, the hash in `SOURCE.json`, and that top-level edges
+    equal node edges.
+- **Coverage:** `graph_items` and `item_sources` link every item's sources to scraped pages.
+  - For the 500 KB spec, links resolve to the exact section: 1,610 of 1,620 spec links.
+  - Sync runs after every scrape.
+- **Report:** a new *Knowledge graph coverage* section and a summary line show items grounded
+  by priority and node type, the source pages to scrape next, and the core items not yet
+  grounded.
+
+### Tests
+
+72 tests in total (+16): graph loading and rules on a small fixture plus the real graph, the
+lockfile, Central version pinning, commit locking, re-download on a pin change, source-URL
+matching, spec sections, coverage, the report section, and `graph validate`.
+
 ## 2.1.0: Q&A pipeline on SQLite (2026-11-15, branch `feat/sqlite-qa-pipeline`)
 
 The pipeline now builds a grounded **question-and-answer** dataset in two LLM phases, tracks every

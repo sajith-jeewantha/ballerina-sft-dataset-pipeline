@@ -6,6 +6,8 @@ data_dir: data                       # data/pipeline.db, data/dataset.jsonl, dat
 db_file: pipeline.db
 
 sources:
+  swan_lake: "2201.14.1"             # one pinned Swan Lake update; resolved pins live in lock_file
+  lock_file: config/sources.lock.json
   order: [bbe, spec, learn, central, github]   # scrape order; questions are taken round-robin in this order
   ballerina_io:
     sitemap: https://ballerina.io/sitemap.xml
@@ -21,6 +23,7 @@ sources:
     org: ballerina-platform
     bbe_repo: ballerina-distribution  # BBE explanation + code + output: examples/<name>/
     bbe_path: examples
+    bbe_ref: "v{swan_lake}"          # ballerina-distribution release tag for the pinned update
     module_repo_patterns: ["^module-ballerina-", "^module-ballerinax-"]
     module_include: ["README.md", "ballerina/Module.md", "ballerina/Package.md", "ballerina/README.md", "ballerina/*.bal"]
     module_exclude: ["ballerina/tests/**", "**/test*.bal"]
@@ -52,6 +55,8 @@ generate:
   max_answer_tokens: 2048
   max_chunk_attempts: 3
   near_duplicate_threshold: 0.85     # word-set Jaccard similarity between questions
+  providers:                         # OpenRouter routing per model-id prefix (sent as `provider`)
+    "deepseek/": {order: [deepseek], allow_fallbacks: false, data_collection: deny}  # DeepSeek terms allow distillation
   # pricing:                         # optional fallback when the provider returns no cost (USD per 1M tokens)
   #   qwen/qwen3.8-flash: {input: 0.15, output: 0.47}
 

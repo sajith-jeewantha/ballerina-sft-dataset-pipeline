@@ -67,6 +67,7 @@ class GithubCfg(BaseModel):
     org: str = "ballerina-platform"
     bbe_repo: str = "ballerina-distribution"  # BBE sources: examples/<name>/{.md,.bal,.out}
     bbe_path: str = "examples"
+    bbe_ref: str = "v{swan_lake}"  # release tag matching the pinned Swan Lake update
     module_repo_patterns: list[str] = Field(default_factory=lambda: [r"^module-ballerina-", r"^module-ballerinax-"])
     # files collected from each module repo (globs on the repo path)
     module_include: list[str] = Field(
@@ -85,6 +86,8 @@ class CentralCfg(BaseModel):
 
 
 class SourcesCfg(BaseModel):
+    swan_lake: str = "2201.14.1"  # the one Swan Lake update every phase is pinned to
+    lock_file: str = "config/sources.lock.json"
     # processing order; BBE first (highest priority)
     order: list[str] = Field(default_factory=lambda: ["bbe", "spec", "learn", "central", "github"])
     ballerina_io: BallerinaIoCfg = Field(default_factory=BallerinaIoCfg)
@@ -128,6 +131,20 @@ class GenerateCfg(BaseModel):
     # Optional fallback prices (USD per 1M tokens) when the provider does not return a cost:
     # {"qwen/qwen3.8-flash": {"input": 0.15, "output": 0.47}}
     pricing: dict[str, dict[str, float]] = Field(default_factory=dict)
+    # OpenRouter provider routing per model-id prefix, sent as the request's `provider` field.
+    # DeepSeek's own terms explicitly allow distillation; other hosts have their own terms,
+    # so DeepSeek models are pinned to the DeepSeek endpoint with no fallback, and prompts are
+    # not shared for training by the provider.
+    providers: dict[str, dict[str, Any]] = Field(
+        default_factory=lambda: {
+            "deepseek/": {"order": ["deepseek"], "allow_fallbacks": False, "data_collection": "deny"},
+        }
+    )
+
+    def provider_for(self, model: str) -> dict[str, Any] | None:
+        """Routing for `model`: the longest matching prefix wins."""
+        matches = [p for p in self.providers if model.startswith(p)]
+        return self.providers[max(matches, key=len)] if matches else None
 
 
 class ValidateCfg(BaseModel):
@@ -168,6 +185,11 @@ class SftCfg(BaseModel):
         "real Ballerina syntax and APIs; if you are not sure something exists or how it behaves, say so "
         "instead of guessing."
     )
+
+
+class GraphCfg(BaseModel):
+    path: str = "graph/graph.json"         # export of ballerina-ecosystem (schema 0.2)
+    source_file: str = "graph/SOURCE.json"  # upstream repo, commit and sha256 of graph.json
 
 
 class ReportCfg(BaseModel):
@@ -218,6 +240,7 @@ class Settings(BaseSettings):
     validate_: ValidateCfg = Field(default_factory=ValidateCfg, alias="validate")
     export: ExportCfg = Field(default_factory=ExportCfg)
     sft: SftCfg = Field(default_factory=SftCfg)
+    graph: GraphCfg = Field(default_factory=GraphCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)
 

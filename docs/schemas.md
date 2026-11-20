@@ -134,7 +134,36 @@ One row per model call.
 | `prompt_tokens`, `completion_tokens` | Token usage reported by the provider |
 | `cost_usd` | OpenRouter's reported cost; else computed from `generate.pricing`; else `NULL`. Cached calls are `0`. |
 | `cached` | 1 if served from `data/cache/llm` |
+| `provider` | Host that served the call (OpenRouter's `provider` field), for licence audits: DeepSeek models are pinned to `DeepSeek` |
 | `status` | `ok` · `error` |
+
+## `graph_items`
+
+One row per knowledge-graph item, written by `sftgen graph sync` (and after every `scrape`).
+The graph comes from `graph/graph.json`; see `graph/SOURCE.json` for its upstream commit.
+
+| Column | Meaning |
+|---|---|
+| `ref` | `node_id#item_id`, the id that dataset samples use in `covers` |
+| `node_id`, `item_id`, `node_type`, `node_title` | Where the item sits in the graph |
+| `priority` | The node's priority: `core` · `important` · `long_tail` |
+| `text`, `difficulty` | The must-cover text, and its difficulty levels (JSON list) |
+| `own_sources` | 0 when the item has no sources of its own and inherits its node's |
+| `graph_version` | Upstream commit (12 characters) of the graph that was synced |
+| `status` | `grounded` (a source is a scraped page, or a scraped spec section) · `not_scraped` (its sources can be scraped but aren't in the database yet) · `external_only` (only non-Ballerina hosts) · `retired` (deprecated node) |
+
+## `item_sources`
+
+One row per (item, source URL). The item's own sources are used, or the node's sources when it
+has none.
+
+| Column | Meaning |
+|---|---|
+| `ref`, `url`, `kind`, `note` | The graph source (`kind`: spec · bbe · central · docs · github · other) |
+| `inherited` | 1 when the source comes from the node |
+| `page_id` | The matching scraped page. Matching rules: ballerina.io by URL (anchor dropped); Central `/<org>/<pkg>/...` to the package page; GitHub blob to the module file (branch ignored); tree and repo links to a file below them; `ballerina-distribution/examples/<name>` to the BBE page |
+| `chunk_ids` | For the spec, the chunks of the section the source points at (by its note or `#section_N.N` anchor) |
+| `status` | `matched` · `not_scraped` · `external` |
 
 ---
 

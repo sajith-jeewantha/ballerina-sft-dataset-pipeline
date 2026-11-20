@@ -3,9 +3,12 @@
 * package list + README: `GET /2.0/registry/packages?org=<org>`
 * API docs:              `GET /2.0/docs/<org>/<package>/<version>`
 
-One page per package (the latest version the registry lists). The page body is
-the package's stable metadata, README and a compact form of its API docs, so
-answers can be checked against real function and type signatures.
+One page per package, pinned in `config/sources.lock.json` to the newest version
+built for the pinned Swan Lake update or earlier (`ballerinaVersion` <= pin;
+`GET /2.0/registry/packages/<org>/<pkg>` lists the versions). Packages with no
+such version are skipped. The page body is the package's stable metadata,
+README and a compact form of its API docs, so answers can be checked against
+real function and type signatures.
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from balpipe_common.config import CentralCfg
+from balpipe_common.lock import SourceLock, compatible
 
 from ballerinascraper.collectors.base import Candidate, Fetched
 from ballerinascraper.collectors.http import PoliteSession
@@ -102,10 +106,39 @@ def compact_docs(docs: dict[str, Any]) -> list[dict[str, Any]]:
 class CentralCollector:
     source = "central"
 
-    def __init__(self, http: PoliteSession, cfg: CentralCfg, ttl_hours: float) -> None:
+    def __init__(self, http: PoliteSession, cfg: CentralCfg, ttl_hours: float, lock: SourceLock,
+                 *, update_lock: bool = False) -> None:
         self.http = http
         self.cfg = cfg
         self.ttl_hours = ttl_hours
+        self.lock = lock
+        self.update_lock = update_lock
+
+    def _package(self, org: str, name: str, version: str) -> dict[str, Any]:
+        url = f"{self.cfg.api}/registry/packages/{org}/{name}/{version}"
+        return self.http.get_cached(url, ttl_hours=24 * 365).json() or {}  # a published version never changes
+
+    def pinned_version(self, pkg: dict[str, Any]) -> str | None:
+        """Newest version built for the pinned Swan Lake update or earlier; recorded in the lock."""
+        o, n = pkg["organization"], pkg["name"]
+        key = f"{o}/{n}"
+        locked = self.lock.get("central", key)
+        if locked and not self.update_lock:
+            return locked.get("version")
+        pin = self.lock.swan_lake
+        choice: tuple[str | None, str | None] = (None, None)
+        if compatible(pkg.get("ballerinaVersion"), pin):
+            choice = (pkg["version"], pkg.get("ballerinaVersion"))
+        else:
+            versions = self.http.get_cached(f"{self.cfg.api}/registry/packages/{o}/{n}",
+                                            ttl_hours=self.ttl_hours).json() or []
+            for v in versions:  # newest first
+                built = self._package(o, n, v).get("ballerinaVersion")
+                if compatible(built, pin):
+                    choice = (v, built)
+                    break
+        self.lock.set("central", key, {"version": choice[0], "ballerina_version": choice[1]})
+        return choice[0]
 
     def packages(self, org: str) -> Iterator[dict[str, Any]]:
         offset = 0
@@ -123,9 +156,14 @@ class CentralCollector:
     def candidates(self) -> Iterator[Candidate]:
         for org in self.cfg.orgs:
             for pkg in self.packages(org):
-                o, n, v = pkg.get("organization"), pkg.get("name"), pkg.get("version")
-                if not (o and n and v) or pkg.get("isDeprecated"):
+                o, n = pkg.get("organization"), pkg.get("name")
+                if not (o and n and pkg.get("version")) or pkg.get("isDeprecated"):
                     continue
+                v = self.pinned_version(pkg)
+                if not v:
+                    continue  # no version built for the pinned Swan Lake update
+                if v != pkg["version"]:
+                    pkg = {**self._package(o, n, v), "organization": o, "name": n, "version": v}
                 licenses = pkg.get("licenses") or []
                 yield Candidate(
                     self.source, f"https://central.ballerina.io/{o}/{n}", version_key=v, title=f"{o}/{n}",

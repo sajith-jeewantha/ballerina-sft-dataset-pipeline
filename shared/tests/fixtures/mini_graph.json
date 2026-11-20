@@ -1,0 +1,25 @@
+{
+ "schema_version": "0.2",
+ "nodes": [
+  {"schema_version": "0.2", "id": "concept.records", "type": "concept", "title": "Records", "summary": "Record types.",
+   "priority": "core", "status": "draft", "modules": [], "out_of_scope": [],
+   "sources": [{"url": "https://ballerina.io/spec/lang/2024R1/#section_5.4", "kind": "spec", "note": "5.4 Records"}],
+   "must_cover": [
+     {"id": "open_records", "text": "Open records accept extra fields.", "difficulty": ["beginner"],
+      "sources": [{"url": "https://ballerina.io/learn/by-example/open-records/", "kind": "bbe"}]},
+     {"id": "record_spec", "text": "Record type descriptor syntax.", "difficulty": ["intermediate"], "sources": []}
+   ],
+   "edges": [{"to": "lib.http", "rel": "related", "via": [], "target_items": []}]},
+  {"schema_version": "0.2", "id": "lib.http", "type": "library", "title": "HTTP", "summary": "HTTP module.",
+   "priority": "important", "status": "draft", "modules": ["ballerina/http"], "out_of_scope": [],
+   "sources": [{"url": "https://central.ballerina.io/ballerina/http/latest", "kind": "central"}],
+   "must_cover": [
+     {"id": "client", "text": "Create an http:Client.", "difficulty": ["beginner", "intermediate"],
+      "sources": [{"url": "https://github.com/ballerina-platform/module-ballerina-http/blob/master/ballerina/README.md", "kind": "github"}]},
+     {"id": "webhooks", "text": "Third-party webhook docs.", "difficulty": ["advanced"],
+      "sources": [{"url": "https://docs.github.com/en/webhooks", "kind": "other"}]}
+   ],
+   "edges": []}
+ ],
+ "edges": [{"source": "concept.records", "target": "lib.http", "rel": "related", "via": [], "target_items": []}]
+}

@@ -43,6 +43,7 @@ class Usage:
     completion_tokens: int | None = None
     cost_usd: float | None = None
     cached: bool = False
+    provider: str | None = None  # the host that served the call (OpenRouter `provider`), for licence audits
 
 
 # --------------------------------------------------------------------------- #
@@ -126,14 +127,20 @@ class LLMClient:
                    **fmt: Any) -> tuple[str, Usage]:
         messages = prompt.messages(**fmt)
         params: dict[str, Any] = {"temperature": temperature, "max_tokens": max_tokens}
-        extra = self.settings.generate.extra_body
+        extra = dict(self.settings.generate.extra_body)
+        routing = self.settings.generate.provider_for(model)
+        if routing:  # e.g. DeepSeek models only from DeepSeek's own endpoint (its terms allow distillation)
+            extra["provider"] = routing
+        # The routing is part of the cache key, so a pinned call never reuses a response that
+        # an unpinned call may have got from another host.
         key = sha256_text(json.dumps({"model": model, "messages": messages, "params": params,
                                       "extra": {k: v for k, v in extra.items() if k != "usage"}}, sort_keys=True))
         cache = self._cache_path(key)
         if cache.is_file():
             data = json.loads(cache.read_text(encoding="utf-8"))
             u = data.get("usage") or {}
-            return data["text"], Usage(model, u.get("prompt_tokens"), u.get("completion_tokens"), 0.0, cached=True)
+            return data["text"], Usage(model, u.get("prompt_tokens"), u.get("completion_tokens"), 0.0, cached=True,
+                                       provider=data.get("provider"))
 
         async with self.sem:
             await self.rate.wait()
@@ -144,12 +151,15 @@ class LLMClient:
         text = (choice.message.content or "").strip() if choice else ""
         if not text:
             raise LLMError(f"empty response from {model} (finish_reason={getattr(choice, 'finish_reason', None)})")
-        usage = Usage(model)
+        served_by = (getattr(resp, "model_extra", None) or {}).get("provider")
+        usage = Usage(model, provider=served_by)
         if resp.usage:
-            usage = Usage(model, resp.usage.prompt_tokens, resp.usage.completion_tokens, self._cost(model, resp.usage))
+            usage = Usage(model, resp.usage.prompt_tokens, resp.usage.completion_tokens, self._cost(model, resp.usage),
+                          provider=served_by)
         cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps({"text": text, "usage": {"prompt_tokens": usage.prompt_tokens,
-                                                             "completion_tokens": usage.completion_tokens}}),
+        cache.write_text(json.dumps({"text": text, "provider": served_by,
+                                     "usage": {"prompt_tokens": usage.prompt_tokens,
+                                               "completion_tokens": usage.completion_tokens}}),
                          encoding="utf-8")
         return text, usage
 

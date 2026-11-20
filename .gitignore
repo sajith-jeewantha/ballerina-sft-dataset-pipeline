@@ -71,3 +71,6 @@ Dependencies.toml
 .pytest_cache/
 httpcache/
 reports/
+
+idea/
+sample.json

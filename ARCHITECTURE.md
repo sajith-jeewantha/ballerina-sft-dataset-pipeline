@@ -84,6 +84,8 @@ flowchart LR
 | Export | `sftgen/export/stage.py` | `dataset.jsonl` (5 fields, for review), invalid answers left out |
 | SFT export | `sftgen/export/sft.py` | `data/sft/train.jsonl`, `eval.jsonl` (chat `messages`), `metadata.jsonl`; split by source page; `Source:` line removed |
 | Report | `sftgen/report.py` | Terminal summary + single-file HTML report |
+| Source pins | `shared/balpipe_common/lock.py`, `config/sources.lock.json` | One Swan Lake update: BBE at its release tag, module repos at a locked commit, Central packages at the newest version built for the pin |
+| Knowledge graph | `shared/balpipe_common/graph.py`, `sftgen/graph/coverage.py`, `graph/graph.json` | Load and validate the graph with the pinned `ballerina_graph` package; match item sources to scraped pages and spec sections; coverage in the report |
 
 ### One question, end to end
 

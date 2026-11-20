@@ -144,7 +144,7 @@ def test_scrape_limit_is_per_source(tmp_path: Path, monkeypatch: pytest.MonkeyPa
                 yield Candidate(self.source, f"https://x/{self.source}/{i}/",
                                 fetch=lambda row: Fetched("body", 200, "u"))
 
-    monkeypatch.setattr(scrape, "build_collectors", lambda s: {k: Fake(k) for k in scrape.SOURCES})
+    monkeypatch.setattr(scrape, "build_collectors", lambda s, lock, **kw: {k: Fake(k) for k in scrape.SOURCES})
     s = Settings(repo_root=tmp_path, limit_scrape_pages=3)  # type: ignore[call-arg]
     with Database(s.db_path) as db, db.run("scrape", s.limits()) as run:
         stats = scrape.scrape_sources(s, db, run)
@@ -152,3 +152,78 @@ def test_scrape_limit_is_per_source(tmp_path: Path, monkeypatch: pytest.MonkeyPa
         assert db.scalar("SELECT COUNT(*) FROM pages") == 15
         again = scrape.scrape_sources(s, db, run)  # next run: cached pages are skipped, 3 new ones per source
         assert all(v["cached"] == 3 and v["downloaded"] == 3 for v in again.values())
+
+
+# ------------------------------------------------------------------ pinning
+class _Resp:
+    def __init__(self, data):  # noqa: ANN001
+        self.data = data
+
+    def json(self):  # noqa: ANN201
+        return self.data
+
+
+class _FakeHttp:
+    """Serves Central registry responses from a dict and records the URLs asked for."""
+
+    def __init__(self, routes: dict) -> None:
+        self.routes = routes
+        self.asked: list[str] = []
+
+    def get_cached(self, url: str, ttl_hours: float):  # noqa: ANN201
+        self.asked.append(url)
+        return _Resp(self.routes[url])
+
+    get = get_cached
+
+
+def test_central_pins_newest_version_built_for_the_swan_lake_pin(tmp_path: Path) -> None:
+    from balpipe_common.config import CentralCfg
+    from balpipe_common.lock import SourceLock
+
+    from ballerinascraper.collectors.central import CentralCollector
+
+    api = CentralCfg().api
+    http = _FakeHttp({
+        f"{api}/registry/packages/ballerina/http": ["2.20.0", "2.19.0", "2.18.2"],
+        f"{api}/registry/packages/ballerina/http/2.20.0": {"ballerinaVersion": "2201.15.0"},
+        f"{api}/registry/packages/ballerina/http/2.19.0": {"ballerinaVersion": "2201.14.0"},
+    })
+    lock = SourceLock(tmp_path / "lock.json", "2201.14.1")
+    col = CentralCollector(http, CentralCfg(), 24, lock)  # type: ignore[arg-type]
+    latest = {"organization": "ballerina", "name": "http", "version": "2.20.0", "ballerinaVersion": "2201.15.0"}
+    assert col.pinned_version(latest) == "2.19.0"
+    assert lock.get("central", "ballerina/http")["version"] == "2.19.0"
+    asked = len(http.asked)
+    assert col.pinned_version(latest) == "2.19.0" and len(http.asked) == asked  # second time: from the lock
+    io = {"organization": "ballerina", "name": "io", "version": "1.8.0", "ballerinaVersion": "2201.12.0"}
+    assert col.pinned_version(io) == "1.8.0"  # latest already compatible: no extra calls
+
+
+def test_github_commit_is_resolved_once_then_locked(tmp_path: Path) -> None:
+    from balpipe_common.lock import SourceLock
+
+    from ballerinascraper.collectors.github import GithubApi
+
+    calls: list[str] = []
+
+    class Api(GithubApi):
+        def commit_sha(self, repo: str, ref: str) -> str:
+            calls.append(f"{repo}@{ref}")
+            return "c0ffee"
+
+    lock = SourceLock(tmp_path / "lock.json", "2201.14.1")
+    api = Api(None, 24)  # type: ignore[arg-type]
+    assert api.pinned_commit(lock, "bbe", "o/dist", "v2201.14.1", update=False) == "c0ffee"
+    assert api.pinned_commit(lock, "bbe", "o/dist", "v2201.14.1", update=False) == "c0ffee"
+    assert calls == ["o/dist@v2201.14.1"]
+    api.pinned_commit(lock, "bbe", "o/dist", "v2201.14.1", update=True)
+    assert len(calls) == 2
+
+
+def test_changed_pin_refetches_without_refresh(db: Database) -> None:
+    with db.run("scrape", {}) as run:
+        url = "https://central.ballerina.io/ballerina/io"
+        assert fetch_candidate(db, _cand(url, version="1.7.0"), run, refresh=False) == "downloaded"
+        assert fetch_candidate(db, _cand(url, version="1.7.0"), run, refresh=False) == "cached"
+        assert fetch_candidate(db, _cand(url, body="<v2>", version="1.8.0"), run, refresh=False) == "updated"

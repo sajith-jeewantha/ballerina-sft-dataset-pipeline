@@ -63,7 +63,7 @@ def record_usage(db: Database, run: RunTracker, phase: str, usage: Usage | None,
     u = usage or Usage(model)
     db.insert("llm_usage", {"run_id": run.id, "phase": phase, "model": u.model, "prompt_tokens": u.prompt_tokens,
                             "completion_tokens": u.completion_tokens, "cost_usd": u.cost_usd,
-                            "cached": int(u.cached), "status": "ok" if ok else "error"})
+                            "cached": int(u.cached), "provider": u.provider, "status": "ok" if ok else "error"})
 
 
 def round_robin(rows: list[sqlite3.Row], order: list[str]) -> deque[sqlite3.Row]:

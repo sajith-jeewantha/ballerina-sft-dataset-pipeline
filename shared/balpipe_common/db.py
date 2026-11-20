@@ -121,6 +121,39 @@ CREATE TABLE IF NOT EXISTS answers (
 );
 CREATE INDEX IF NOT EXISTS ix_answers_status ON answers(status);
 
+CREATE TABLE IF NOT EXISTS graph_items (
+    ref           TEXT PRIMARY KEY,         -- node_id#item_id, the id samples use in `covers`
+    node_id       TEXT NOT NULL,
+    item_id       TEXT NOT NULL,
+    node_type     TEXT NOT NULL,
+    node_title    TEXT NOT NULL,
+    priority      TEXT NOT NULL,            -- core | important | long_tail
+    text          TEXT NOT NULL,
+    difficulty    TEXT NOT NULL,            -- JSON list
+    own_sources   INTEGER NOT NULL,         -- 0 = item inherits the node's sources
+    graph_version TEXT NOT NULL,
+    status        TEXT NOT NULL,            -- grounded | not_scraped | external_only | no_sources | retired
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_graph_items_node ON graph_items(node_id);
+
+CREATE TABLE IF NOT EXISTS item_sources (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    ref          TEXT NOT NULL REFERENCES graph_items(ref),
+    url          TEXT NOT NULL,
+    kind         TEXT NOT NULL,             -- spec | bbe | central | docs | github | other
+    note         TEXT,
+    inherited    INTEGER NOT NULL,          -- 1 = node-level source used because the item has none
+    page_id      INTEGER REFERENCES pages(id),
+    chunk_ids    TEXT NOT NULL DEFAULT '[]', -- JSON: chunks that ground the item (section match for the spec)
+    status       TEXT NOT NULL,             -- matched | not_scraped | external
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_item_sources_ref ON item_sources(ref);
+CREATE INDEX IF NOT EXISTS ix_item_sources_page ON item_sources(page_id);
+
 CREATE TABLE IF NOT EXISTS llm_usage (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id            INTEGER,
@@ -130,6 +163,7 @@ CREATE TABLE IF NOT EXISTS llm_usage (
     completion_tokens INTEGER,
     cost_usd          REAL,
     cached            INTEGER NOT NULL DEFAULT 0,
+    provider          TEXT,                 -- host that served the call (licence audit)
     status            TEXT NOT NULL,        -- ok | error
     created_at        TEXT NOT NULL,
     updated_at        TEXT NOT NULL
@@ -146,8 +180,18 @@ class Database:
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA foreign_keys=ON")
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
         self.conn.commit()
+
+    # Columns added after a table was first created: (table, column, type). Applied once, idempotently.
+    MIGRATIONS = (("llm_usage", "provider", "TEXT"),)
+
+    def _migrate(self) -> None:
+        for table, column, ctype in self.MIGRATIONS:
+            cols = {r[1] for r in self.conn.execute(f"PRAGMA table_info({table})")}
+            if column not in cols:
+                self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ctype}")
 
     def close(self) -> None:
         self.conn.close()
