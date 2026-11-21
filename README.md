@@ -65,7 +65,7 @@ flowchart LR
     DB[("data/pipeline.db<br/>pages · chunks · questions<br/>answers · runs · llm_usage")]
     SCRAPE <--> DB
     GEN <--> DB
-    DB --> R[/"reports/report.html"/]
+    DB --> R[/"data/reports/report.html"/]
 ```
 
 ```mermaid
@@ -116,11 +116,14 @@ without stopping the run.
 | `sftgen validate` *(optional)* | Compile the ```` ```ballerina ```` blocks in each answer with `bal` if it is installed | answer: `valid` · `invalid` · `not_checked` |
 | `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid` are left out) | — |
 | `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` | — |
-| `sftgen report` | Rebuild `reports/report.html` and print the summary | — |
+| `sftgen report` | Rebuild `data/reports/report.html` and print the summary | — |
 | `sftgen run-all` | `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` → `export-sft` | — |
 | `sftgen graph validate` | Check `graph/graph.json`: schema 0.2 and the graph rules from [ballerina-ecosystem](https://github.com/sajith-jeewantha/ballerina-ecosystem), plus the hash recorded in `graph/SOURCE.json` | — |
 | `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
 | `sftgen graph sync` | Load the graph into the database and match each item's sources to scraped pages (also runs after every `scrape`) | item: `grounded` · `not_scraped` · `external_only` · `retired` |
+| `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
+| `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
+| `sftgen storage pull` | Download what's missing locally: the newest database snapshot and the outputs. `--overwrite` replaces local files; the local database is backed up first | — |
 
 Flags:
 - `scrape --refresh`: re-check downloaded pages for changes.
@@ -128,6 +131,7 @@ Flags:
 - `scrape --source bbe`: one source only (repeatable).
 - `generate-answers --retry-failed`
 - `validate --recheck`
+- `storage pull --overwrite`
 - `--log-format text|json`
 
 ### Pinned sources
@@ -183,19 +187,21 @@ sftgen scrape
   GITHUB_TOKEN           set
   question model         qwen/qwen3.8-flash
   answer model           deepseek/deepseek-v4.1-flash
+  Swan Lake pin          2201.14.1 (lock: config/sources.lock.json)
+  storage                local only (STORAGE_BUCKET=false)
 ```
 
 ---
 
 ## The report
 
-After every command a short summary is printed, and `reports/report.html` is rewritten. It's a
+After every command a short summary is printed, and `data/reports/report.html` is rewritten. It's a
 single file with no server needed:
 
 ```bash
-open reports/report.html          # macOS
-xdg-open reports/report.html      # Linux
-start reports\report.html         # Windows
+open data/reports/report.html          # macOS
+xdg-open data/reports/report.html      # Linux
+start data\reports\report.html         # Windows
 ```
 
 It shows:
@@ -223,7 +229,7 @@ Chunks     1272  |  bbe 6, spec 351, learn 7, central 877, github 31
 Questions  10  |  pending 0, answered 10, failed 0
 Validation valid 6, not_checked 3, invalid 1
 LLM usage  48,210 tokens, $0.0123
-Report     reports/report.html
+Report     data/reports/report.html
 ```
 
 ---
@@ -290,6 +296,47 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
 
+### Local folder and cloud bucket
+
+Everything the pipeline writes lives under **`LOCAL_DATA_DIR`** (default `data/`). That folder is
+always the working copy, because SQLite and `bal build` need a real disk. Set
+`STORAGE_BUCKET=true` to keep a copy in a GCS or S3 bucket **with the same layout**:
+
+| Local (`data/…`) | Bucket (`gs://BUCKET/PREFIX/…`) |
+|---|---|
+| `dataset.jsonl`, `sft/*.jsonl`, `reports/report.html` | same paths |
+| `pipeline.db` | `db/pipeline-<UTC time>.db.gz` snapshots; `db/LATEST` names the newest |
+| `config/sources.lock.json` (repo) | `sources/sources.lock.json` |
+| `graph/graph.json`, `graph/SOURCE.json` (repo) | `graph/<graph commit>/graph.json`, `SOURCE.json` |
+| `cache/` (HTTP, model and compiler caches) | never uploaded |
+
+With the bucket on, every command:
+1. **Restores** the database from `db/LATEST` if there's no local `pipeline.db` (for example on a
+   new machine or cloud VM).
+2. **Uploads** each phase's new or changed files as soon as the phase succeeds. Unchanged files
+   are skipped.
+3. **Uploads a database snapshot** at the end. The 20 newest are kept (`storage.keep_db_snapshots`).
+
+If an upload fails, the command still saves everything locally and exits with code 1; run
+`sftgen storage push` to retry. Only one machine should write to a bucket prefix at a time.
+
+**Set it up** in `.env`:
+
+```env
+STORAGE_BUCKET=true
+STORAGE_PROVIDER=gcs        # or aws-s3
+BUCKET_NAME=ballerina-slm-data
+BUCKET_PREFIX=              # optional sub-folder
+```
+
+- **GCS:** run `pip install -e "shared[gcs]"` and `gcloud auth application-default login`.
+- **AWS S3:** run `pip install -e "shared[s3]"` and set `AWS_PROFILE` (from `~/.aws/credentials`)
+  and `AWS_REGION`.
+- **S3-compatible stores** such as Cloudflare R2: use `aws-s3` and also set `S3_ENDPOINT_URL`.
+- No keys go in `.env`.
+- To try the layout without a cloud account, set `STORAGE_PROVIDER=local` and
+  `BUCKET_NAME=/some/folder`.
+
 ---
 
 ## Repository structure
@@ -302,7 +349,7 @@ ballerina-sft-dataset-pipeline/
 ├── docs/
 │   ├── recommendations.md        # design research (v2; partly superseded, see note inside)
 │   └── schemas.md                # SQLite tables and columns
-├── shared/balpipe_common/        # config · db (SQLite) · ids · logging
+├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · ids · logging
 ├── scraper/ballerinascraper/
 │   └── ballerinascraper/
 │       ├── scrape.py             # fetch loop: limits, caching, change detection, failures
@@ -318,8 +365,8 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
 │   └── tests/
-├── data/                         # gitignored: pipeline.db · dataset.jsonl · sft/ · cache/
-└── reports/                      # gitignored: report.html
+└── data/                         # gitignored (LOCAL_DATA_DIR): pipeline.db · dataset.jsonl · sft/ ·
+                                  #   reports/report.html · cache/ · .storage/ (push bookkeeping)
 ```
 
 ---
@@ -421,7 +468,7 @@ Each command prints its limits first and a summary at the end, and refreshes the
 ### 7. Check the results
 
 ```bash
-open reports/report.html             # macOS; Linux: xdg-open; Windows: start
+open data/reports/report.html        # macOS; Linux: xdg-open; Windows: start
 head -n 3 data/dataset.jsonl
 head -n 1 data/sft/train.jsonl
 sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"
@@ -455,12 +502,14 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen scrape --refresh` | Re-check pages you already have for upstream changes |
 | `sftgen scrape --update-lock` | Re-resolve the pinned commits and Central versions in `config/sources.lock.json` |
 | `sftgen graph validate` | Check the knowledge graph before using it |
+| `sftgen storage status` | See what's local only, changed, or only in the bucket |
+| `sftgen storage pull` | On a new machine: get the database and outputs from the bucket |
 | `sftgen generate-answers --retry-failed` | Retry questions whose answer call failed |
 | `sftgen validate --recheck` | Re-compile all answers, e.g. after installing a new `bal` |
 | `sftgen report` | Rebuild the report and summary at any time |
 | `sftgen <command> --log-format json` | Machine-readable logs |
 | `LIMIT_GENERATING=5 sftgen generate-questions` | Override a limit for one command |
-| `rm -rf data reports` | Start over from scratch. This deletes the database, so any generated questions and answers are lost. The model response cache in `data/cache/llm` is deleted too. |
+| `rm -rf data` | Start over from scratch. This deletes the database, so any generated questions and answers are lost. The model response cache in `data/cache/llm` is deleted too. |
 
 ---
 
@@ -468,8 +517,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 
 | Where | What | Committed? |
 |---|---|---|
-| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `GITHUB_TOKEN`, and the run limits above | ❌ never |
-| `config/pipeline.yaml` | source filters, crawl politeness, chunk size, concurrency, temperatures, compiler settings, export, SFT export (eval share, system prompt, citation stripping) and report paths | ✅ |
+| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `GITHUB_TOKEN`, the run limits above, and the storage switch (`STORAGE_BUCKET`, `STORAGE_PROVIDER`, `BUCKET_NAME`, `BUCKET_PREFIX`, `LOCAL_DATA_DIR`, `AWS_*`, `S3_ENDPOINT_URL`) | ❌ never |
+| `config/pipeline.yaml` | source filters, crawl politeness, chunk size, concurrency, temperatures, compiler settings, export, SFT export (eval share, system prompt, citation stripping), report, and bucket snapshot settings. Output paths are relative to `LOCAL_DATA_DIR` | ✅ |
 
 - Precedence: **environment > `.env` > `pipeline.yaml` > defaults**. Empty values in `.env` are
   ignored. Override any YAML key with `BALPIPE__SECTION__KEY`, e.g. `BALPIPE__GENERATE__CONCURRENCY=2`.

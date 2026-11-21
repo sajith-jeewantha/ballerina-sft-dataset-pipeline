@@ -447,7 +447,7 @@ S3_ENDPOINT_URL=
 | Prompts (plans, accepted, rejected, coverage) | `prompts/<run>/…` | ✓ | ✓ |
 | Answers, attempts, preference pairs | `answers/<run>/…` | ✓ | ✓ |
 | Final datasets + cards | `datasets/<version>/{train,eval,metadata}.jsonl, CARD.md` | ✓ | ✓ |
-| Pipeline database | `db/pipeline.db` (+ snapshots) | ✓ working copy | snapshots only |
+| Pipeline database | local `pipeline.db`; bucket `db/pipeline-<UTC time>.db.gz` + `db/LATEST` | ✓ working copy | gzipped snapshots only |
 | Reports | `reports/report.html` | ✓ | ✓ |
 | Checkpoints | `checkpoints/…` (training project) | — | ✓ (training project writes here) |
 | Caches (HTTP, LLM, bal) | `cache/…` | ✓ | ✗ never |
@@ -499,7 +499,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 |---|---|---|---|
 | **M0** ✅ | Hygiene and pinning | Commit `graph/` and the `.gitignore` change. Add `sources.lock.json` (Swan Lake 2201.14.1), pin BBE to the distribution tag, set the OpenRouter provider pin for the teacher | `sftgen scrape --refresh` shows pinned versions in the report |
 | **M1** ✅ | Graph integration + coverage | `graph.py` loader and validator, `sftgen graph validate/stats`, item↔page matching from source URLs, and a **coverage section in the report** (items with or without grounding and samples) | `sftgen graph validate` → `OK 242/3257/1704`; the report shows coverage per node and priority |
-| **M2** | Storage switch | `storage.py`, `.env` keys, push and pull after each command | Run with `false`, then `true` against a test bucket: identical layout |
+| **M2** ✅ | Storage switch | `storage.py`, `.env` keys, push and pull after each command | Run with `false`, then `true` against a test bucket: identical layout |
 | **M3** | Licence register + repo collector | `sftgen collect-repos`: sparse, pinned, licence-gated, Swan Lake filter, dedup. It covers ballerina-platform, ballerina-guides, wso2 and **permissive external repos**, and keeps the register CSV up to date | Collect `ballerina-guides` (15 repos), then 20 external repos; counts and licences in the report |
 | **M4** | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; ~180 BBE eval items each pass `bal run` against their `.out` |
 | **M5** | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
@@ -510,6 +510,15 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M10** | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
 
 **Done (2026-11-19):** M0 and M1 are built and tested; see CHANGELOG "Unreleased".
+
+**Done (2026-11-21):** M2 is built and tested.
+- It was tested with `STORAGE_PROVIDER=local` (a folder as the bucket), with the bucket off and
+  then on: the layout was identical.
+- It hasn't run against a real GCS or S3 bucket yet. That needs `shared[gcs]` or `shared[s3]`
+  and credentials.
+- Today's outputs keep their current names under `LOCAL_DATA_DIR`. The §4.3 paths for later
+  artifacts (`corpus/`, `codebases/`, `eval/`, `datasets/<version>/` …) are added by the
+  milestones that produce them.
 - With the current database, 1,227 of 3,231 active items are grounded (core: 412 of 676).
 - Most of the rest are only "not scraped yet", which more scraping (M3) closes.
 

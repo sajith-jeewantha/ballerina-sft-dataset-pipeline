@@ -61,7 +61,7 @@ flowchart LR
 
     DB[("data/pipeline.db")]
     F & CL & CH & GQ & GA & VA <--> DB
-    DB --> RP[/"reports/report.html"/]
+    DB --> RP[/"data/reports/report.html"/]
 ```
 
 ---
@@ -86,6 +86,7 @@ flowchart LR
 | Report | `sftgen/report.py` | Terminal summary + single-file HTML report |
 | Source pins | `shared/balpipe_common/lock.py`, `config/sources.lock.json` | One Swan Lake update: BBE at its release tag, module repos at a locked commit, Central packages at the newest version built for the pin |
 | Knowledge graph | `shared/balpipe_common/graph.py`, `sftgen/graph/coverage.py`, `graph/graph.json` | Load and validate the graph with the pinned `ballerina_graph` package; match item sources to scraped pages and spec sections; coverage in the report |
+| Storage switch | `shared/balpipe_common/storage.py` | `LOCAL_DATA_DIR` is the working copy; with `STORAGE_BUCKET=true` it is mirrored to GCS or S3 (fsspec) with the same layout: restore a missing database, upload changed outputs after each phase, gzipped database snapshots |
 
 ### One question, end to end
 
@@ -137,7 +138,14 @@ chunk text each answer was grounded in.
 | `data/cache/bal/` | Compile results by code hash + Ballerina version | yes |
 | `data/dataset.jsonl` | The exported dataset (review format) | yes, from the database |
 | `data/sft/` | `train.jsonl`, `eval.jsonl` (chat `messages`), `metadata.jsonl` | yes, from the database |
-| `reports/report.html` | The report | yes, `sftgen report` |
+| `data/reports/report.html` | The report | yes, `sftgen report` |
+| `data/.storage/pushed.json` | Hashes of files last uploaded to each bucket | yes |
+
+All output paths are relative to `LOCAL_DATA_DIR` (default `data/`). With `STORAGE_BUCKET=true`
+the bucket holds the same files under the same paths, minus `cache/`. The database is held as
+`db/pipeline-<time>.db.gz` snapshots, never as a live file. The lockfile is copied to
+`sources/sources.lock.json` and the graph to `graph/<commit>/`. See the README section
+*Local folder and cloud bucket*.
 
 Tables are described in [docs/schemas.md](docs/schemas.md).
 
@@ -146,7 +154,7 @@ Tables are described in [docs/schemas.md](docs/schemas.md).
 ## 6. Repo folder structure
 
 ```
-shared/balpipe_common/          config.py · db.py · ids.py · logging.py
+shared/balpipe_common/          config.py · db.py · graph.py · lock.py · storage.py · ids.py · logging.py
 scraper/ballerinascraper/
   ballerinascraper/
     scrape.py                   fetch loop
@@ -202,7 +210,7 @@ sftgen export-sft        # chat `messages` files for fine-tuning
 sftgen run-all
 
 # any time
-sftgen report && open reports/report.html
+sftgen report && open data/reports/report.html
 ```
 
 ---

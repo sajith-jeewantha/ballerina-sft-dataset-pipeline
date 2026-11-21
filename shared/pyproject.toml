@@ -12,10 +12,14 @@ dependencies = [
     "pydantic-settings==2.16.2",
     "pyyaml==6.0.3",
     "python-dotenv==1.2.4",
+    "fsspec==2026.9.0",  # storage switch: local folder or cloud bucket with one API
     # Knowledge-graph schema and checks, owned by the graph repo; pinned to the commit of graph/graph.json
     "ballerina-graph @ git+https://github.com/sajith-jeewantha/ballerina-ecosystem@64c8d80be237d20893934dc9b50055bba8f9a51d#subdirectory=ballerina-graph",
 ]
 
+[project.optional-dependencies]
+gcs = ["gcsfs==2026.10.1"]  # STORAGE_PROVIDER=gcs (auth: gcloud auth application-default login)
+s3 = ["s3fs==2026.9.0"]     # STORAGE_PROVIDER=aws-s3, also S3-compatible stores (R2, MinIO)
 
 [tool.setuptools.packages.find]
 include = ["balpipe_common*"]

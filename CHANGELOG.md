@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0 and M1 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0, M1 and M2 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -39,9 +39,44 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
   by priority and node type, the source pages to scrape next, and the core items not yet
   grounded.
 
+### M2: storage switch
+
+- **New `.env` keys:** `STORAGE_BUCKET`, `STORAGE_PROVIDER` (`gcs` | `aws-s3`), `BUCKET_NAME`,
+  `BUCKET_PREFIX`, `LOCAL_DATA_DIR`, plus `AWS_PROFILE`, `AWS_REGION` and `S3_ENDPOINT_URL`
+  for S3 and S3-compatible stores such as R2. No cloud keys go in `.env`: GCS uses ADC and AWS
+  uses a profile.
+- **`shared/balpipe_common/storage.py`** (fsspec). The local folder is always the working copy;
+  the bucket mirrors it with the same relative paths.
+  - With the bucket on, a missing local database is restored from `db/LATEST`.
+  - Each phase's new or changed files are uploaded when the phase succeeds (content-hashed;
+    unchanged files are skipped).
+  - A gzipped database snapshot is uploaded at the end (`storage.keep_db_snapshots`, default
+    20). The live database is never written to the bucket.
+  - `cache/` and OS files are never uploaded.
+  - The lockfile and graph are copied for provenance (`sources/`, `graph/<commit>/`).
+- **`sftgen storage status | push | pull [--overwrite]`.** The startup block shows the storage
+  target.
+- **If an upload fails,** local outputs are kept and the command exits with 1; `sftgen storage
+  push` retries.
+- Cloud clients are optional extras: `pip install -e "shared[gcs]"` or `"shared[s3]"`.
+  `fsspec` is a new core dependency.
+- `STORAGE_PROVIDER=local` (a folder as the bucket) is for trying the layout without a cloud
+  account.
+
+**Changed.**
+- Output paths are now relative to `LOCAL_DATA_DIR`. Defaults: `export.path: dataset.jsonl`,
+  `sft.dir: sft`, `report.path: reports/report.html`.
+- **The report moved** from `reports/report.html` to `data/reports/report.html`, so all outputs
+  live in one folder that mirrors the bucket. The old `reports/` folder can be deleted.
+- Older configs with `data/…` paths keep working: the prefix is dropped.
+
 ### Tests
 
-72 tests in total (+16): graph loading and rules on a small fixture plus the real graph, the
+80 tests in total (+8 for M2: bucket layout, change-only uploads, pull to a fresh machine,
+snapshot pruning, missing client library, data-relative paths, and the CLI end to end with
+`STORAGE_BUCKET=false` then `true`).
+
+M0 and M1: 72 tests (+16): graph loading and rules on a small fixture plus the real graph, the
 lockfile, Central version pinning, commit locking, re-download on a pin change, source-URL
 matching, spec sections, coverage, the report section, and `graph validate`.
 

@@ -2,7 +2,8 @@
 # Any key can be overridden with an env var: BALPIPE__<SECTION>__<KEY>=value
 # (e.g. BALPIPE__GENERATE__CONCURRENCY=2).
 
-data_dir: data                       # data/pipeline.db, data/dataset.jsonl, data/cache/
+data_dir: data                       # all outputs live here (LOCAL_DATA_DIR in .env overrides it);
+                                     # output paths below are relative to it
 db_file: pipeline.db
 
 sources:
@@ -69,11 +70,11 @@ validate:
   prewarm_modules: [ballerina/io, ballerina/http, ballerina/log]
 
 export:
-  path: data/dataset.jsonl
+  path: dataset.jsonl
   include_invalid: false             # leave out answers whose code failed to compile
 
 sft:                                 # export-sft: chat-format files for fine-tuning
-  dir: data/sft                      # train.jsonl · eval.jsonl · metadata.jsonl
+  dir: sft                           # train.jsonl · eval.jsonl · metadata.jsonl
   eval_fraction: 0.05                # held-out share, split by source page
   strip_source_line: true            # drop the trailing "Source: <url>" line from answers
   # Repeated in every training row: use exactly the same text at inference. "" = no system message.
@@ -87,6 +88,11 @@ sft:                                 # export-sft: chat-format files for fine-tu
 report:
   path: reports/report.html
   samples: 5
+
+storage:                              # used only when STORAGE_BUCKET=true (.env)
+  snapshot_db: true                  # upload db/pipeline-<time>.db.gz after each command
+  keep_db_snapshots: 20              # delete older snapshots from the bucket; 0 = keep all
+  exclude: ["cache/**", ".storage/**"]   # never uploaded
 
 logging:
   level: INFO

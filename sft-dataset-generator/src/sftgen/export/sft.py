@@ -55,7 +55,7 @@ def _write_atomic(path: Path, rows: list[dict]) -> None:
 
 def run(s: Settings, db: Database, run_: RunTracker) -> dict[str, int]:
     cfg = s.sft
-    out = s.path(cfg.dir)
+    out = s.sft_dir
     out.mkdir(parents=True, exist_ok=True)
     status_filter = "" if s.export.include_invalid else "AND a.status != 'invalid'"
     rows = db.query(

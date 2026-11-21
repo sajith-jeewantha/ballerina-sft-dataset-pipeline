@@ -323,7 +323,7 @@ def render_html(d: ReportData) -> str:
 
 def write_report(s: Settings, db: Database) -> tuple[Path, str]:
     data = collect(s, db)
-    path = s.path(s.report.path)
+    path = s.report_path
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(render_html(data), encoding="utf-8")
     return path, terminal_summary(data, path)

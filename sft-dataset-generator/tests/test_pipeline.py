@@ -192,3 +192,38 @@ def test_sft_helpers() -> None:
     assert strip_source("No citation") == "No citation"
     assert [m["role"] for m in to_messages("q", "a", "")] == ["user", "assistant"]
     assert split_for("https://a/", 0.0) == "train" and split_for("https://a/", 0.999999) == "eval"
+
+
+def test_cli_pushes_outputs_and_restores_db_with_storage_on(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+                                                           capsys: pytest.CaptureFixture[str]) -> None:
+    """`STORAGE_BUCKET=false` then `true`: the bucket gets the same layout as the local folder."""
+    from sftgen.cli import main
+
+    root = tmp_path / "repo"
+    (root / "config").mkdir(parents=True)
+    (root / "config" / "pipeline.yaml").write_text("data_dir: data\n")
+    monkeypatch.setenv("BALPIPE_ROOT", str(root))
+    monkeypatch.setenv("STORAGE_PROVIDER", "local")
+    monkeypatch.setenv("BUCKET_NAME", str(tmp_path / "bucket"))
+
+    monkeypatch.setenv("STORAGE_BUCKET", "false")
+    assert main(["report"]) == 0
+    assert "local only" in capsys.readouterr().out
+    assert not (tmp_path / "bucket").exists()
+    local = sorted(p.relative_to(root / "data").as_posix() for p in (root / "data").rglob("*") if p.is_file())
+
+    monkeypatch.setenv("STORAGE_BUCKET", "true")
+    assert main(["report"]) == 0
+    assert "Storage    synced to file://" in capsys.readouterr().out
+    bucket = tmp_path / "bucket"
+    files = sorted(p.relative_to(bucket).as_posix() for p in bucket.rglob("*") if p.is_file())
+    assert [f for f in files if not f.startswith("db/")] == [f for f in local if not f.startswith("pipeline.db")]
+    assert "db/LATEST" in files
+
+    (root / "data" / "pipeline.db").unlink()  # a fresh machine: the database comes back from the bucket
+    for extra in ("pipeline.db-wal", "pipeline.db-shm"):
+        (root / "data" / extra).unlink(missing_ok=True)
+    assert main(["report"]) == 0
+    assert "restored the database from file://" in capsys.readouterr().out
+    assert main(["storage", "status"]) == 0
+    assert "changed since push: 0" in capsys.readouterr().out

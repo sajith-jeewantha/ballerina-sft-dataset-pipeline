@@ -12,7 +12,7 @@ import logging
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import AliasChoices, BaseModel, Field, SecretStr
 from pydantic_settings import (
@@ -167,14 +167,14 @@ class ValidateCfg(BaseModel):
 
 
 class ExportCfg(BaseModel):
-    path: str = "data/dataset.jsonl"
+    path: str = "dataset.jsonl"  # relative to LOCAL_DATA_DIR
     include_invalid: bool = False  # answers whose code failed to compile are left out by default
 
 
 class SftCfg(BaseModel):
     """`export-sft`: chat-format (`messages`) files for supervised fine-tuning."""
 
-    dir: str = "data/sft"            # train.jsonl, eval.jsonl, metadata.jsonl
+    dir: str = "sft"                 # under LOCAL_DATA_DIR: train.jsonl, eval.jsonl, metadata.jsonl
     eval_fraction: float = Field(default=0.05, ge=0.0, lt=1.0)  # split by source page, never by row
     strip_source_line: bool = True   # drop the trailing "Source: <url>" so the model does not learn to invent URLs
     # Repeated in every training row; use exactly the same text at inference. "" = no system message.
@@ -193,8 +193,16 @@ class GraphCfg(BaseModel):
 
 
 class ReportCfg(BaseModel):
-    path: str = "reports/report.html"
+    path: str = "reports/report.html"  # relative to LOCAL_DATA_DIR
     samples: int = 5
+
+
+class StorageCfg(BaseModel):
+    """What is copied to the bucket when STORAGE_BUCKET=true (see storage.py)."""
+
+    snapshot_db: bool = True      # upload a gzipped copy of pipeline.db after each command
+    keep_db_snapshots: int = Field(default=20, ge=0)  # older snapshots are deleted; 0 = keep all
+    exclude: list[str] = Field(default_factory=lambda: ["cache/**", ".storage/**"])  # never uploaded
 
 
 class LoggingCfg(BaseModel):
@@ -230,8 +238,18 @@ class Settings(BaseSettings):
     questions_per_chunk: int = Field(default=3, ge=1, le=20, validation_alias=AliasChoices("QUESTIONS_PER_CHUNK"))
     request_delay_seconds: float = Field(default=1.0, ge=0, validation_alias=AliasChoices("REQUEST_DELAY_SECONDS"))
 
+    # --- storage switch (.env) ---
+    storage_bucket: bool = Field(default=False, validation_alias=AliasChoices("STORAGE_BUCKET"))
+    storage_provider: Literal["gcs", "aws-s3", "local"] = Field(
+        default="gcs", validation_alias=AliasChoices("STORAGE_PROVIDER"))  # local = a folder, for testing
+    bucket_name: str | None = Field(default=None, validation_alias=AliasChoices("BUCKET_NAME"))
+    bucket_prefix: str = Field(default="", validation_alias=AliasChoices("BUCKET_PREFIX"))
+    aws_profile: str | None = Field(default=None, validation_alias=AliasChoices("AWS_PROFILE"))
+    aws_region: str | None = Field(default=None, validation_alias=AliasChoices("AWS_REGION"))
+    s3_endpoint_url: str | None = Field(default=None, validation_alias=AliasChoices("S3_ENDPOINT_URL"))
+
     # --- pipeline settings (pipeline.yaml) ---
-    data_dir: str = "data"
+    data_dir: str = Field(default="data", validation_alias=AliasChoices("LOCAL_DATA_DIR", "data_dir"))
     db_file: str = "pipeline.db"
     sources: SourcesCfg = Field(default_factory=SourcesCfg)
     crawl: CrawlCfg = Field(default_factory=CrawlCfg)
@@ -242,6 +260,7 @@ class Settings(BaseSettings):
     sft: SftCfg = Field(default_factory=SftCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
+    storage: StorageCfg = Field(default_factory=StorageCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)
 
     # set by load_settings
@@ -269,6 +288,27 @@ class Settings(BaseSettings):
     @property
     def data_root(self) -> Path:
         return self.path(self.data_dir)
+
+    def data_path(self, rel: str) -> Path:
+        """An output path under LOCAL_DATA_DIR. Older configs wrote `data/...`; that prefix is dropped."""
+        p = Path(rel)
+        if p.is_absolute():
+            return p
+        if p.parts and p.parts[0] == "data" and len(p.parts) > 1:
+            p = Path(*p.parts[1:])
+        return self.data_root / p
+
+    @property
+    def export_path(self) -> Path:
+        return self.data_path(self.export.path)
+
+    @property
+    def sft_dir(self) -> Path:
+        return self.data_path(self.sft.dir)
+
+    @property
+    def report_path(self) -> Path:
+        return self.data_path(self.report.path)
 
     @property
     def db_path(self) -> Path:

@@ -18,7 +18,7 @@ FIELDS = ("question", "answer", "source_url", "category", "difficulty")
 
 
 def run(s: Settings, db: Database, run_: RunTracker) -> dict[str, int]:
-    out = s.path(s.export.path)
+    out = s.export_path
     out.parent.mkdir(parents=True, exist_ok=True)
     status_filter = "" if s.export.include_invalid else "AND a.status != 'invalid'"
     rows = db.query(
