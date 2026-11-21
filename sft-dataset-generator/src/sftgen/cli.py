@@ -2,6 +2,11 @@
 
 Commands (run in this order, or all at once with `run-all`):
   scrape               fetch sources into data/pipeline.db, convert to Markdown, chunk
+  plan-prompts         show the prompt plan: items in scope (prompts.nodes), budgets by priority x
+                       difficulty x task type, accepted so far and open slots (no model calls)
+  generate-prompts     fill open slots: the writer model (DeepSeek) writes prompts per graph item,
+                       grounded in item sources, FTS5 and Central symbols; the judge model reviews
+                       them. Up to LIMIT_GENERATING prompts written per run; data/prompts/<set>/
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -51,7 +56,7 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "collect-repos", "build-eval", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
+COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
@@ -69,7 +74,7 @@ def print_startup(s: Settings, command: str, store: Storage | None = None) -> No
         f"sftgen {command}",
         f"  database               {rel(s.db_path)}",
         f"  LIMIT_SCRAPE_PAGES     {limit(s.limit_scrape_pages, 'pages per source per run')}",
-        f"  LIMIT_GENERATING       {limit(s.limit_generating, 'questions per run')}",
+        f"  LIMIT_GENERATING       {limit(s.limit_generating, 'prompts per run' if 'prompts' in command else 'questions per run')}",
         f"  QUESTIONS_PER_CHUNK    {s.questions_per_chunk}",
         f"  REQUEST_DELAY_SECONDS  {s.request_delay_seconds:g}",
         *([f"  LIMIT_REPOS            {limit(s.limit_repos, 'repos cloned per run')}"] if command == "collect-repos"
@@ -77,6 +82,10 @@ def print_startup(s: Settings, command: str, store: Storage | None = None) -> No
         f"  GITHUB_TOKEN           {'set' if s.github_token else 'not set (GitHub API: 60 requests/hour)'}",
         f"  question model         {s.question_gen_model or '(not set)'}",
         f"  answer model           {s.answer_gen_model or '(not set)'}",
+        *([f"  prompt writer          {s.writer_model or '(not set)'}",
+           f"  prompt reviewer        {s.reviewer_model or '(not set)'}",
+           f"  prompt set             {s.prompts.set_name} ({len(s.prompts.nodes) or 'all'} nodes)"]
+          if command in ("plan-prompts", "generate-prompts") else []),
         f"  Swan Lake pin          {s.sources.swan_lake} (lock: {s.sources.lock_file})",
         f"  storage                {store.describe() if store else 'local only'}",
         "",
@@ -115,6 +124,19 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             out = sync(s, db)
             run.stats.update({k: v for k, v in out.items() if isinstance(v, int)})
             return out
+        if command == "plan-prompts":
+            from sftgen.generate.prompts import prepare
+            from sftgen.plan.planner import plan, summary
+
+            prep = prepare(db)
+            out = summary(plan(s, db), s.prompts)
+            print(_plan_table(out, s), flush=True)
+            return {**prep, **{k: v for k, v in out.items() if k != "nodes"}}
+        if command == "generate-prompts":
+            from sftgen.generate.prompts import run as gen_prompts
+
+            _decontam(s, db, run)
+            return gen_prompts(s, db, run)
         if command == "generate-questions":
             from sftgen.generate.questions import run as gen_questions
 
@@ -139,6 +161,18 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             _decontam(s, db, run)
             return export_sft(s, db, run)
     raise ValueError(command)
+
+
+def _plan_table(out: dict, s: Settings) -> str:
+    rows = [("node", "items", "budget", "accepted", "open", "given up")]
+    rows += [(n, str(d["items"]), str(d["budget"]), str(d["accepted"]), str(d["missing"]), str(d["given_up"]))
+             for n, d in out["nodes"].items()]
+    rows.append(("total", str(out["items"]), str(out["budget"]), str(out["accepted"]), str(out["missing"]),
+                 str(out["given_up"])))
+    w = [max(len(r[i]) for r in rows) for i in range(6)]
+    lines = [f"Prompt plan '{out['set']}': budgets per item {s.prompts.budgets}, task mix {s.prompts.task_mix}"]
+    lines += ["  " + "  ".join(c.ljust(w[i]) if i == 0 else c.rjust(w[i]) for i, c in enumerate(r)) for r in rows]
+    return "\n".join(lines) + "\n"
 
 
 def _decontam(s: Settings, db: Database, run: object) -> dict:

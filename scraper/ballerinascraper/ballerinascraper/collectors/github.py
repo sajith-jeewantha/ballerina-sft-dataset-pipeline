@@ -5,7 +5,9 @@
   code, `.out` output) come from `ballerina-distribution/examples/<name>/` at
   the release tag of the pinned Swan Lake update (e.g. `v2201.14.1`), so code
   is kept exactly as written, with its explanation. If an example has no
-  folder there, the ballerina.io page itself is used (code only).
+  folder there, the ballerina.io page itself is used (code only). The files
+  are read from a sparse git snapshot of `examples/` (`bbe_source.py`, no
+  API quota) when a snapshot function is given, else through the blobs API.
 * `ModuleCollector`: READMEs and `.bal` API source files from the org's
   `module-ballerina-*` / `module-ballerinax-*` repos, most-starred first, each
   pinned to the commit recorded in `config/sources.lock.json`.
@@ -19,7 +21,7 @@ from __future__ import annotations
 import base64
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from functools import lru_cache
 from pathlib import PurePosixPath
 
@@ -117,8 +119,10 @@ class BbeCollector:
     source = "bbe"
 
     def __init__(self, api: GithubApi, cfg: GithubCfg, sitemap: Sitemap, web: PoliteSession,
-                 lock: SourceLock, *, update_lock: bool = False) -> None:
+                 lock: SourceLock, *, update_lock: bool = False,
+                 snapshot: Callable[[str], dict[str, bytes]] | None = None) -> None:
         self.api = api
+        self.snapshot = snapshot
         self.cfg = cfg
         self.sitemap = sitemap
         self.web = web
@@ -134,7 +138,18 @@ class BbeCollector:
         lic = repo_license(meta)
         folders: dict[str, dict[str, str]] = {}  # name -> {file name: blob sha}
         prefix = self.cfg.bbe_path.rstrip("/") + "/"
-        for entry in self.api.tree(repo, commit):
+        texts: dict[str, str] = {}  # blob sha -> text, from the snapshot
+        if self.snapshot is not None:
+            from ballerinascraper.bbe_source import git_blob_sha
+
+            entries = []
+            for path, data in self.snapshot(commit).items():
+                sha = git_blob_sha(data)
+                texts[sha] = data.decode("utf-8", errors="replace")
+                entries.append({"path": path, "sha": sha})
+        else:
+            entries = self.api.tree(repo, commit)
+        for entry in entries:
             parts = entry["path"].removeprefix(prefix).split("/") if entry["path"].startswith(prefix) else []
             if len(parts) == 2 and parts[1].endswith(BBE_FILE_EXTS):
                 folders.setdefault(parts[0], {})[parts[1]] = entry["sha"]
@@ -150,12 +165,15 @@ class BbeCollector:
             version = short_hash(*(f"{f}:{s}" for f, s in sorted(files.items())))
             yield Candidate(
                 self.source, url, version_key=version, license=lic,
-                fetch=lambda row, n=name, fs=files: self._bundle(repo, ref, n, fs),
+                fetch=lambda row, n=name, fs=files: self._bundle(repo, ref, n, fs, texts),
                 meta={"origin": "github", "repo": repo, "folder": f"{prefix}{name}", "ref": ref, "commit": commit},
             )
 
-    def _bundle(self, repo: str, branch: str, name: str, files: dict[str, str]) -> Fetched:
-        bundle = {fname: self.api.blob_text(repo, sha) for fname, sha in sorted(files.items())}
+    def _bundle(self, repo: str, branch: str, name: str, files: dict[str, str],
+                texts: dict[str, str] | None = None) -> Fetched:
+        texts = texts or {}
+        bundle = {fname: texts[sha] if sha in texts else self.api.blob_text(repo, sha)
+                  for fname, sha in sorted(files.items())}
         return Fetched(json.dumps(bundle, ensure_ascii=False, sort_keys=True), 200,
                        f"https://github.com/{repo}/tree/{branch}/{self.cfg.bbe_path}/{name}")
 

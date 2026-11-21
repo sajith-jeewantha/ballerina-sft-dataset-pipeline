@@ -85,6 +85,28 @@ sft:                                 # export-sft: chat-format files for fine-tu
     real Ballerina syntax and APIs; if you are not sure something exists or how it behaves, say so
     instead of guessing.
 
+prompts:                             # plan-prompts / generate-prompts (item-driven prompts, M5)
+  set_name: pilot                    # outputs go to <data>/prompts/pilot/
+  nodes:                             # graph nodes in scope; [] = every active node. Pilot: the HTTP cluster
+    - lib.http
+    - topic.rest_api
+    - concept.services_listeners
+    - concept.resource_methods
+    - concept.client_objects
+    - lib.auth
+    - lib.jwt
+    - lib.oauth2
+    - lib.mime
+  budgets: {core: 10, important: 6, long_tail: 3}   # prompts per item, by the node's priority
+  task_mix: {write_code: 0.35, use_api: 0.2, explain: 0.2, fix_code: 0.15, design: 0.1}
+  max_rounds: 3                      # writer calls per item: the first, plus gap-fill for rejected slots
+  min_score: 3                       # every review score (1-5) must reach this to accept a prompt
+  near_duplicate_threshold: 0.8      # word-set Jaccard between prompts in the set
+  max_grounding_tokens: 3500         # excerpts per item (item sources, Central symbols, FTS5 neighbours)
+  chunks_per_source: 2
+  fts_neighbours: 2
+  max_symbols: 6
+
 eval:                                # build-eval: held-out eval set and decontamination
   version: v1                        # files go to <data>/eval/v1/
   bbe_eval_fraction: 0.30            # BBE examples held out, decided by a hash of the example name

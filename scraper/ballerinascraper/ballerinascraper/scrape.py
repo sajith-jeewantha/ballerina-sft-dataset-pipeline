@@ -20,6 +20,7 @@ from balpipe_common.db import Database, RunTracker
 from balpipe_common.ids import sha256_text, utc_now_iso
 from balpipe_common.lock import SourceLock
 
+from ballerinascraper.bbe_source import examples_snapshot
 from ballerinascraper.collectors.ballerina_io import Sitemap, WebPageCollector
 from ballerinascraper.collectors.base import Candidate, Collector
 from ballerinascraper.collectors.central import CentralCollector
@@ -62,8 +63,10 @@ def build_collectors(s: Settings, lock: SourceLock, *, update_lock: bool = False
     github = github_api(s)
     central = PoliteSession(c.user_agent, headers={"Accept": "application/json"}, **common)
     sitemap = Sitemap(web, s.sources.ballerina_io, c.listing_cache_hours)
+    bbe_url = f"https://github.com/{s.sources.github.org}/{s.sources.github.bbe_repo}.git"
     return {
-        "bbe": BbeCollector(github, s.sources.github, sitemap, web, lock, update_lock=update_lock),
+        "bbe": BbeCollector(github, s.sources.github, sitemap, web, lock, update_lock=update_lock,
+                            snapshot=lambda commit: examples_snapshot(s, bbe_url, commit)),
         "spec": WebPageCollector("spec", sitemap, web),
         "learn": WebPageCollector("learn", sitemap, web),
         "central": CentralCollector(central, s.sources.central, c.listing_cache_hours, lock, update_lock=update_lock),

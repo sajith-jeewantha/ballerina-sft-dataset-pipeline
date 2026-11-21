@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **approved; M0–M4 done (2026-11-21), M5 next**. See [Progress](#progress).
+status: **approved; M0–M4 done, M5 built (2026-11-21), its live run is next**. See [Progress](#progress).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -32,7 +32,7 @@ decontamination.
 | M2 | Storage switch | ✅ done 2026-11-21 | `sftgen storage status/push/pull` |
 | M3 | Licence register + repo collector | ✅ done 2026-11-21 (`platform` and `wso2` groups not run yet) | `sftgen collect-repos` |
 | M4 | Eval set v1 + decontamination | ✅ done 2026-11-21 | `sftgen build-eval` |
-| M5 | Item-driven prompts (pilot) | next | — |
+| M5 | Item-driven prompts (pilot) | 🟡 built 2026-11-21; live run waits for `OPENROUTER_API_KEY` | `sftgen plan-prompts` · `generate-prompts` |
 | M6–M10 | Verified answers → dataset v1 | not started | — |
 
 Details per milestone are in the "Done" notes under §6.
@@ -519,7 +519,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M2** ✅ | Storage switch | `storage.py`, `.env` keys, push and pull after each command | Run with `false`, then `true` against a test bucket: identical layout |
 | **M3** ✅ | Licence register + repo collector | `sftgen collect-repos`: sparse, pinned, licence-gated, Swan Lake filter, dedup. It covers ballerina-platform, ballerina-guides, wso2 and **permissive external repos**, and keeps the register CSV up to date | Collect `ballerina-guides` (15 repos), then 20 external repos; counts and licences in the report |
 | **M4** ✅ | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; every checked BBE eval item passes `bal run` against its `.out` (or `bal build`), or has a known upstream difference. **Met:** 0 overlap in both exports; 148/150 pass, 2 known differences |
-| **M5** | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
+| **M5** 🟡 | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
 | **M6** | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
 | **M7** | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
 | **M8** | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
@@ -603,6 +603,30 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 - **Outputs:** `data/eval/v1/bbe.jsonl`, `decontam.jsonl` and `split.json`.
 - **Prose isn't fingerprinted:** a page that paraphrases an eval example's explanation without
   its code isn't caught. M8's benchmark translations should add text fingerprints if needed.
+
+**Built (2026-11-21):** M5's code is built and tested; the live run is pending.
+- `sftgen plan-prompts` plans the pilot: the HTTP cluster, 9 nodes, 122 items, **884 prompts**.
+  - Nodes: `lib.http`, `topic.rest_api`, services/listeners, resource methods, client objects,
+    auth, jwt, oauth2 and mime.
+  - Budgets by priority: core 10, important 6.
+  - Slots spread over 5 task types and each item's difficulties.
+- `sftgen generate-prompts`: DeepSeek writes per item; filters drop source references,
+  near-duplicates and eval overlaps; a judge of another family (Qwen) scores five criteria;
+  rejected slots are refilled on later runs, up to 3 writer calls per item.
+- **Grounding (no vector DB):**
+  - Item sources: chunks, spec sections, or GitHub files from collected repos.
+  - A Central symbol table: 3,248 entries in 90 modules.
+  - Node sources for items without their own.
+  - FTS5/BM25 neighbours.
+  - About 1,900 tokens per item. Only 8 of 122 pilot items rely on search alone.
+- **To ground it, at no model cost:**
+  - Scraped all of BBE (from the git snapshot, which removed BBE's GitHub API use) and the
+    learn docs.
+  - Collected the `platform` group: 435 of 436 repos.
+  - Graph grounding rose from 1,227 to **2,600 of 3,231 items** (core: 412 → **667 of 676**).
+- **Live run:** add `OPENROUTER_API_KEY`, then `LIMIT_GENERATING=30 sftgen generate-prompts` to
+  check quality, then `LIMIT_GENERATING=0`. Expected cost for the 884 prompts: about $0.3–0.6
+  (writer ~2.8k in / 1.2k out per item; reviewer ~3.4k in / 0.6k out; ~30% gap-fill).
 
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.

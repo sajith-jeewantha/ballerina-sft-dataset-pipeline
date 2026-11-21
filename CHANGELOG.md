@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M4 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M5 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -141,9 +141,61 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
   `convert-from-json-to-user-defined-type`) behave differently on 2201.14.1.
 - Held out: 131 chunks, 3 questions and 11 repo files. Both exports have 0 overlap.
 
+### M5: item-driven prompts (pilot)
+
+- **`sftgen plan-prompts`** (no model calls):
+  - Prompts are planned per graph item for the nodes in `prompts.nodes`. The pilot is the HTTP
+    cluster: 9 nodes, 122 items, **884 prompts**.
+  - Budgets by priority: core 10, important 6, long tail 3.
+  - Each budget is spread over the task mix (`write_code`, `use_api`, `explain`, `fix_code`,
+    `design`) and the item's own difficulties.
+- **`sftgen generate-prompts`**:
+  - **Write:** per item, the writer (`PROMPT_WRITER_MODEL`, default the DeepSeek teacher) writes
+    prompts for the open slots from the item's grounding.
+  - **Filter:** prompts that refer to their sources, near-duplicates, and eval overlaps are
+    dropped.
+  - **Review:** a judge of a **different model family** (`JUDGE_MODEL`, default
+    `QUESTION_GEN_MODEL`; enforced) scores each prompt on five criteria. Accepted = every score
+    ≥ 3.
+  - **Gap-fill:** rejected slots are rewritten on later runs, up to 3 writer calls per item.
+  - **Bookkeeping:** `LIMIT_GENERATING` caps the prompts written per run; calls are recorded as
+    `write-prompts` / `review-prompts` in `llm_usage`.
+  - **Outputs:** `data/prompts/<set>/{accepted,rejected}.jsonl`, `coverage.json`.
+- **Grounding** (`sftgen/retrieval/`):
+  - **Own sources:** the item's own sources, as best-matching chunks or spec sections.
+  - **GitHub sources:** read from `collect-repos` snapshots when not scraped.
+  - **Central symbols:** a new `symbols` table with 3,248 entries from 90 modules, parsed from the
+    Central API reference.
+  - **Node sources**, for items without their own.
+  - **FTS5 neighbours:** a new `chunks_fts` BM25 index.
+  - Eval overlaps are never used.
+- **BBE without the API:** the scraper reads BBE files from the same sparse git snapshot as
+  `build-eval` (blob SHAs computed locally, so version keys are unchanged), instead of one
+  GitHub API call per file.
+- **Graph coverage** counts a GitHub source as matched when `collect-repos` has the file.
+- **Fixes:**
+  - `Database.one()`/`scalar()` now close their cursor. An unfinished read kept a read
+    transaction open, so a later write failed with "database is locked" when another process
+    (e.g. `collect-repos`) had committed meanwhile.
+  - `apply_decontam` commits per table, so other writers wait less.
+- **The report** gets a *Prompts* section with the plan per node, task × difficulty, review
+  scores, rejection reasons and 100 accepted prompts. The terminal summary gets a Prompts line.
+
+**Data (no model calls):**
+- Full BBE and learn scrape: 593 BBE and 196 learn pages.
+- Platform group collected: 435 of 436 module repos.
+- Graph grounding: 2,600 of 3,231 items (core 667 of 676), up from 1,227 (412).
+
+**Not run yet:** the live prompt run needs `OPENROUTER_API_KEY` in `.env`.
+
 ### Tests
 
-97 tests in total (+8 for M4: containment, exact and near matches and boilerplate; incremental
+102 tests in total (+5 for M5: task mix and slots; symbol parsing and lookup, FTS5 search and
+grounding from pages, symbols and collected repo files; plan totals and unknown nodes; the
+writer/filter/reviewer loop with gap-fill, outputs and the report section, using a fake model
+client; the different-family rule).
+
+M4: 97 tests in total (+8 for M4: containment, exact and near matches and boilerplate; incremental
 re-checks, held-out chunks and clearing; the split rule; parsing `index.json`; check modes and
 output comparison; a real `bal run`/`bal build` check, skipped without `bal`; and `build-eval`
 end to end, including a decontaminated export and a retired item).

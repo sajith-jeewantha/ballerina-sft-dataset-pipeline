@@ -108,445 +108,445 @@ ballerina-platform,graphql-tools,Apache-2.0,safe,exclude expected-output tests; 
 ballerina-platform,json-schema-tools,Apache-2.0,safe,exclude expected-output tests; corpus (tool sources only),278,,2026-11-16,,,
 ballerina-platform,lsp4intellij,Apache-2.0,safe,corpus (low priority),5080,,2026-11-16,,,
 ballerina-platform,mcp-tools,Apache-2.0,safe,exclude expected-output tests; corpus (tool sources only),252,,2026-11-16,,,
-ballerina-platform,module-ballerina-a2a,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1434,,2026-11-16,,,
-ballerina-platform,module-ballerina-ai,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",17992,,2026-11-16,,,
-ballerina-platform,module-ballerina-ai.eval,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",223,,2026-11-16,,,
-ballerina-platform,module-ballerina-ai.np,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",686,,2026-11-16,,,
-ballerina-platform,module-ballerina-auth,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3288,,2026-11-16,,,
-ballerina-platform,module-ballerina-authzen,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",191,,2026-11-16,,,
-ballerina-platform,module-ballerina-avro,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",604,,2026-11-16,,,
-ballerina-platform,module-ballerina-c2c,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",27989,,2026-11-16,,,
-ballerina-platform,module-ballerina-cache,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2424,,2026-11-16,,,
-ballerina-platform,module-ballerina-constraint,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",746,,2026-11-16,,,
-ballerina-platform,module-ballerina-crypto,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2139,,2026-11-16,,,
-ballerina-platform,module-ballerina-data.csv,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1008,,2026-11-16,,,
-ballerina-platform,module-ballerina-data.jsondata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",604,,2026-11-16,,,
-ballerina-platform,module-ballerina-data.toml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",90,,2026-11-16,,,
-ballerina-platform,module-ballerina-data.xmldata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1147,,2026-11-16,,,
-ballerina-platform,module-ballerina-data.yaml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",521,,2026-11-16,,,
-ballerina-platform,module-ballerina-dataservice,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",85,,2026-11-16,,,
-ballerina-platform,module-ballerina-dataservice.graphql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerina-dataservice.http,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",104,,2026-11-16,,,
-ballerina-platform,module-ballerina-docker,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",52312,,2026-11-16,,,
-ballerina-platform,module-ballerina-edi,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1772,,2026-11-16,,,
-ballerina-platform,module-ballerina-email,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",29593,,2026-11-16,,,
-ballerina-platform,module-ballerina-etl,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",100,,2026-11-16,,,
-ballerina-platform,module-ballerina-file,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1801,,2026-11-16,,,
-ballerina-platform,module-ballerina-ftp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",57780,,2026-11-16,,,
-ballerina-platform,module-ballerina-graphql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",10233,,2026-11-16,,,
-ballerina-platform,module-ballerina-grpc,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",10398,,2026-11-16,,,
-ballerina-platform,module-ballerina-http,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",60290,,2026-11-16,,,
-ballerina-platform,module-ballerina-io,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",4330,,2026-11-16,,,
-ballerina-platform,module-ballerina-jballerina.java.arrays,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",875,,2026-11-16,,,
-ballerina-platform,module-ballerina-jwt,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2952,,2026-11-16,,,
-ballerina-platform,module-ballerina-kubernetes,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3470,,2026-11-16,,,
-ballerina-platform,module-ballerina-ldap,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",791,,2026-11-16,,,
-ballerina-platform,module-ballerina-log,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2787,,2026-11-16,,,
-ballerina-platform,module-ballerina-math.vector,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",269,,2026-11-16,,,
-ballerina-platform,module-ballerina-mcp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1993,,2026-11-16,,,
-ballerina-platform,module-ballerina-messaging,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",342,,2026-11-16,,,
-ballerina-platform,module-ballerina-mime,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1961,,2026-11-16,,,
-ballerina-platform,module-ballerina-mqtt,NOASSERTION,check,"codebase-pool, commit-mining, corpus, rag",46213,,2026-11-16,licence file not recognised (NOASSERTION): check by hand,,
-ballerina-platform,module-ballerina-oauth2,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2932,,2026-11-16,,,
-ballerina-platform,module-ballerina-observe,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",15737,,2026-11-16,,,
-ballerina-platform,module-ballerina-os,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1400,,2026-11-16,,,
-ballerina-platform,module-ballerina-otel,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",284,,2026-11-16,,,
-ballerina-platform,module-ballerina-pdf,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2629,,2026-11-16,,,
-ballerina-platform,module-ballerina-persist,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2394,,2026-11-16,,,
-ballerina-platform,module-ballerina-protobuf,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",19186,,2026-11-16,,,
-ballerina-platform,module-ballerina-random,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",765,,2026-11-16,,,
-ballerina-platform,module-ballerina-regex,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",773,,2026-11-16,,,
-ballerina-platform,module-ballerina-scan,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",100,,2026-11-16,,,
-ballerina-platform,module-ballerina-serdes,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",43547,,2026-11-16,,,
-ballerina-platform,module-ballerina-smb,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",743,,2026-11-16,,,
-ballerina-platform,module-ballerina-smpp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",456,,2026-11-16,,,
-ballerina-platform,module-ballerina-soap,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",923,,2026-11-16,,,
-ballerina-platform,module-ballerina-sql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3919,,2026-11-16,,,
-ballerina-platform,module-ballerina-task,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1898,,2026-11-16,,,
-ballerina-platform,module-ballerina-tcp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3818,,2026-11-16,,,
-ballerina-platform,module-ballerina-time,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1293,,2026-11-16,,,
-ballerina-platform,module-ballerina-toml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",700,,2026-11-16,,,
-ballerina-platform,module-ballerina-udp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",27407,,2026-11-16,,,
-ballerina-platform,module-ballerina-url,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1029,,2026-11-16,,,
-ballerina-platform,module-ballerina-uuid,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",844,,2026-11-16,,,
-ballerina-platform,module-ballerina-websocket,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",19867,,2026-11-16,,,
-ballerina-platform,module-ballerina-websub,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3446,,2026-11-16,,,
-ballerina-platform,module-ballerina-websubhub,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",81807,,2026-11-16,,,
-ballerina-platform,module-ballerina-workflow,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",5782,,2026-11-16,,,
-ballerina-platform,module-ballerina-xlsx,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",658,,2026-11-16,,,
-ballerina-platform,module-ballerina-xmldata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1329,,2026-11-16,,,
-ballerina-platform,module-ballerina-xslt,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",919,,2026-11-16,,,
-ballerina-platform,module-ballerina-yaml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",665,,2026-11-16,,,
-ballerina-platform,module-ballerina-zip,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",350,,2026-11-16,,,
+ballerina-platform,module-ballerina-a2a,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1434,66199a2f74e179a7451571539ec334b3b7d1a1d0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,71
+ballerina-platform,module-ballerina-ai,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",17992,f64e3925290aee7e3a939736c66b9fcfdca141a8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,190
+ballerina-platform,module-ballerina-ai.eval,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",223,2df51b2b934e40dfedf2474e7762c0ea9005cbac,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerina-ai.np,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",686,8b394561b6cf6d5782578299c332d75785ecbd85,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,45
+ballerina-platform,module-ballerina-auth,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3289,4533849efa8170c555d19061430d288ad056fa0c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,30
+ballerina-platform,module-ballerina-authzen,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",191,2bcf8f2750d7eda8fcef2fa3abf2c21f536b1fcb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerina-avro,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",604,f4409db2ce81817f9191b8c11bf5922baad69bd9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerina-c2c,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",27993,0a1c5f2332c6f840586ec0c2496bea07b3be273f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,269
+ballerina-platform,module-ballerina-cache,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2424,5702c48c9828bd4e42e589e6e3f22ace0638fb85,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,26
+ballerina-platform,module-ballerina-constraint,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",746,6f144d7006708d994dfda58fef9fdc60c29272fa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,72
+ballerina-platform,module-ballerina-crypto,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2139,62c900a4516a917e8e404cdbe447423b518a195d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,68
+ballerina-platform,module-ballerina-data.csv,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1008,6f2e020fb3e9ba0cf49a5310ed298a3cac17944c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,86
+ballerina-platform,module-ballerina-data.jsondata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",604,e6588506a6852b84b1ac9a3548d18c8ca5a604fb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,49
+ballerina-platform,module-ballerina-data.toml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",90,df18346d409470458940dc47b75bec10fbe6a074,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerina-data.xmldata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1147,281b84f01052a88da9304695282d4cf137dafe50,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,79
+ballerina-platform,module-ballerina-data.yaml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",521,99ae71951449fecff69d5bf7d640f13c4ec1c6dc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,54
+ballerina-platform,module-ballerina-dataservice,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",174,0697299fbf6a79c9b3f2893d9283a457fcba3ba5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,79
+ballerina-platform,module-ballerina-dataservice.graphql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",124,9a81ad8abb9b99c546c93e35fc61f6d2063e8155,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerina-dataservice.http,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",127,bb8c862708fb9d1859d6ecfc52c37d58800c8494,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerina-docker,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",52312,d4cfaf2e640412d8fbf6d8dfdbf195a7794fbe5a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerina-edi,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1772,b4ef697b84df3dcc9bf8b089f8a64a284479cf73,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,46
+ballerina-platform,module-ballerina-email,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",29593,476d6523709a7bb3c835e90db5abfcded3aaf6a1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,102
+ballerina-platform,module-ballerina-etl,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",100,af844fa4acc827d78577c6c450877964fa29e455,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,32
+ballerina-platform,module-ballerina-file,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1801,be5a29d292364f9db82da05252e2ee3bca9a36d7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,64
+ballerina-platform,module-ballerina-ftp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",57780,6b639e6874d7cd1dd39c9caf351e2b10bf83549b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,189
+ballerina-platform,module-ballerina-graphql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",10198,db393ffca5312766cb53d7c27e657141dce65a6c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,572
+ballerina-platform,module-ballerina-grpc,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",10398,5eb0532d9b8512f1d2456a539f559c43bb11faca,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,436
+ballerina-platform,module-ballerina-http,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",60659,cf723ffed04d5f54db88baec737f85c69812822c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,533
+ballerina-platform,module-ballerina-io,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",4328,5fa6c339521748c45e07974a3b95aeeaa62fd8ee,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,57
+ballerina-platform,module-ballerina-jballerina.java.arrays,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",875,f546ba3df78d3e43857a4e2f8f07516671583f47,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerina-jwt,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2952,29a35f5e4a67819abf93561482a46b1aebfe3566,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,55
+ballerina-platform,module-ballerina-kubernetes,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3470,829ac89eeef36c720a79247b9e005fb254f2b7b5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,154
+ballerina-platform,module-ballerina-ldap,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",791,88905eb05b918eb98be27669ff8861d1ae82d5de,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerina-log,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2787,f5c5b2afc8e81060967bd730bafab4d826372280,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,93
+ballerina-platform,module-ballerina-math.vector,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",269,f2e26bcb26b0bee35b18b88764f17d307e7d9150,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerina-mcp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1993,a6097a42accccc0dc22ed93235ea018b908fc6fa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,421
+ballerina-platform,module-ballerina-messaging,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",342,757948a9e2d945cb4487d467edd89535461cb99f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerina-mime,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1961,d7fe33591e694f473d45b895a4cc799f185b607d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerina-mqtt,,check,"codebase-pool, commit-mining, corpus, rag",46213,d3e3496978a9a8a07c02469957db18b44d5b48ee,2026-11-21,unrecognised LICENSE text (GitHub reports none),c39c3818440f0249de55289e7fca4f921170ce6eac83d420c1ad745ac4a37863,84
+ballerina-platform,module-ballerina-oauth2,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2932,604caa634a109f5cf81717cb80deb70a06a47c79,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerina-observe,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",15737,8c7ed230447a3d8db3aa15c8e1d545128dc36adb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerina-os,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1400,9860cb83ca9d7075db89fa44f5c22094da178121,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,28
+ballerina-platform,module-ballerina-otel,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",296,dd0f0a734ca86cf81bd3fde0163736b4126201e9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerina-pdf,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2629,946007e638bfa3b185babc1dd7a1d754442c97d8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerina-persist,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",2394,a9a8d9cb6f25ae8a1c5fc84936ae82ed7b3a3fbb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,101
+ballerina-platform,module-ballerina-protobuf,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",19186,dab90169fa7495bf98c65a4694cd506a89e5f06d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,39
+ballerina-platform,module-ballerina-random,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",765,43185c29699da1f9d02ebc9274bf8d46d5f5cb22,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerina-regex,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",773,6cd6b6899e89977af470df93b6128a25f8d6e1d7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerina-scan,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",100,f5c00406e1706ba71e27fbc79ace3ae2dba6fb16,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerina-serdes,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",43547,33beed977c409f9979dbe95477d632f5a3dc20b7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,24
+ballerina-platform,module-ballerina-smb,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",743,a68d92c59169b603c0d9bc5b66c96d259869e2e8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,86
+ballerina-platform,module-ballerina-smpp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",456,1610d040ee8a33f11c765d0aea3454a00bc3be17,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,57
+ballerina-platform,module-ballerina-soap,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",923,2ddf453c079b118a54de767abea14b7d895b4c1e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,33
+ballerina-platform,module-ballerina-sql,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3919,d441b540e62ab2ad4f4a4695c3b28d0257966ffb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,39
+ballerina-platform,module-ballerina-task,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1898,973e6309159b394bb8cf44134a200d3135209a3a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,21
+ballerina-platform,module-ballerina-tcp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3818,b0e99686c5d3c367cf4442ce5486072fe806b461,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,67
+ballerina-platform,module-ballerina-time,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1293,e9269e4e4f349abcfe8767413ca41bdb6fb88496,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerina-toml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",700,8a5a30de019952f64fab07e4b8e6ea3a3dacfd46,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,38
+ballerina-platform,module-ballerina-udp,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",27407,89e862e6f9384e25d20a8fbfb75a9b9a37da08bb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,73
+ballerina-platform,module-ballerina-url,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1029,10bd25e1341cdd72bbdf44b6b1fd954049f09cd7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerina-uuid,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",844,57eba446c89387b4e7d71d874d4a5ae8c7abdfbc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,10
+ballerina-platform,module-ballerina-websocket,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",19867,06e22bdcd157552374beb38808a5853363420db6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,261
+ballerina-platform,module-ballerina-websub,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",3446,139cc709c48a39ea2b4e94433aaf917c267b2b5e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,94
+ballerina-platform,module-ballerina-websubhub,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",81807,7d2ff2d4fbe3ff17851b0f69adc130e976c3c3a3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,144
+ballerina-platform,module-ballerina-workflow,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",5785,5f593f9e25100a5806287bdd82c9a829dc9685fa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,490
+ballerina-platform,module-ballerina-xlsx,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",658,8bd2bc1a0543818332958017ccabe2aef9c17050,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,41
+ballerina-platform,module-ballerina-xmldata,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",1329,30f5d11adc0075788c6fcee49276722eae6a153d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,38
+ballerina-platform,module-ballerina-xslt,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",919,1e10d8a8c286798769af050ec9af2678944728ef,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerina-yaml,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",665,3ed0a5913f8201bd241d579280e55939f3e46989,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,71
+ballerina-platform,module-ballerina-zip,Apache-2.0,safe,"codebase-pool, commit-mining, corpus, rag",350,9652fed167ff91c0d8542b087caad6dc0641ac02,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,29
 ballerina-platform,module-ballerinai-observe,Apache-2.0,safe,corpus,551,,2026-11-16,,,
 ballerina-platform,module-ballerinai-remote.management,Apache-2.0,safe,corpus,124,,2026-11-16,,,
 ballerina-platform,module-ballerinai-transaction,Apache-2.0,safe,corpus,1376,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aayu.mftg.as2.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-activemq.artemis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-activemq.classic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",690,,2026-11-16,,,
-ballerina-platform,module-ballerinax-activemq.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",261,,2026-11-16,,,
-ballerina-platform,module-ballerinax-adobe.analytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",137,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.agent,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2199,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.anthropic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",351,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.aws.bedrock,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",291,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.aws.dynamodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",222,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.aws.opensearch,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.aws.s3,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",362,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.azure,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",785,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.azure.storage.blobs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",292,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.azure.storage.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",334,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.deepseek,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",186,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.devant,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",121,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.google.drive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",400,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.google.gemini,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",525,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.googleapis.vertex,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",158,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.memory.mssql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",198,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.memory.postgresql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.memory.redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",141,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.microsoft.sharepoint,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",229,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.milvus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1364,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.mistral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",231,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.ollama,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",221,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.openai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",397,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.openrouter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",244,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.pgvector,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",220,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.pinecone,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",163,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.sqlite,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",169,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.weaviate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",857,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ai.wso2.integration,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",174,,2026-11-16,,,
-ballerina-platform,module-ballerinax-alfresco,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,,2026-11-16,,,
-ballerina-platform,module-ballerinax-amadeus.flightcreateorders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",110,,2026-11-16,,,
-ballerina-platform,module-ballerinax-amadeus.flightoffersprice,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",108,,2026-11-16,,,
-ballerina-platform,module-ballerinax-amadeus.flightofferssearch,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",109,,2026-11-16,,,
-ballerina-platform,module-ballerinax-amp,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",737,,2026-11-16,,,
-ballerina-platform,module-ballerinax-apideck.accounting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",224,,2026-11-16,,,
-ballerina-platform,module-ballerinax-apideck.lead,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",134,,2026-11-16,,,
-ballerina-platform,module-ballerinax-apideck.proxy,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",120,,2026-11-16,,,
-ballerina-platform,module-ballerinax-apple.appstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",735,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ardoq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",802,,2026-11-16,,,
-ballerina-platform,module-ballerinax-asana,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1971,,2026-11-16,,,
-ballerina-platform,module-ballerinax-asb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3101,,2026-11-16,,,
-ballerina-platform,module-ballerinax-avaza,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",366,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3579,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.dynamodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3629,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.dynamodbstreams,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3467,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.lambda,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1639,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.marketplace.mpe,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",199,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.marketplace.mpm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.redshift,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3750,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.redshift.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",227,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.redshiftdata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1511,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.s3,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2962,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.secretmanager,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.ses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",303,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.simpledb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",180,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.sns,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6383,,2026-11-16,,,
-ballerina-platform,module-ballerinax-aws.sqs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3728,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure-cosmosdb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2097,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure-storage-service,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",9148,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.ad,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",397,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.ai.search,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",861,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.ai.search.index,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",832,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.datalake,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",218,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.eventhub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",806,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.functions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1831,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.keyvault,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1233,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.openai.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",553,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.openai.responses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",407,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.sqldb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",84,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.storage.blob,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",575,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.storage.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2544,,2026-11-16,,,
-ballerina-platform,module-ballerinax-azure.textanalytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",116,,2026-11-16,,,
-ballerina-platform,module-ballerinax-bintable,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",101,,2026-11-16,,,
-ballerina-platform,module-ballerinax-bitbucket,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",168,,2026-11-16,,,
-ballerina-platform,module-ballerinax-bitly,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",239,,2026-11-16,,,
-ballerina-platform,module-ballerinax-botify,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,,2026-11-16,,,
-ballerina-platform,module-ballerinax-box,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",296,,2026-11-16,,,
-ballerina-platform,module-ballerinax-candid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",515,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdata.connect,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",215,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdata.connect.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",14773,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",520,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdc.schema.aws.s3.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",141,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdc.schema.azure.blob.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",117,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cdc.schema.rocketmq.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",145,,2026-11-16,,,
-ballerina-platform,module-ballerinax-choreo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",788,,2026-11-16,,,
-ballerina-platform,module-ballerinax-clever.data,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",153,,2026-11-16,,,
-ballerina-platform,module-ballerinax-client.config,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",31,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cloudmersive.barcode,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",113,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cloudmersive.currency,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",107,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cloudmersive.security,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cloudmersive.validate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",124,,2026-11-16,,,
-ballerina-platform,module-ballerinax-cloudmersive.virusscan,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",122,,2026-11-16,,,
-ballerina-platform,module-ballerinax-commercetools.auditlog,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",131,,2026-11-16,,,
-ballerina-platform,module-ballerinax-commercetools.customizedata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",157,,2026-11-16,,,
-ballerina-platform,module-ballerinax-commercetools.pricingdiscount,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",123,,2026-11-16,,,
-ballerina-platform,module-ballerinax-confluent.cavroserdes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",369,,2026-11-16,,,
-ballerina-platform,module-ballerinax-confluent.cregistry,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",388,,2026-11-16,,,
-ballerina-platform,module-ballerinax-constantcontact,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,,2026-11-16,,,
-ballerina-platform,module-ballerinax-copybook,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",501,,2026-11-16,,,
-ballerina-platform,module-ballerinax-datamapper,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",647,,2026-11-16,,,
-ballerina-platform,module-ballerinax-dayforce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1234,,2026-11-16,,,
-ballerina-platform,module-ballerinax-discord,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2197,,2026-11-16,,,
-ballerina-platform,module-ballerinax-docusign.dsadmin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4485,,2026-11-16,,,
-ballerina-platform,module-ballerinax-docusign.dsclick,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4406,,2026-11-16,,,
-ballerina-platform,module-ballerinax-docusign.dsesign,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",8269,,2026-11-16,,,
-ballerina-platform,module-ballerinax-docusign.dsrooms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-docusign.monitor,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",111,,2026-11-16,,,
-ballerina-platform,module-ballerinax-dropbox,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",819,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.account,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",186,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.analytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",143,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.browse,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.finances,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",196,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.inventory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",187,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.listing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",124,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.logistics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",127,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.metadata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",214,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.negotiation,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ebay.recommendation,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,,2026-11-16,,,
-ballerina-platform,module-ballerinax-edifact,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",837,,2026-11-16,,,
-ballerina-platform,module-ballerinax-elastic.elasticcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",755,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.bian,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.iso20022,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",225,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.iso20022-to-swiftmt,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",661,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.iso8583,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",72,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.swiftmt,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6083,,2026-11-16,,,
-ballerina-platform,module-ballerinax-financial.swiftmt-to-iso20022,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",752,,2026-11-16,,,
-ballerina-platform,module-ballerinax-flatapi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",173,,2026-11-16,,,
-ballerina-platform,module-ballerinax-freemarker,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",301,,2026-11-16,,,
-ballerina-platform,module-ballerinax-gcalendar,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2086,,2026-11-16,,,
-ballerina-platform,module-ballerinax-gcloud.pubsub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",214,,2026-11-16,,,
-ballerina-platform,module-ballerinax-github,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6142,,2026-11-16,,,
-ballerina-platform,module-ballerinax-github.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1295,,2026-11-16,,,
-ballerina-platform,module-ballerinax-gitlab,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",84,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1956,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.drive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1150,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.gdocs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.gemini,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.gforms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.gmail,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3164,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.people,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1097,,2026-11-16,,,
-ballerina-platform,module-ballerinax-googleapis.sheets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4965,,2026-11-16,,,
-ballerina-platform,module-ballerinax-graphhopper.directions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",275,,2026-11-16,,,
-ballerina-platform,module-ballerinax-guidewire.insnow,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",320,,2026-11-16,,,
-ballerina-platform,module-ballerinax-h2.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",238,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.base,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",50,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.ccda,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",50,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.clients,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2024,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.dicom,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2045,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.fhir.r4,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",8093,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.fhir.r5,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1087,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.fhir.templates,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",948,,2026-11-16,,,
-ballerina-platform,module-ballerinax-health.hl7v2,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5027,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.automation.actions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2070,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.associations,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5442,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.associations.schema,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1400,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.commerce.carts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2480,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.commerce.discounts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1836,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.commerce.orders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2612,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.commerce.quotes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1022,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.commerce.taxes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1982,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagement.meeting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2274,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagement.notes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2319,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagements.calls,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4304,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagements.communications,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1087,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagements.email,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2017,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.engagements.tasks,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6740,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.extensions.timelines,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2587,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.extensions.videoconferencing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1896,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.import,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2024,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.lists,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2656,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.companies,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2663,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.contacts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2049,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.deals,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2943,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.feedback,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2304,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.leads,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2283,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.lineitems,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2323,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.products,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2298,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.schemas,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2660,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.obj.tickets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2174,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.owners,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1727,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.pipelines,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2639,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.crm.properties,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2779,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.events,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.events.completions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",223,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.events.definitions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",82,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",88,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.campaigns,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2296,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.emails,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2704,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.events,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2900,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.forms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3252,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.subscriptions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2173,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.marketing.transactional,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3980,,2026-11-16,,,
-ballerina-platform,module-ballerinax-hubspot.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",460,,2026-11-16,,,
-ballerina-platform,module-ballerinax-huggingface.tgi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",241,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ibm.ctg,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ibm.db2,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",9356,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ibm.db2.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",28,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ibm.ibmmq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1829,,2026-11-16,,,
-ballerina-platform,module-ballerinax-identityserver.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,,2026-11-16,,,
-ballerina-platform,module-ballerinax-idetraceprovider,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",177,,2026-11-16,,,
-ballerina-platform,module-ballerinax-intercom,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",453,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.currencyexchange,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.currencyrate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",112,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.emailinfo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",122,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.globalnumberinfo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.statedata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,,2026-11-16,,,
-ballerina-platform,module-ballerinax-interzoid.weatherzip,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",121,,2026-11-16,,,
-ballerina-platform,module-ballerinax-jaeger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",729,,2026-11-16,,,
-ballerina-platform,module-ballerinax-java.jdbc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",17565,,2026-11-16,,,
-ballerina-platform,module-ballerinax-java.jms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1610,,2026-11-16,,,
-ballerina-platform,module-ballerinax-jira,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2407,,2026-11-16,,,
-ballerina-platform,module-ballerinax-jira.servicemanagement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",155,,2026-11-16,,,
-ballerina-platform,module-ballerinax-kafka,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",31131,,2026-11-16,,,
-ballerina-platform,module-ballerinax-karbon,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",289,,2026-11-16,,,
-ballerina-platform,module-ballerinax-linkedin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,,2026-11-16,,,
-ballerina-platform,module-ballerinax-listennotes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mailchimp,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mailchimp.marketing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",759,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mailchimp.transactional,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",995,,2026-11-16,,,
-ballerina-platform,module-ballerinax-metrics.logs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",139,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.assetmanagement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.bc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1771,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.commerce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.finance,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1727,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.hr,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.dynamics365.scm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",393,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.excel,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3856,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.onedrive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3657,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.onenote,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",365,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.outlook.calendar,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1369,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.outlook.mail,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",14230,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3057,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.admin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.embedded,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.lists,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3644,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.onenote,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",83,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.pages,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3776,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.sites,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3091,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.sharepoint.termstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",83,,2026-11-16,,,
-ballerina-platform,module-ballerinax-microsoft.teams,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2826,,2026-11-16,,,
-ballerina-platform,module-ballerinax-milvus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1384,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mistral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",790,,2026-11-16,,,
-ballerina-platform,module-ballerinax-moesif,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",207,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mongodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1672,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mssql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4654,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mssql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",207,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mssql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",384,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mysql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5219,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mysql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",202,,2026-11-16,,,
-ballerina-platform,module-ballerinax-mysql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",340,,2026-11-16,,,
-ballerina-platform,module-ballerinax-nats,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",27332,,2026-11-16,,,
-ballerina-platform,module-ballerinax-netsuite,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",38595,,2026-11-16,,,
-ballerina-platform,module-ballerinax-newrelic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",293,,2026-11-16,,,
-ballerina-platform,module-ballerinax-notion,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2771,,2026-11-16,,,
-ballerina-platform,module-ballerinax-np,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",263,,2026-11-16,,,
-ballerina-platform,module-ballerinax-onepassword,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",157,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1906,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.assistants,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",789,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.audio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2115,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2535,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.finetunes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2140,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.images,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5418,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openai.responses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1261,,2026-11-16,,,
-ballerina-platform,module-ballerinax-openrouter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",308,,2026-11-16,,,
-ballerina-platform,module-ballerinax-oracledb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3409,,2026-11-16,,,
-ballerina-platform,module-ballerinax-oracledb.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",176,,2026-11-16,,,
-ballerina-platform,module-ballerinax-oracledb.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",333,,2026-11-16,,,
-ballerina-platform,module-ballerinax-oraclefusion.common.scheduler,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",198,,2026-11-16,,,
-ballerina-platform,module-ballerinax-oraclefusion.erp.integrations,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",149,,2026-11-16,,,
-ballerina-platform,module-ballerinax-pandadoc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",411,,2026-11-16,,,
-ballerina-platform,module-ballerinax-paypal.invoices,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",983,,2026-11-16,,,
-ballerina-platform,module-ballerinax-paypal.orders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1012,,2026-11-16,,,
-ballerina-platform,module-ballerinax-paypal.payments,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",985,,2026-11-16,,,
-ballerina-platform,module-ballerinax-paypal.subscriptions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1590,,2026-11-16,,,
-ballerina-platform,module-ballerinax-peoplehr,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,,2026-11-16,,,
-ballerina-platform,module-ballerinax-persist.googlesheets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",493,,2026-11-16,,,
-ballerina-platform,module-ballerinax-persist.inmemory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",365,,2026-11-16,,,
-ballerina-platform,module-ballerinax-persist.redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",431,,2026-11-16,,,
-ballerina-platform,module-ballerinax-persist.sql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1150,,2026-11-16,,,
-ballerina-platform,module-ballerinax-pgvector,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-pipedrive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",370,,2026-11-16,,,
-ballerina-platform,module-ballerinax-plaid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",486,,2026-11-16,,,
-ballerina-platform,module-ballerinax-pocketsmith,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",125,,2026-11-16,,,
-ballerina-platform,module-ballerinax-postgresql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4180,,2026-11-16,,,
-ballerina-platform,module-ballerinax-postgresql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",254,,2026-11-16,,,
-ballerina-platform,module-ballerinax-postgresql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",283,,2026-11-16,,,
-ballerina-platform,module-ballerinax-power.bi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",218,,2026-11-16,,,
-ballerina-platform,module-ballerinax-pricefx,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2519,,2026-11-16,,,
-ballerina-platform,module-ballerinax-prometheus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",517,,2026-11-16,,,
-ballerina-platform,module-ballerinax-quickbooks.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",431,,2026-11-16,,,
-ballerina-platform,module-ballerinax-rabbitmq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",27669,,2026-11-16,,,
-ballerina-platform,module-ballerinax-reckon.one,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",322,,2026-11-16,,,
-ballerina-platform,module-ballerinax-recurly,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",599,,2026-11-16,,,
-ballerina-platform,module-ballerinax-redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",34294,,2026-11-16,,,
-ballerina-platform,module-ballerinax-rudderstack,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1159,,2026-11-16,,,
-ballerina-platform,module-ballerinax-runzero,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",245,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sakari.sms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",133,,2026-11-16,,,
-ballerina-platform,module-ballerinax-salesforce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",15280,,2026-11-16,,,
-ballerina-platform,module-ballerinax-salesforce.datacloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1306,,2026-11-16,,,
-ballerina-platform,module-ballerinax-salesforce.marketingcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1320,,2026-11-16,,,
-ballerina-platform,module-ballerinax-salesforce.pubsub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",512,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1197,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.businessone,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4569,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.commerce.webservices,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",607,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.concur.sharedapis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.jco,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",28815,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.delivery,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1950,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.inventory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1296,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.masterdata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1104,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.procurement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1225,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.qm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2855,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.s4hana.sales,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2732,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.signavio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",422,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.successfactors.employeecentral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2433,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sap.successfactors.recruiting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,,2026-11-16,,,
-ballerina-platform,module-ballerinax-scim,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",640,,2026-11-16,,,
-ballerina-platform,module-ballerinax-sendgrid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",78,,2026-11-16,,,
-ballerina-platform,module-ballerinax-shipwire.receivings,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,,2026-11-16,,,
-ballerina-platform,module-ballerinax-shopify.admin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",17711,,2026-11-16,,,
-ballerina-platform,module-ballerinax-shopify.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,,2026-11-16,,,
-ballerina-platform,module-ballerinax-shortcut,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",258,,2026-11-16,,,
-ballerina-platform,module-ballerinax-slack,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2823,,2026-11-16,,,
-ballerina-platform,module-ballerinax-slack.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,,2026-11-16,,,
-ballerina-platform,module-ballerinax-smartsheet,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",227,,2026-11-16,,,
-ballerina-platform,module-ballerinax-snowflake,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1404,,2026-11-16,,,
-ballerina-platform,module-ballerinax-snowflake.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",23838,,2026-11-16,,,
-ballerina-platform,module-ballerinax-solace,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",835,,2026-11-16,,,
-ballerina-platform,module-ballerinax-solace.jms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",520,,2026-11-16,,,
-ballerina-platform,module-ballerinax-soundcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",177,,2026-11-16,,,
-ballerina-platform,module-ballerinax-spotify,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",404,,2026-11-16,,,
-ballerina-platform,module-ballerinax-square,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1289,,2026-11-16,,,
-ballerina-platform,module-ballerinax-storecove,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",327,,2026-11-16,,,
-ballerina-platform,module-ballerinax-stripe,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5371,,2026-11-16,,,
-ballerina-platform,module-ballerinax-tableau,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",161,,2026-11-16,,,
-ballerina-platform,module-ballerinax-telegram,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",461,,2026-11-16,,,
-ballerina-platform,module-ballerinax-temporal,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",140,,2026-11-16,,,
-ballerina-platform,module-ballerinax-themoviedb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",223,,2026-11-16,,,
-ballerina-platform,module-ballerinax-trello,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",367,,2026-11-16,,,
-ballerina-platform,module-ballerinax-twilio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4234,,2026-11-16,,,
-ballerina-platform,module-ballerinax-twilio.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,,2026-11-16,,,
-ballerina-platform,module-ballerinax-twitter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2299,,2026-11-16,,,
-ballerina-platform,module-ballerinax-weaviate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",172,,2026-11-16,,,
-ballerina-platform,module-ballerinax-webscraping.ai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,,2026-11-16,,,
-ballerina-platform,module-ballerinax-whatsapp.business,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",258,,2026-11-16,,,
-ballerina-platform,module-ballerinax-wso2.apim.catalog,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",430,,2026-11-16,,,
-ballerina-platform,module-ballerinax-wso2.controlplane,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",386,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.accounts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",553,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.appstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",125,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.assets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",134,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.bankfeeds,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",129,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",110,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.finance,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",139,,2026-11-16,,,
-ballerina-platform,module-ballerinax-xero.projects,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",149,,2026-11-16,,,
-ballerina-platform,module-ballerinax-ynab,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",166,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zendesk,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",924,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zipkin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6662,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zoom.meetings,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1614,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zoom.scheduler,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1919,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zoom.zmeeting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",74,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zuora,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2713,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zuora.collection,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,,2026-11-16,,,
-ballerina-platform,module-ballerinax-zuora.revenue,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",111,,2026-11-16,,,
+ballerina-platform,module-ballerinax-aayu.mftg.as2.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",614,2e642edcc173746f15ae2c11f0976c6bbd5155a8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-activemq.artemis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,7a25ee46aaaa0bc5ad4757ec74d98b17d7f8f02b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-activemq.classic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",690,c11ba51452cb667d8adacc26b9d6b011f4b5cd94,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,26
+ballerina-platform,module-ballerinax-activemq.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",261,ef720e7ce900b335d1f409d625a59e4e7b36e3cb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-adobe.analytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",140,dd7cf87cf961b1ebda0669468bb4dd2aa7586f31,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ai.agent,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2199,c4ec6ba82f0219e310b8783282ecbcd902a98cf7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,75
+ballerina-platform,module-ballerinax-ai.anthropic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",351,64417d9d92e9396eb4dc4b97d042552fd0d44b0e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ai.aws.bedrock,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",501,55af7f8d7360bf4b3857af89216dd414f9e769b5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,152
+ballerina-platform,module-ballerinax-ai.aws.dynamodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",222,cd999a6a85af477529fad5b353be0e7ad36488e3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerinax-ai.aws.opensearch,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5,26ec4c2d53c3142e7236c44f3487af32d6d03e05,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-ai.aws.s3,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",362,ea8a26a9e7db7715bed4e32bf4a1ac32835b4aac,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,31
+ballerina-platform,module-ballerinax-ai.azure,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",785,f4abc4ebb748a06da229aa0c90315482b50afa8e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,94
+ballerina-platform,module-ballerinax-ai.azure.storage.blobs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",292,d6c3ba60a5be0230ad11c908b7568329752d9ff9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-ai.azure.storage.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",334,81b2308436c7f3ef9ee6075124c094bd00d31039,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-ai.deepseek,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",186,0e25e7686346c9e768ebfd10af3c77dd4c14e3f1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-ai.devant,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",121,1f5232ce2ab82796974f2ac5bb7bebc7325c230c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-ai.google.drive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",400,29f751737cb15dd5bb33f52ad6e609fa9108df57,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ai.google.gemini,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",525,de55169e81f3e7824886212a2278ccd0d587fb6a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-ai.googleapis.vertex,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",158,862f555ec212176df2babbf8edc0952cf87a829b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-ai.memory.mssql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",198,00619f798ef01a912ff3b2d4d0873311c72c6b75,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-ai.memory.postgresql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,b7cf626acc6ad8b698399cea024c049e00643ad6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerinax-ai.memory.redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",141,8a33dd4354c1a7bcb1a51065ced1eff42098e4f8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerinax-ai.microsoft.sharepoint,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",229,cc5d45ffe4bf625042f47ed6d2b94152a9588df3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-ai.milvus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1364,fd75737610bb4c6a94d94b07561f7cd9d2b62379,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-ai.mistral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",231,7a8dd28a9c808ca6fa19ccfd299fd32df345a3e5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-ai.ollama,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",221,87adf21912f5666ffef85f72418fc3f5fb784f73,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-ai.openai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",397,9290f868af20cd46bbc203f3fe53f2b8e771a52c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-ai.openrouter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",244,9633195a2da91d470bdfaf5b0db3cf4591371a6b,2026-11-21,,cf90d659de5c1e6418267ab8043b756e65508ee5d8d50b29eb2d2fe444c2c3eb,13
+ballerina-platform,module-ballerinax-ai.pgvector,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",220,4efeb0fb18d27a1d7093e4fcc361887820c94545,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,10
+ballerina-platform,module-ballerinax-ai.pinecone,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",163,66e2a6e66cad76761796b56955fcc403aaac1cd9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerinax-ai.sqlite,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",169,28007847451c4902cd4022ef7dae494a48098344,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,10
+ballerina-platform,module-ballerinax-ai.weaviate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",857,ee81b152fc2b3ddc01be9d20a6397941f9fe1191,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-ai.wso2.integration,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",230,303fe493dabaf75e0b47a2868afc802b4c44b15e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-alfresco,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,31a7fd065ae388743680bc8aeb98a3035363601f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-amadeus.flightcreateorders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",113,a19647d4402d0c8191924380a766a6b33618ac63,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-amadeus.flightoffersprice,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",112,18779d5f9d41d5c888337fae861642f1928f5fbc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-amadeus.flightofferssearch,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",120,3f460ddcb26717ab457c97c41c05a5317ca5e9d5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-amp,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",655,68c193553eb6a63ccb3ebc9401544c28fd0e36cb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-apideck.accounting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",227,922c09548e8f351ca735d8c44eb231c3bdbfc718,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-apideck.lead,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",136,70c9766a05a2c6237ed252d3e9e1d92d35eac4fa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-apideck.proxy,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",122,990f06645cf522186c1f09877dca318294a65ed6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-apple.appstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",737,7de5d0ed90aed846f60af3d6e6624a35adde39d7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-ardoq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",802,dc1ab62aa82ea09699b600e59c27cd6855d5ccdf,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-asana,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1971,480fb4c68089e27d603f36f75c35c687bc71c9ea,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-asb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3101,20280314c7581de00ca02d63755f0cce7f8b0523,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,77
+ballerina-platform,module-ballerinax-avaza,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",368,b7b20799abee5a88fcec6767cf83bc0153c53504,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-aws,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3579,a7ca78a02435ed2a0ad91d5d663894d62f4bff36,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerinax-aws.dynamodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3629,09504e4a44f4f9c57ed8f5b1ffe8de4b46dc652d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-aws.dynamodbstreams,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3467,04a5411b3cca5c01f2ac83e8ddb1a93b8d54c24e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-aws.lambda,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1639,bd9d2fc7b91a685d6feb9c34d7d57b9e5c9c67dd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,33
+ballerina-platform,module-ballerinax-aws.marketplace.mpe,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",199,ac77fe90de1df8b5428f3cd96429898a97298a7f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-aws.marketplace.mpm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,1ac109c7e621306f2ea026e3bdda87ef94a5f064,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-aws.redshift,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3750,5062f40181898298e2ed0c59e9b54fd361b35578,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerinax-aws.redshift.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",227,30fe2a1d76c433b8c8e6014d54630a5860cb67e1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-aws.redshiftdata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1511,eff6eb118638058c2acd8c90c07108007c19bf03,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerinax-aws.s3,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2962,e5bc3d9652ca3e7c05babbe7a160f039eaa85e9b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-aws.secretmanager,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",217,1982b2e362159a77a518cad7f2a98c4995c8d359,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-aws.ses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",303,fd7556154cc04d1cd6c1e799c5c3b7225f55b08b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-aws.simpledb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",180,fd34d9578f89f99047a34786d78939e695f22b8a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-aws.sns,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6383,b694cee7f4c09b5bd38bf16b44a04a5131329b24,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,31
+ballerina-platform,module-ballerinax-aws.sqs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3728,92d798cd3477d4a8f05f00834779336a301604db,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerinax-azure-cosmosdb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2097,22f33f062b292fa6c4f7ce9ce2e1a35c60fd7158,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,61
+ballerina-platform,module-ballerinax-azure-storage-service,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",9152,45a122bee17e748917d174a6c081238e93e46821,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,42
+ballerina-platform,module-ballerinax-azure.ad,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",397,865ba1ff69a2c67355bc5e8003e1ccd1282a582e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,33
+ballerina-platform,module-ballerinax-azure.ai.search,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",861,9a0e264195ddf57371ffb2f8fb1627d35279dc5b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-azure.ai.search.index,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",832,9d93d4fa3269fa70446e15ec0c2f8c45db53b295,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-azure.datalake,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",218,2013e2e7a2a1c2ffd8177ec1a7c8394983017328,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-azure.eventhub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",806,3d970ca20e28ae4e9e3c4b45a995a3fdfe788f4f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,40
+ballerina-platform,module-ballerinax-azure.functions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1831,0996e7cb51dd5f4d6d71494c5b1a60ff6deb7809,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,60
+ballerina-platform,module-ballerinax-azure.keyvault,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1233,5111ede0407313ce98e39b4c2503d21f41a36357,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-azure.openai.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",553,165775f0091f06577b23228f95f7c1ce0f74219b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-azure.openai.responses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",407,4c90572fe8bab1534c98eb3faf2b5cbb4af6658d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-azure.sqldb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",84,f4b722a0fed157284d9095cf9de4671aef97ea82,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-azure.storage.blob,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",583,5dedc2bd82f79574622b4842ae297476b1e4f175,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,207
+ballerina-platform,module-ballerinax-azure.storage.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2544,d0b89d448b78f910a7d24c1ae3913421886b1313,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,112
+ballerina-platform,module-ballerinax-azure.textanalytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",119,04d8151e19613c55fc50e8542888c67eb527aae6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-bintable,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",103,db173c18454d9f55837dfd491d13afd28460bb1c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-bitbucket,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",168,d25beb94328934ce38ed7007920106a91abab9d1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-bitly,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",242,3b22dcb2ae7a41f0c7e7fa120c5cc878a041d178,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-botify,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",122,eb57ba31f4e984f9567650f5613d87538d45506a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-box,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",300,ab9fa9a91cd78a5d5d77e1b7379c2727250fa634,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-candid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",515,6100669243200b4aec362afad6a364a4ce6b3e0d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,30
+ballerina-platform,module-ballerinax-cdata.connect,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",215,b1b2e8a5aebfedea5c629e1b67c612a79465155a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-cdata.connect.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",14773,4f7e8c7ea5935fe768b8d9a360b7fbf799cced47,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-cdc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",543,7f1ec1bc3d28d47134867829495467c4494d7444,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,146
+ballerina-platform,module-ballerinax-cdc.schema.aws.s3.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",141,d7081a55d65babc21a71058b6a58d8e45e1033bb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-cdc.schema.azure.blob.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",117,19aff358e6158cb1cd16055d57f98da8a540a126,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-cdc.schema.rocketmq.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",145,315ff233b26f40e0989eb00c089fb67a1199496d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-choreo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",788,1ab908fd339e77cbd90d99ab89f715ecb58cd9a5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-clever.data,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",156,a5207b925e28304b66f587c454e721a89c35a779,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-client.config,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",31,868f766633110fb54c1fce34f695a1e54ed2f90e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-cloudmersive.barcode,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",116,d0eab63eed6d02882f2d191ff88e846daf205a1c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-cloudmersive.currency,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",110,84be7011ce1572e3cc0324d5368717a096925fda,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-cloudmersive.security,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",117,ea76078921f19602c88a402fc6ba5038ac36414d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-cloudmersive.validate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",128,37cfd249abfcace85e3481886262408539695759,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-cloudmersive.virusscan,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",123,6cf96526d0390d6af8bcad2f7eca843ca6f17a29,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-commercetools.auditlog,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",132,0ad79096ac88524ab59468790081bcfe9b9343fb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-commercetools.customizedata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",160,9d5da38f9a38aa75381c6d6e1abd2351ea147eb7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-commercetools.pricingdiscount,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",125,196a629d3d254fc9cc1b484b5a3f7a6f75922f9f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-confluent.cavroserdes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",369,91571148d52789bec6de4571dd23db8cbe5bb475,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-confluent.cregistry,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",388,fb8d8e5aa6ef7683cdd2e493f76234f1b9266922,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-constantcontact,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",221,9849c49fd306fa78cbab55fd5ead4a0bdc011921,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-copybook,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",501,f0a096a5614e6b99622555a1666357c7e3e80def,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,26
+ballerina-platform,module-ballerinax-datamapper,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",647,9849c08b637382320c89e8d5ce350f1a538de214,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,68
+ballerina-platform,module-ballerinax-dayforce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1234,c277bd0d3b0b57c51f48d40e4e8aaf38be6ee7f1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-discord,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2197,46ee360e8c95624216e86f8a5d93eff857f5fe88,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-docusign.dsadmin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4485,ac0813ec031f0f2f179045e93cf157399e246d84,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-docusign.dsclick,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4406,2b228cbdb09b51cdde5c98db4dc480398ccdfe94,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-docusign.dsesign,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",8269,d8cbae2b87d4084e8ccf365466decf2eda1df84d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-docusign.dsrooms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,1e278d36905dd1b1769d483bb3d24ae949300807,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-docusign.monitor,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,0834040d62826da27a13a2b6b9a0d1e41758f548,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-dropbox,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",819,b977ef6d39e959721b43ab69c37661c6c5b3c426,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-ebay.account,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",189,992a5529daa20d8aea80d0b86487231665b502c8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.analytics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",145,d6b28991a7869d43dccca8d4a2a95ac78982b51d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-ebay.browse,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",219,b02d53f2401e35dc48867696edcabc93060bb1f4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-ebay.finances,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",199,b150ed5df4aad80b529b7a5ccf5ac461eb3d4342,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.inventory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",190,7ca53bc822883754264fbe9b7536b28a8e4f794b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.listing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",127,bf38d5f4835ec9bdfb8e90beecb1374cf862eb5a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.logistics,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",129,acbaf379bf3010246df0ca0704420aabe7f9e466,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.metadata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",216,ed5aca0bdf95f4acc7c318aaf494b4529c92190d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ebay.negotiation,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,8e4beff708665b4b43fdce89bcdaa5538082c61c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-ebay.recommendation,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",122,8ac17a96660bb7f38fa0372b6fba14b9684a77cb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-edifact,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",837,08c21a993c188f5c6d2bb7e82a87e7a8ea100a89,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,3
+ballerina-platform,module-ballerinax-elastic.elasticcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",755,fd9858f7bb780c7555c9930a60d2341fee54915e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-financial.bian,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,06ab3432fa977da68cf9f6cbbefc3dabe569e82e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-financial.iso20022,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",225,56f85ed9f51488fdf1b629c1889ed3a09a01ddab,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,41
+ballerina-platform,module-ballerinax-financial.iso20022-to-swiftmt,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",661,ece3fb3c1bac6322e223c1c47fcc2d299491b06e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,68
+ballerina-platform,module-ballerinax-financial.iso8583,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",72,cb3e7561ce84a8eb18b6b1cf8a7120e20f8cb9e9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-financial.swiftmt,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6083,30c368b8d31049c2e0ec77761330a6176a648e72,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,60
+ballerina-platform,module-ballerinax-financial.swiftmt-to-iso20022,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",752,72cd117fc51a5b2b9bffe9507647272e10e06a37,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,74
+ballerina-platform,module-ballerinax-flatapi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",175,6b1f9c44a19ef031bedbb15ecf943b2689f80a1d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-freemarker,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",301,45e3492e286d1e2e9a3e309e1158ef8342cbbf06,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-gcalendar,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2086,b73ea91d29eaadf1c38f600e1d3eab13e64313ad,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-gcloud.pubsub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",214,bb1c59de4523334de1a62cc6c86ddb86f2fe119a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-github,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6142,5938a08e1ed8f280bc053bd7738eac7f97bf5fe6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-github.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1666,aa536b23460400b463be1cc2ca63150053f487ae,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-gitlab,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",84,1fc544dd2015914b30997265b917214815e902b0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-googleapis.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1956,a3dbad49e38880addd4c36b608710e4b4a9da2f7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,34
+ballerina-platform,module-ballerinax-googleapis.drive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1150,3b53cf0633b7d252e3d00ee2caf64a1218ec6a30,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,56
+ballerina-platform,module-ballerinax-googleapis.gdocs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,1f32920e9c5d5e97c3b9e287c0c7286a21ef8934,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-googleapis.gemini,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,45f56bfbbd7af85ded36413e8c616b58ffa2636f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-googleapis.gforms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,694fd6da40d2f13ad4c282790c683d378eff0afc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-googleapis.gmail,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3164,f36f520d2287b86411ecb844d8f2178c3a8e2500,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,28
+ballerina-platform,module-ballerinax-googleapis.people,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1097,a02ae7f73bce5fe29d0d2c67dcae6ae0191377df,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerinax-googleapis.sheets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4965,139c8d34d4952a6648f87b95517eb95be4fcd4fd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,26
+ballerina-platform,module-ballerinax-graphhopper.directions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",277,704483c29b18ab1a9ec7e587535d1164e003dfc0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-guidewire.insnow,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",320,53e2f5d47e21d1fbe91ec6887810c6ad7a619c8f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-h2.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",238,164644fdfd7a4dcfbdf5d6b3ef34c5fef4a4e4eb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-health.base,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",50,603d964ce8dceea9519e5a7c03d02ba8b489e5cb,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-health.ccda,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",50,a4679d7bf4dc9e904839f999a44fa758e8a88e5a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-health.clients,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2024,cb4c76cc7be7de19e7643a64d91595b8b1a0d6a0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,30
+ballerina-platform,module-ballerinax-health.dicom,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2045,60e84e81c7478a8e3d3a77f3b2ae58a6945c5fc1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,54
+ballerina-platform,module-ballerinax-health.fhir.r4,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",8100,bea524de4bc646fa371878b1e6faca527e390dc2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1247
+ballerina-platform,module-ballerinax-health.fhir.r5,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1087,392344b9a23d6af778686598020bd673dd819bd3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,341
+ballerina-platform,module-ballerinax-health.fhir.templates,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",948,007354ad9b80424629a11a28fe58e18a14a1c210,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,773
+ballerina-platform,module-ballerinax-health.hl7v2,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5029,9e846a4913fa705001e587eab70e40b091afd917,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16866
+ballerina-platform,module-ballerinax-hubspot.automation.actions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2070,a8a0c3337918f6306dc385016f4fc01eef19a7a1,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-hubspot.crm.associations,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5442,ea73a5f5c03aed2ec7cdebf41c75edbbcfd6ce29,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.associations.schema,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1400,075cb5ffa95962c29105ecdccb464f29109564a8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-hubspot.crm.commerce.carts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2480,f967540a81bce6edf5425bad1019ad4c311b8192,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.commerce.discounts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1836,06e86b94ef58e64175bd2c59c76b1f3edbabdabc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-hubspot.crm.commerce.orders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2612,9362273e3b795a53170b9cc8e3d77959348c0be4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-hubspot.crm.commerce.quotes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1022,f677cb62cde0510a5245ca48e788f211213a9ce9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.commerce.taxes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1982,f1093177062185cedb19a39e1b6ee808443d4355,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-hubspot.crm.engagement.meeting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2274,4d80105c09502bf434b00b87d2b682614842fe55,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-hubspot.crm.engagement.notes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2319,651dfc313b3c18720e0fba59772a0d389d6f1dc8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.engagements.calls,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4304,ae7a1e4692d3e1c6e9a49c2c67537e9ba0b77d8f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-hubspot.crm.engagements.communications,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1087,567d5a26366534ce2de07c3e3c11a6bbd4d8b038,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.engagements.email,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2017,8999e7ce9f51470367c60dbc3499c6c45f2e79aa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-hubspot.crm.engagements.tasks,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6740,ebd44cab0d74d15fb7762db5ceb90654f679c67c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.extensions.timelines,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2587,09b3d88dae0403a6075f171740b56497133a0f46,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-hubspot.crm.extensions.videoconferencing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1896,2d275a3209299a727253b7b085c4b0ef7fed0661,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-hubspot.crm.import,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2024,4ab5820ece0bface0425746caaf9fc36b5a21f75,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-hubspot.crm.lists,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2656,3ed5eae85f47058c0ec5c77088c274f4ff3260e9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.companies,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2663,ac0678896146d3ac246bf8e97c157e04be7394ce,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.contacts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2049,256204aba0cf1cb1a8da48f2610842991d8821f8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.deals,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2943,7d5199bf68ff84d3a09b51d7a42a7623725b37a9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.feedback,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2304,54fd615f12a43c17b07682188e2a4d3f98445947,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-hubspot.crm.obj.leads,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2283,1e6935d8f134070772baaa5be08458d7613b6253,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.lineitems,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2323,4b68cee6cd9ba16c84f9cbc17bc4e054c0d3b76e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.products,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2298,e34a95d15f274da76d3e6872b4798c57621393be,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.crm.obj.schemas,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2660,0c097a642575c8df50db14b47984ea47fd439c9e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-hubspot.crm.obj.tickets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2174,8404362efabd388d5bc01b05f73e28c0785b4c50,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-hubspot.crm.owners,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1727,0675263bdc8cda2a322c7f06b74997f82e7b1025,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-hubspot.crm.pipelines,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2639,32f60093193e56e9315ae9bff741c24280bd8e9e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-hubspot.crm.properties,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2779,fe666a2cde51c54748b4e5db3e3aa0b81d0607bd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.events,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,00587b152372a37f914d41a156edb4bfe8957c5d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-hubspot.events.completions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",223,997797c42891e345fb2157d3ae539ac8d71bbce0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-hubspot.events.definitions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",82,bfc6b7034b203e4d105376b33942540d7bbed2dd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-hubspot.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",88,077051f181a2727cd765f383bbb3a322eda5ae18,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-hubspot.marketing.campaigns,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2296,2fb41a26a58e7bdadc385a80f05e9bf7129e4975,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-hubspot.marketing.emails,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2704,d1d13dfcfc2dc4499a2bd652759f61486448bfc0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.marketing.events,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2900,fa0be7492fe8dc7ca92d702d4dbdca75051e1cc8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.marketing.forms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3252,5c0663ad24ca111fbfabf2e241e8ab62e24f6d24,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-hubspot.marketing.subscriptions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2173,e484668de14e1b63c0805550977f7b26a0e6aa5e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-hubspot.marketing.transactional,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3980,042b0d8fe3aa8fb836e36cdefd2b7d45cf17df1f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-hubspot.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",598,e8ba47c5cfaed9edc25465510f7487f0d206cc93,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-huggingface.tgi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",243,0c62204f51003b4f4765a60198fa395b68ff6910,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ibm.ctg,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",185,b850e40761c792e58af767a9ab6cf782128b06aa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerinax-ibm.db2,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",9356,366601dc263dcde2e2b46c8b86cc6150fac3bdea,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-ibm.db2.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",28,9d4f659de522f03388cc0d2f4508adac42c64d8f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-ibm.ibmmq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1829,a662ed25acafc80f84b4439ceab223159c42346b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,36
+ballerina-platform,module-ballerinax-identityserver.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",668,bf6aeed19224832f0cbf72cfa6e6c8f80a6c2cb9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-idetraceprovider,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",177,2cd643dd1473208cc0efa7ef65d7a28f87f251a4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-intercom,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",453,5c1f1a73de90f17ee19b692b357628f01a0dfbca,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,21
+ballerina-platform,module-ballerinax-interzoid.currencyexchange,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,30309f7a85f5c31a43b94ce63a56772d07bdad19,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-interzoid.currencyrate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,38bad2a152f5b8675b11f27e764ebc9a77cedc12,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-interzoid.emailinfo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",124,6a1bda57e7989256c279847f46084836ba0a839a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-interzoid.globalnumberinfo,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",121,6dbaf6b17d527ccec36cff61a1e3cee8ce32d2c8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-interzoid.statedata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",123,d1915da8ace18bfcd49826af9a05cc70f34c4064,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-interzoid.weatherzip,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",123,e801af3b24be7e7151c70004e88ef349a9588d02,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-jaeger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",729,4e98f5f98ceb1d3fbdb380c4b97df58d30c2a933,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-java.jdbc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",17565,c3d0fe25ca76be4044ca4e70665dc20b07dd5787,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,40
+ballerina-platform,module-ballerinax-java.jms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1610,ac104f295371f60517ac912974593caabae1e01f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,47
+ballerina-platform,module-ballerinax-jira,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2407,fac3bd9e1d695c9a2980abedfad3c134599b0de5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-jira.servicemanagement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",155,48a9ffd0886f406f41785e88ad0aa6d34b139e7b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-kafka,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",31131,ececee316070d5209a649beddbb2c788f1a3d0bf,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,150
+ballerina-platform,module-ballerinax-karbon,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",291,c1d3b2ae782cb95b53e46fa1b43ab16b88da3363,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-linkedin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,b03f79ec8b13039f8301de83c1a132a0e29de8fd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-listennotes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",120,183c6279e2e6c1137669ced9f363910e3842d7e3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-mailchimp,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",70,4f8ca0474af3fa442c491b803f28bca6937da926,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-mailchimp.marketing,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",759,bab2ffaa6d31d350e24ef37130c9ae03ae7346c2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-mailchimp.transactional,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",995,3c2e419f2968b439ac7f78173d26271758bb18dd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-metrics.logs,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",139,d2b8067a2e5b73ad6a6679b7eac2f551f69b3e66,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-microsoft.dynamics365.assetmanagement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,1eb1b68ddd3a3fc7a77bac4422caaf8b9c082588,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.dynamics365.bc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1771,922445536c1091fb2415727496b5f23bd1a23c2b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-microsoft.dynamics365.commerce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,336cd4ace4e46131824190b4d64bbf767596c5ed,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.dynamics365.finance,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1727,fb15cb2f34749e8a031344943c107e115b93d7c4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,310
+ballerina-platform,module-ballerinax-microsoft.dynamics365.hr,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,4360449880dfb52a7a8c6b1cfcb50977146d61b2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.dynamics365.scm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",393,bf1929984148aaf0b3ff12f3cd1662947f925d87,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-microsoft.excel,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3856,bfd57fc16d13cd3af9bb4bf7dac4ec719ab9f11c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-microsoft.onedrive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3657,08691651803afe9344245711a1f0a618ad6e3fe7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-microsoft.onenote,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2034,74a6c7b8f743a1fd49817e60c5f1fcf52b3316f5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-microsoft.outlook.calendar,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1369,4a0a76a341775b87cddb3a5f659322388a264a01,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-microsoft.outlook.mail,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",14230,3f29cd54cb6eaa179a3d5785f5dd74d9e8c623da,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-microsoft.sharepoint,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3057,988169086aaa784b68f1fb3c8d5c8511422a2303,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-microsoft.sharepoint.admin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,b961195dbb38a8f5b78025bfe91c7a0bf66e43d2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.sharepoint.embedded,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,b84782c5ddedb9054b449dd27a7183f7c5e5c480,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.sharepoint.lists,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3644,5e36373a0d30ef2a6932109b2077dbdf1e0591a4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerinax-microsoft.sharepoint.onenote,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",83,a8579a03bff819ea78844b4261f4ac837abcd2d6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-microsoft.sharepoint.pages,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3776,9366d9412c4a5f297cf0b66f8d49597ea72f001b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-microsoft.sharepoint.sites,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3091,83079cf75a8a5fc360b4350c422d665379c9f3c0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerinax-microsoft.sharepoint.termstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",83,f38243f10249af5bdd4af3f6c01569a1432ef136,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-microsoft.teams,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2826,b22b7d6384c9d6f8230e155ef27058baff7e98c7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-milvus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1384,3ca8864ec0bde1a800949a295da2bd69150a6caf,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerinax-mistral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",790,a3c29e6cd1d6803c46812911b296980498634b79,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,11
+ballerina-platform,module-ballerinax-moesif,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",207,883b9cce485f52eb1cb10186eaaae54c23bfc161,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerinax-mongodb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1672,42a8ccc0033108503f5c21ac067d26b4c6de153e,2026-11-21,,b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1,24
+ballerina-platform,module-ballerinax-mssql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4654,3d6c4493da7792dafe79c6a0bab8b6f6a4b252a0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,49
+ballerina-platform,module-ballerinax-mssql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",207,00bccd49e9f2c72052920b6990603ec818b21ae8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-mssql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",384,1594f477ed2371a4ffd0cbf1cafaa163ec31c4fa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-mysql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5219,1b94a662a8c74f52f264eee7ecc994c656580ff3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,55
+ballerina-platform,module-ballerinax-mysql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",202,5e663ec52cf83191df2abacfb6b78017c1dd12b3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-mysql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",340,616544f44ebf4a64a1bb25e394f68ceabebcfb41,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-nats,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",27332,712d438f34050a6138e877311879064b8652f05c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,153
+ballerina-platform,module-ballerinax-netsuite,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",38595,0c641db20ee949c44d09ce4137128f6973d489b2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,33
+ballerina-platform,module-ballerinax-newrelic,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",294,c4a1d21ba9560e86f7eb9cee8f3adef53fbf3ec2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-notion,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2771,e655d62043cba2f5347cb181fefeb91c6a2043d3,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,21
+ballerina-platform,module-ballerinax-np,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",263,2c4821a06978f617c389048f2067b54a0c752ff5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-onepassword,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",160,7657b15c35179a4a0076a09090afc2123abc81c4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-openai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1906,baa5a0527a943c453e2aeafa2ce310398644ad5b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-openai.assistants,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",789,b9b2febbf0265d384439fefdbf4dc256666a5638,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-openai.audio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2115,a72f7d4814fcefd8cd8fe4614d99de961b19e344,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-openai.chat,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2535,f41c5ab1627cb069709098ad7f33d08955e0262c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-openai.finetunes,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2140,0ee920928fe6088c95b6c8064061fb34128f3d03,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-openai.images,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5418,87f0f5cbdc08b8101faaedf65c1f7cc66d4a3eff,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-openai.responses,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1261,4b2b745645253ff76b2184345ada638c3dd0c068,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-openrouter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",308,be1ad1ef741a1ff2a3bcd9d831d8078797c04e0e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-oracledb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",3409,22002292fdf134afb400be1f00c204f89c615bc9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,50
+ballerina-platform,module-ballerinax-oracledb.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",176,88bb8590082ab86efa3ef5a3a729e25b46d00c47,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-oracledb.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",333,3a20dc4ab260340b5bb2134e5cfdf46741cac2f5,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-oraclefusion.common.scheduler,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",198,6b17828b3f81bba11a27e1b3d22060f150d82653,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-oraclefusion.erp.integrations,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",149,2070d09ef5af01217ea6a50de15f37efd7a7b9fc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-pandadoc,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",414,858541f46176f64659cc2e21de502081ecf0ffe7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-paypal.invoices,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",983,fe54e2dcb6a0c5334589284f5e25ff6dca59f84a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-paypal.orders,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1012,3915cd120fd8088a9bf758cbb45e8d5e83eef326,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-paypal.payments,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",985,3fb66bd0dc91c6a6391cd84a4b6905619a728302,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-paypal.subscriptions,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1590,d6b97a9b67696cf7ab49f1f738ac3b937182d38c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-peoplehr,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",115,4758dfb7cb506d491a0f100e752ac323a24e743f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerinax-persist.googlesheets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",493,f1278c912ff9f0e6c6eebdbfadd2e35539b59662,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,25
+ballerina-platform,module-ballerinax-persist.inmemory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",365,3ef5386e1ad4bb3316dce8aa56dc1a996237b7a8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerinax-persist.redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",431,72a1085fc196f47efb65c8f36857bbc50515fbfd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,32
+ballerina-platform,module-ballerinax-persist.sql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1150,284bc9168a44b4704f0abfb9022ddc61c0e019de,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,153
+ballerina-platform,module-ballerinax-pgvector,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,44cd6db2119b68c30469399a102a5e1efdb43818,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-pipedrive,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",373,0d9853e1197894fa04bb81c4ac24f85691f29a3b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-plaid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",486,dd6871f1a0b9d5d57ed205269896ec2b9e99fe01,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-pocketsmith,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",128,c3a1f3fddfb21333164210e035492914260c4e92,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-postgresql,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4180,94887585285470d4eeca56f434db23b5eecc1e84,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,59
+ballerina-platform,module-ballerinax-postgresql.cdc.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",254,be59ee5075f03ab97daa0791a5bcddc909ab2a38,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-postgresql.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",283,0e735c717284eb7b4013b514abca1a014821cc57,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-power.bi,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",218,adee32912a8e402a72ada1a34feaab350abf515d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-pricefx,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2519,9ad3ef3ebd4e879cdcf854a15dd91128fcd89dac,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,23
+ballerina-platform,module-ballerinax-prometheus,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",517,fd3f1ab591c5f93e0bf575d77601aabc01b15afe,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-quickbooks.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",550,4f4122bdc5399972891a7d4e847f0f742a165cf0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-rabbitmq,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",27669,f25b7399036e0c90f792527de1a9ec3a1d52c27f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,112
+ballerina-platform,module-ballerinax-reckon.one,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",324,4425e574a309c6aaee60f85f1a91678d5b6b4370,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-recurly,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",602,f0b6c3a86f04e79206dde6d6d810c90138bce63f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-redis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",34297,9d601b67551a37150d5f78dd7bf7a2c70f5c7f84,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,28
+ballerina-platform,module-ballerinax-rudderstack,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1159,52b0784caad9d7c2b417e255d7cc0f26348213a2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-runzero,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",244,a3b73f8513ce1b06b1676f35c10b2c9d9a143239,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-sakari.sms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",134,32f109a8829210948812ee3b532e5b80a81ad979,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-salesforce,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",15280,3939cc5661c2fd379db3ede32ade58cc2c267434,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,130
+ballerina-platform,module-ballerinax-salesforce.datacloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1306,098c9749cbc3fb11c819bdda934a3d2464353ed2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
+ballerina-platform,module-ballerinax-salesforce.marketingcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1320,535625c818566b2b736fd26cfd3fa42c4b25f16b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-salesforce.pubsub,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",512,0844484ee73534a7e4d702bab731f15d1a060a1b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,48
+ballerina-platform,module-ballerinax-sap,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1346,56cbaff46f419a7576a310dd4f8c4ea0c857c694,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,22
+ballerina-platform,module-ballerinax-sap.businessone,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4569,f06691e0e4e9e571e0c1855c69ed6e224e125b07,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,118
+ballerina-platform,module-ballerinax-sap.commerce.webservices,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",607,1587f347951d25a1f46e699cf7cecefd06949ffa,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-sap.concur.sharedapis,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,905105ceb152b04779da7585466406a6ade008fd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-sap.jco,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",28815,f208113ce4df7ef0d9e2019890d974ace1b4a5f7,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,34
+ballerina-platform,module-ballerinax-sap.s4hana.delivery,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1950,c4aecc11a81d4cb64903edfb6a057e9403a0657f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,45
+ballerina-platform,module-ballerinax-sap.s4hana.inventory,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1296,a418abc882991d989d50c73dfbf718d7723d7121,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,52
+ballerina-platform,module-ballerinax-sap.s4hana.masterdata,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1104,60d4d5c394508e47789650ede94b19c50741e3dc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-sap.s4hana.procurement,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1225,498ca589fc937b57a86488781b87d056739f575a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,14
+ballerina-platform,module-ballerinax-sap.s4hana.qm,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2855,75c062b4d437be1e1d69ba428ed2fea9ac779f1f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,61
+ballerina-platform,module-ballerinax-sap.s4hana.sales,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2732,8b37e63e267dc0c619926b2c93d99a61ea47c92f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,145
+ballerina-platform,module-ballerinax-sap.signavio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",422,bcca8b613ed0fbdddc7b2a11863dbd8a5dcffe2d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,18
+ballerina-platform,module-ballerinax-sap.successfactors.employeecentral,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2433,61d18ad06259a0f0ff80227a02adf01537c85a95,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,182
+ballerina-platform,module-ballerinax-sap.successfactors.recruiting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",7,a98b9402d7702e60d00304709398120ce7939944,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-scim,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",640,c15a9f73b8c025e7de6090cd7c6f899053465e51,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-sendgrid,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",78,3ff9d2ceda8870af5348896dc6993f58a90cf7de,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-shipwire.receivings,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",118,3f4adbcd97d45c2181c488916d1167e43e4a0580,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-shopify.admin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",17711,a18884ecdf9168fe9507cb2ccc87a6b502b6e519,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-shopify.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1668,5639b0c48a1efcac8eb79c65a8e4e237b2315206,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-shortcut,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",260,f1b8fe7d94941a8ac877251815f623a39bb2eb4c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-slack,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2823,51ae33e28866de203126c7373380202992bf974b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-slack.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",859,466c212563c71f8126db2acdea788ce9e3074cbe,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-smartsheet,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",227,ba6252e7f5fc23060bbedbb9cfc5df54c2916341,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,13
+ballerina-platform,module-ballerinax-snowflake,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1404,b4e5429196181628457a4db3749d0cd2e6711f92,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,21
+ballerina-platform,module-ballerinax-snowflake.driver,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",23838,ee9da96f1e34380f9e4022d0572039abfb88026e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,5
+ballerina-platform,module-ballerinax-solace,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",835,338cd7562b9222f76e3b60b380bddf10e153774e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,58
+ballerina-platform,module-ballerinax-solace.jms,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",520,479fe0db8f7f038269e1140c90a530f90a87b9e8,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,53
+ballerina-platform,module-ballerinax-soundcloud,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",180,842f50c7501aa835593d2f356d3f71f5063a84b6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-spotify,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",404,76ffc2d50fe6cae8c57a16caf4bf8f083a375245,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-square,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1292,d7c9b6ada401d8751223e6e70ec533df81b882c6,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-storecove,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",329,12228927138114def240634021e48365f0119bcd,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-stripe,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",5390,bf765221a3b9bdcc5bb886bd89a0031628b66b21,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-tableau,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",161,77763070610f974b4330cb3e9d2a7a26703b94bc,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+ballerina-platform,module-ballerinax-telegram,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",461,7f398b53e8963cf3cc30c1c15464a34e5430951a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,25
+ballerina-platform,module-ballerinax-temporal,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",140,016e9d53b753883bffd9c5324f888e938a1fe7b2,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,1
+ballerina-platform,module-ballerinax-themoviedb,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",226,cc08788318b4dca5bf1ba4798a86bd8b8db62029,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-trello,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",367,f0476ba82cc92486f7686009505760fa67473c7e,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-twilio,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",4234,cc3a1916f6206e9fa1f601167b7464c3eeb1f188,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,44
+ballerina-platform,module-ballerinax-twilio.trigger,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",229,59d32a71caefd54bb829decc3a5a973b0bf61757,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-twitter,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2299,47ff9cd5a98a5aaee6e27d0ca0fb4e86739f2601,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-weaviate,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",176,b92f8d766ff3baa1cb5a4f0cf01fafa17fc1839b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-webscraping.ai,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",116,79e4361cb5ef6a4a508d1e0dda018bb349b2556b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-whatsapp.business,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",258,2eaa8f59f42cb9965dea369b5c0ed55a44c0c65f,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,20
+ballerina-platform,module-ballerinax-wso2.apim.catalog,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",430,c524be7a6c245eaec81a4d0d3e13210176c119ab,2026-11-21,,cf90d659de5c1e6418267ab8043b756e65508ee5d8d50b29eb2d2fe444c2c3eb,42
+ballerina-platform,module-ballerinax-wso2.controlplane,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",386,8ff3303013fc6a802ec85b1d8e16ea1d91494061,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,12
+ballerina-platform,module-ballerinax-xero.accounts,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",553,b7ab105708c69ba481a783f570ce78931d287566,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,19
+ballerina-platform,module-ballerinax-xero.appstore,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",128,cf44f008abd3e313045c701297309f64c624fa47,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-xero.assets,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",137,af48b8da6137ea102e8c01c2638cf66c42623727,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-xero.bankfeeds,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",129,16f28b10eae6259241cf3c656485daa3591e1aab,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-xero.files,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",114,db8a90d69f9fa87cd0886fae494dcb8ba78ffc7d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-xero.finance,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",143,82d7d52f734c7665edf75b2485dece001a634d05,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-xero.projects,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",153,507eb5eccf1cf570c2bd43ae106ec7978eecad44,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-ynab,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",168,9e8f7407241925a6f595584611e385f7f37fcec4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-zendesk,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",924,480c27d203cbd9f9536d58fc3a41a1473c1300b9,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-zipkin,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",6662,c6da4c857785c1508f6cda332748706e4a30006d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,10
+ballerina-platform,module-ballerinax-zoom.meetings,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1614,57521eb8e9b2d1c478a41bae15faec6d68429906,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
+ballerina-platform,module-ballerinax-zoom.scheduler,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",1919,1950a13a3ed1eea0c5bc229892ad5bdcf3a6486c,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,16
+ballerina-platform,module-ballerinax-zoom.zmeeting,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",74,58d60cf34171c0b69b398563b66a0acbefc1d9b0,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,7
+ballerina-platform,module-ballerinax-zuora,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",2713,e960cdffa84f15bf495a1b90d2f8483a1b4b5637,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,8
+ballerina-platform,module-ballerinax-zuora.collection,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",85,3f0d4755b132ea0901454088bda4e5fe09ef462d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,6
+ballerina-platform,module-ballerinax-zuora.revenue,Apache-2.0,safe,"corpus (down-weight generated client/types), rag",114,a85c3a1056c7497e0022a6d7275f315a5c4aabd4,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,15
 ballerina-platform,nballerina,Apache-2.0,safe,see notes,9948,,2026-11-16,,,
 ballerina-platform,openapi-connectors,Apache-2.0,safe,exclude expected-output tests; corpus (tool sources only),46377,,2026-11-16,"generated code (1,114 .bal, 0 tests): down-weight",,
 ballerina-platform,openapi-tools,Apache-2.0,safe,exclude expected-output tests; corpus (tool sources only),16281,,2026-11-16,,,

@@ -21,12 +21,10 @@
 
 from __future__ import annotations
 
-import io
 import json
 import logging
 import os
 import re
-import tarfile
 import tempfile
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -40,6 +38,8 @@ from balpipe_common.decontam import Decontaminator, apply_decontam, pack_shingle
 from balpipe_common.dedup import MinHasher, code_hash, shingle_hashes
 from balpipe_common.ids import sha256_text, utc_now_iso
 from balpipe_common.lock import SourceLock
+
+from ballerinascraper.bbe_source import examples_snapshot, tag_commit
 
 from sftgen.eval.verify import Verifier, verify_mode
 
@@ -78,17 +78,6 @@ def split_for(name: str, fraction: float, salt: str = "bbe-split") -> str:
 # --------------------------------------------------------------------------- #
 # Pin and snapshot
 # --------------------------------------------------------------------------- #
-def tag_commit(url: str, tag: str) -> str:
-    from ballerinascraper.repos import _git
-
-    out = _git("ls-remote", url, f"refs/tags/{tag}", f"refs/tags/{tag}^{{}}", timeout=120)
-    refs = dict(reversed(line.split("\t", 1)) for line in out.splitlines() if "\t" in line)
-    sha = refs.get(f"refs/tags/{tag}^{{}}") or refs.get(f"refs/tags/{tag}")  # annotated tags peel to the commit
-    if not sha:
-        raise RuntimeError(f"tag {tag} not found at {url}")
-    return sha
-
-
 def pinned_commit(lock: SourceLock, repo: str, url: str, tag: str, *, update: bool) -> str:
     locked = lock.get("bbe", repo)
     if locked and locked.get("ref") == tag and locked.get("commit") and not update:
@@ -96,29 +85,6 @@ def pinned_commit(lock: SourceLock, repo: str, url: str, tag: str, *, update: bo
     commit = tag_commit(url, tag)
     lock.set("bbe", repo, {"ref": tag, "commit": commit})
     return commit
-
-
-def examples_snapshot(s: Settings, url: str, commit: str) -> dict[str, bytes]:
-    """{path: bytes} under the examples folder at the commit; cached as a tarball."""
-    cache = s.cache_dir / "bbe" / f"examples@{commit[:12]}.tar.gz"
-    if cache.is_file():
-        with tarfile.open(cache) as tar:
-            return {m.name: tar.extractfile(m).read() for m in tar.getmembers() if m.isfile()}  # type: ignore[union-attr]
-    from ballerinascraper.repos import take_snapshot
-
-    path = s.sources.github.bbe_path.strip("/")
-    cfg = s.repos.model_copy(update={"sparse_patterns": [f"{path}/**"], "exclude_paths": [],
-                                     "max_file_bytes": 2_000_000})
-    snap = take_snapshot(url, commit, s.cache_dir / "bbe" / "work", cfg)
-    cache.parent.mkdir(parents=True, exist_ok=True)
-    tmp = cache.with_name(f".{cache.name}.part")
-    with tarfile.open(tmp, "w:gz") as tar:
-        for rel, data in snap.files.items():
-            ti = tarfile.TarInfo(rel)
-            ti.size = len(data)
-            tar.addfile(ti, io.BytesIO(data))
-    tmp.replace(cache)
-    return snap.files
 
 
 def parse_examples(files: dict[str, bytes], root: str) -> tuple[list[Example], list[str]]:

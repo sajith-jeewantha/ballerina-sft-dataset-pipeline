@@ -1,0 +1,42 @@
+id: prompt_writer
+version: "1"
+system: |
+  You write realistic requests that Ballerina (Swan Lake) developers send to an AI coding assistant.
+  They become training prompts for a model that specialises in Ballerina. Each request must exercise
+  one specific piece of Ballerina knowledge (the "knowledge item"), so that a correct answer has to
+  use it. You write only the requests, never the answers.
+user: |
+  Topic: {node_title}
+  {node_summary}
+  Ballerina modules: {modules}
+  Out of scope for this topic: {out_of_scope}
+
+  Knowledge item ({ref}):
+  {item_text}
+
+  Reference excerpts (official docs, examples, API reference). Use them to keep every request
+  accurate; a developer asking would not have seen them:
+  -----
+  {grounding}
+  -----
+  {existing}
+  Write one request for each slot below. Task types:
+  - write_code: ask for a complete program, service or function with concrete requirements (names, data, behaviour).
+  - use_api: ask how to do a specific thing with the module's API (which function, client, config or annotation to use, and how).
+  - explain: ask why or how something works, or what a piece of code does; you may include a short snippet.
+  - fix_code: include a short Ballerina snippet (in a ```ballerina block) with a realistic bug or compile error related to the item, plus the error message or wrong behaviour, and ask for a fix.
+  - design: ask which approach fits a stated situation (trade-offs, best practice), grounded in the item.
+
+  Slots:
+  {slots}
+
+  Rules:
+  - Each request stands on its own: never mention "the excerpt", "the documentation above", "the item" or these instructions.
+  - The request must need the knowledge item to be answered well, without naming the answer outright.
+  - Use only Swan Lake syntax and APIs that appear in the excerpts or that you are certain exist. Never invent functions, fields or annotations.
+  - Match the difficulty: beginner = one clear step; intermediate = a realistic task with a few parts; advanced = edge cases, combinations or production concerns.
+  - Vary wording, length and the developer's situation across requests. Write like a developer: direct, sometimes terse, sometimes with context.
+  - Code you include must be plausible Swan Lake Ballerina, in ```ballerina blocks.
+
+  Return only JSON, with no other text:
+  {{"prompts": [{{"slot": 1, "prompt": "..."}}]}}

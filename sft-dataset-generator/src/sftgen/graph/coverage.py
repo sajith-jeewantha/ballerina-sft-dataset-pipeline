@@ -9,7 +9,8 @@ item has none) to scraped pages in `item_sources`:
   under the heading named by the source's note or `#section_N.N` anchor.
 * Central links (`/latest`, versions, sub-pages) match the package page.
 * GitHub blob links match the module file. Tree and repo links match any file
-  below them. `ballerina-distribution/examples/<name>` links match the BBE page.
+  below them. A GitHub file that isn't a scraped page matches a file collected by
+  `collect-repos` (`repo_files`), which grounding reads directly. `ballerina-distribution/examples/<name>` links match the BBE page.
 * Other hosts are `external`: not a source this pipeline scrapes.
 
 Item status: `grounded` (a matched page or spec section), `not_scraped` (its
@@ -119,6 +120,17 @@ def sync_loaded(db: Database, lg: LoadedGraph) -> dict[str, Any]:
         readme = [h for h in hits if re.search(r"(README|Module|Package)\.md$", h["url"])]
         return (readme or hits or [None])[0]
 
+    repo_keys = sorted(f"gh:{r['full_name']}:{r['path']}" for r in db.query(
+        "SELECT r.full_name, f.path FROM repo_files f JOIN repos r ON r.id = f.repo_id "
+        "WHERE r.status = 'collected' AND f.text IS NOT NULL AND f.eval_overlap IS NULL"))
+
+    def in_repos(key: str) -> bool:
+        if not key.startswith("gh:"):
+            return False
+        prefix = key[:-1] if key.endswith("*") else key
+        i = bisect.bisect_left(repo_keys, prefix)
+        return i < len(repo_keys) and (repo_keys[i] == key or (key.endswith("*") and repo_keys[i].startswith(prefix)))
+
     active = {g.ref(n, i) for n, i in g.iter_items()}
     existing = {r["ref"]: r["created_at"] for r in db.query("SELECT ref, created_at FROM graph_items")}
     db.execute("DELETE FROM item_sources")
@@ -140,12 +152,12 @@ def sync_loaded(db: Database, lg: LoadedGraph) -> dict[str, Any]:
             if key is None:
                 st = "external"
             elif page is None:
-                st = "not_scraped"
+                st = "matched" if in_repos(key) else "not_scraped"
             else:
                 st = "matched"
                 if page["source"] == "spec":
                     chunk_ids = _section_chunks(spec_chunks.get(page["id"], []), getattr(src, "note", None), anchor)
-            grounded = st == "matched" and (page["source"] != "spec" or bool(chunk_ids))
+            grounded = st == "matched" and (page is None or page["source"] != "spec" or bool(chunk_ids))
             statuses.append("grounded" if grounded else st)
             rows_sources.append((ref, src.url, _val(src.kind), getattr(src, "note", None), int(not own),
                                  page["id"] if page else None, json.dumps(chunk_ids), st, now, now))

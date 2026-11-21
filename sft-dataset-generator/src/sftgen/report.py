@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import html
 import json
+import logging
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -17,6 +18,8 @@ from typing import Any
 from balpipe_common.config import Settings
 from balpipe_common.db import Database
 from balpipe_common.ids import utc_now_iso
+
+log = logging.getLogger(__name__)
 
 SOURCE_LABELS = {"bbe": "Ballerina by Example", "spec": "Language spec 2024R1", "learn": "Learn docs",
                  "central": "Ballerina Central", "github": "GitHub modules"}
@@ -42,6 +45,7 @@ class ReportData:
     swan_lake: str = ""
     repos: dict[str, Any] | None = None     # collect-repos (ballerinascraper/repos.py)
     eval_set: dict[str, Any] | None = None  # build-eval (sftgen/eval/bbe.py) and decontamination
+    prompts: dict[str, Any] | None = None   # plan-prompts / generate-prompts (sftgen/generate/prompts.py)
 
     @property
     def total_pages(self) -> int:
@@ -88,8 +92,45 @@ def collect(s: Settings, db: Database) -> ReportData:
         questions_by_difficulty=by("difficulty"), question_status=by("status"),
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
-        swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db),
+        swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
     )
+
+
+def _prompts(s: Settings, db: Database) -> dict[str, Any] | None:
+    set_name = s.prompts.set_name
+    if not db.scalar("SELECT COUNT(*) FROM prompts WHERE set_name = ?", (set_name,)):
+        return None
+    plan_summary = None
+    try:
+        from sftgen.plan.planner import plan, summary
+
+        plan_summary = summary(plan(s, db), s.prompts)
+    except Exception as exc:  # the report never fails on the plan
+        log.warning("prompt plan not shown: %s", exc)
+    status = {r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM prompts WHERE set_name = ? GROUP BY 1",
+                                            (set_name,))}
+    matrix = _grouped(db.query("SELECT task_type, difficulty, COUNT(*) FROM prompts WHERE set_name = ? "
+                               "AND status = 'accepted' GROUP BY 1, 2", (set_name,)))
+    scores: dict[str, list[int]] = {}
+    reasons: dict[str, int] = {}
+    for r in db.query("SELECT review, status FROM prompts WHERE set_name = ? AND review IS NOT NULL", (set_name,)):
+        rv = json.loads(r["review"])
+        for k in ("on_item", "answerable", "clear", "realistic", "task_fit"):
+            if isinstance(rv.get(k), int):
+                scores.setdefault(k, []).append(rv[k])
+        if r["status"] == "rejected":
+            why = (rv.get("reason") or rv.get("filter") or "no reason").strip().rstrip(".")[:90]
+            reasons[why] = reasons.get(why, 0) + 1
+    samples = [dict(r) for r in db.query(
+        "SELECT id, ref, task_type, difficulty, prompt, review, grounding FROM prompts WHERE set_name = ? "
+        "AND status = 'accepted' AND eval_overlap IS NULL ORDER BY substr(prompt_hash, 1, 8) LIMIT 100",
+        (set_name,))]
+    models = db.one("SELECT GROUP_CONCAT(DISTINCT writer_model) AS w, GROUP_CONCAT(DISTINCT reviewer_model) AS r "
+                    "FROM prompts WHERE set_name = ?", (set_name,))
+    return {"set": set_name, "plan": plan_summary, "status": status, "matrix": matrix,
+            "scores": {k: round(sum(v) / len(v), 2) for k, v in scores.items() if v},
+            "reasons": dict(sorted(reasons.items(), key=lambda kv: -kv[1])[:12]), "samples": samples,
+            "writer": models["w"] if models else None, "reviewer": models["r"] if models else None}
 
 
 def _eval(db: Database) -> dict[str, Any] | None:
@@ -183,6 +224,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
           if d.coverage else []),
         *([_repos_line(d.repos)] if d.repos else []),
         *([_eval_line(d.eval_set)] if d.eval_set else []),
+        *([_prompts_line(d.prompts)] if d.prompts else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -198,6 +240,14 @@ def _repos_line(r: dict[str, Any]) -> str:
     check = sum(v.get("licence_check", 0) for v in r["groups"].values())
     return (f"Repos      {collected}/{total} collected, {check} need a licence check  |  "
             f"{kept:,} unique .bal files, ~{tokens / 1e6:.1f}M tokens")
+
+
+def _prompts_line(p: dict[str, Any]) -> str:
+    st = p["status"]
+    plan = p["plan"] or {}
+    return (f"Prompts    {p['set']}: {st.get('accepted', 0)} accepted / {plan.get('budget', '?')} planned "
+            f"({plan.get('missing', '?')} open)  |  rejected {st.get('rejected', 0)}, duplicate "
+            f"{st.get('duplicate', 0)}, eval overlap {st.get('eval_overlap', 0)}")
 
 
 def _eval_line(e: dict[str, Any]) -> str:
@@ -367,6 +417,56 @@ def _repos_html(d: ReportData) -> list[str]:
     ]
 
 
+def _prompts_html(d: ReportData) -> list[str]:
+    p = d.prompts
+    if not p:
+        return []
+    plan = p["plan"] or {"nodes": {}}
+    node_rows = [[_e(n), str(v["items"]), str(v["budget"]), str(v["accepted"]), str(v["missing"]),
+                  str(v["given_up"])] for n, v in plan["nodes"].items()]
+    diffs = ["beginner", "intermediate", "advanced"]
+    tasks = sorted(p["matrix"])
+    matrix_rows = [[_e(t), *[str(p["matrix"][t].get(dd, 0)) for dd in diffs], str(sum(p["matrix"][t].values()))]
+                   for t in tasks]
+    samples = []
+    for sm in p["samples"]:
+        rv = json.loads(sm["review"] or "{}")
+        g = json.loads(sm["grounding"] or "{}")
+        score = " · ".join(f"{k} {rv[k]}" for k in ("on_item", "answerable", "clear", "realistic", "task_fit")
+                           if k in rv)
+        samples.append(
+            f'<div class="qa"><div><span class="tag">{_e(sm["ref"])}</span><span class="tag">{_e(sm["task_type"])}'
+            f'</span><span class="tag">{_e(sm["difficulty"])}</span><span class="tag">{_e(score)}</span></div>'
+            f'{_render_answer(sm["prompt"])}<p class="muted">Grounding: '
+            + _e(", ".join(g.get("urls", [])[:4]) or "none") + "</p></div>")
+    st = p["status"]
+    return [
+        "<h2>Prompts</h2>",
+        f'<p class="muted">Set <b>{_e(p["set"])}</b> from <code>sftgen generate-prompts</code>: planned per graph item '
+        "(budget by priority, split over task types and the item's difficulties), written by "
+        f"<code>{_e(p['writer'])}</code> from the item's grounding and reviewed by <code>{_e(p['reviewer'])}</code>. "
+        "Files in <code>data/prompts/</code>.</p>",
+        '<div class="grid">' + "".join(
+            f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}</div></div>' for k, v in (
+                ("Planned", plan.get("budget", "—")), ("Accepted", st.get("accepted", 0)),
+                ("Open slots", plan.get("missing", "—")), ("Rejected", st.get("rejected", 0)),
+                ("Duplicates", st.get("duplicate", 0)), ("Eval overlap", st.get("eval_overlap", 0)))) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        '<div class="card scroll"><h3>By node</h3>' + _table(
+            ["Node", "Items", "Planned", "Accepted", "Open", "Given up"], node_rows, numeric={1, 2, 3, 4, 5}) + "</div>",
+        '<div class="card scroll"><h3>Accepted by task and difficulty</h3>' + _table(
+            ["Task", *diffs, "Total"], matrix_rows, numeric={1, 2, 3, 4}) + "</div>",
+        "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Average review scores (1-5)</h3>{_bars(p["scores"])}</div>',
+        '<div class="card"><h3>Why prompts were rejected</h3>'
+        + (_bars(p["reasons"], alt=True) if p["reasons"] else '<p class="muted">None.</p>') + "</div>",
+        "</div>",
+        f'<details style="margin-top:12px"><summary><b>{len(samples)} accepted prompts</b> (a stable sample, '
+        "for reading)</summary>" + "".join(samples) + "</details>",
+    ]
+
+
 def _eval_html(d: ReportData) -> list[str]:
     e = d.eval_set
     if not e:
@@ -453,6 +553,7 @@ def render_html(d: ReportData) -> str:
         *_coverage_html(d),
         *_repos_html(d),
         *_eval_html(d),
+        *_prompts_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

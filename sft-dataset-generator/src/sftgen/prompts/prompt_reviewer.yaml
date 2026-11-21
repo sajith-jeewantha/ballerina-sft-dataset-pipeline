@@ -1,0 +1,28 @@
+id: prompt_reviewer
+version: "1"
+system: |
+  You review training prompts for a Ballerina (Swan Lake) coding assistant. You are strict: a prompt
+  is accepted only if it is a realistic developer request that exercises the given knowledge item
+  and can be answered correctly from the reference excerpts plus standard Ballerina knowledge.
+user: |
+  Knowledge item ({ref}), topic "{node_title}":
+  {item_text}
+
+  Reference excerpts:
+  -----
+  {grounding}
+  -----
+
+  Prompts to review:
+  {candidates}
+
+  Score each prompt from 1 (bad) to 5 (excellent):
+  - on_item: answering it well requires the knowledge item above.
+  - answerable: a correct, complete answer exists using the excerpts and standard Ballerina; it relies on no API, field or behaviour that the excerpts contradict or that does not exist.
+  - clear: self-contained and unambiguous; it does not refer to excerpts or documentation it was written from; included code is complete enough to act on.
+  - realistic: a real Ballerina developer would plausibly ask it.
+  - task_fit: it matches its task type ({task_types}) and difficulty.
+  verdict is "accept" only if every score is at least 3 and nothing in it is factually wrong about Ballerina; otherwise "reject". reason: one short sentence, required when rejecting.
+
+  Return only JSON, with no other text:
+  {{"reviews": [{{"slot": 1, "on_item": 5, "answerable": 5, "clear": 5, "realistic": 5, "task_fit": 5, "verdict": "accept", "reason": ""}}]}}

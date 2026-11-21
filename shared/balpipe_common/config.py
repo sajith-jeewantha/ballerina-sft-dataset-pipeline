@@ -230,6 +230,34 @@ class SftCfg(BaseModel):
     )
 
 
+PILOT_NODES = ["lib.http", "topic.rest_api", "concept.services_listeners", "concept.resource_methods",
+               "concept.client_objects", "lib.auth", "lib.jwt", "lib.oauth2", "lib.mime"]
+TASK_TYPES = ["write_code", "use_api", "explain", "fix_code", "design"]
+
+
+class PromptsCfg(BaseModel):
+    """`plan-prompts` / `generate-prompts`: prompts planned per graph item, written and reviewed."""
+
+    set_name: str = "pilot"           # outputs go to <data>/prompts/<set_name>/
+    nodes: list[str] = Field(default_factory=lambda: list(PILOT_NODES))  # [] = every active node
+    # prompts per item, by the node's priority; spread over the item's difficulties and the task mix
+    budgets: dict[str, int] = Field(default_factory=lambda: {"core": 10, "important": 6, "long_tail": 3})
+    task_mix: dict[str, float] = Field(default_factory=lambda: {
+        "write_code": 0.35, "use_api": 0.2, "explain": 0.2, "fix_code": 0.15, "design": 0.1})
+    max_rounds: int = 3               # writer calls per item (first try + gap-fill for rejected slots)
+    writer_temperature: float = 0.8
+    reviewer_temperature: float = 0.0
+    max_writer_tokens: int = 4000
+    max_reviewer_tokens: int = 2500
+    min_score: int = 3                # every review score (1-5) must reach this to accept
+    near_duplicate_threshold: float = 0.8   # word-set Jaccard between prompts
+    # grounding passed to the writer and the reviewer
+    max_grounding_tokens: int = 3500  # approximate (chars / 4)
+    chunks_per_source: int = 2        # best-matching chunks of each matched source page
+    fts_neighbours: int = 2           # extra chunks found by full-text search on the item text
+    max_symbols: int = 6              # Central API entries (signatures, fields) named in the item
+
+
 class EvalCfg(BaseModel):
     """`build-eval`: the held-out evaluation set and the decontamination fingerprints."""
 
@@ -294,6 +322,9 @@ class Settings(BaseSettings):
     llm_base_url: str = Field(default="https://openrouter.ai/api/v1", validation_alias=AliasChoices("LLM_BASE_URL"))
     question_gen_model: str | None = Field(default=None, validation_alias=AliasChoices("QUESTION_GEN_MODEL"))
     answer_gen_model: str | None = Field(default=None, validation_alias=AliasChoices("ANSWER_GEN_MODEL"))
+    # M5: DeepSeek writes the prompts; a judge model of a different family reviews them
+    prompt_writer_model: str | None = Field(default=None, validation_alias=AliasChoices("PROMPT_WRITER_MODEL"))
+    judge_model: str | None = Field(default=None, validation_alias=AliasChoices("JUDGE_MODEL"))
     github_token: SecretStr | None = Field(default=None, validation_alias=AliasChoices("GITHUB_TOKEN"))
     limit_generating: int = Field(default=10, ge=0, validation_alias=AliasChoices("LIMIT_GENERATING"))
     limit_scrape_pages: int = Field(default=20, ge=0, validation_alias=AliasChoices("LIMIT_SCRAPE_PAGES"))
@@ -322,6 +353,7 @@ class Settings(BaseSettings):
     export: ExportCfg = Field(default_factory=ExportCfg)
     sft: SftCfg = Field(default_factory=SftCfg)
     eval_: EvalCfg = Field(default_factory=EvalCfg, alias="eval")
+    prompts: PromptsCfg = Field(default_factory=PromptsCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -370,6 +402,20 @@ class Settings(BaseSettings):
     @property
     def sft_dir(self) -> Path:
         return self.data_path(self.sft.dir)
+
+    @property
+    def writer_model(self) -> str | None:
+        """PROMPT_WRITER_MODEL, else the teacher (ANSWER_GEN_MODEL)."""
+        return self.prompt_writer_model or self.answer_gen_model
+
+    @property
+    def reviewer_model(self) -> str | None:
+        """JUDGE_MODEL, else QUESTION_GEN_MODEL."""
+        return self.judge_model or self.question_gen_model
+
+    @property
+    def prompts_dir(self) -> Path:
+        return self.data_path("prompts") / self.prompts.set_name
 
     @property
     def eval_dir(self) -> Path:

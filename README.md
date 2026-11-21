@@ -90,7 +90,7 @@ Only these sources are used. The blog is **not** used.
 
 | Source | What is collected | How |
 |---|---|---|
-| [Ballerina by Example](https://ballerina.io/learn/by-example/) (highest priority) | Each example's explanation, code and expected output, **exactly as written** | Page list from the ballerina.io sitemap; content from `ballerina-distribution/examples/<name>/` through the GitHub API. The ballerina.io page only ships the explanation inside compiled JavaScript, so the source files are the faithful copy. |
+| [Ballerina by Example](https://ballerina.io/learn/by-example/) (highest priority) | Each example's explanation, code and expected output, **exactly as written** | Page list from the ballerina.io sitemap; content from `ballerina-distribution/examples/<name>/` at the pinned tag, read from a sparse git snapshot (no API quota). The ballerina.io page only ships the explanation inside compiled JavaScript, so the source files are the faithful copy. |
 | [Learn docs](https://ballerina.io/learn/) | Guides, tools, packages, tutorials, integration patterns | ballerina.io sitemap → each page's embedded Markdown source (exact text and code fences) |
 | [Language spec 2024R1](https://ballerina.io/spec/lang/2024R1/) | The full spec, split by section headings, grammar kept as ```` ```ebnf ```` | One HTML page → structure-preserving Markdown |
 | [Ballerina Central](https://central.ballerina.io/) | Package READMEs and API docs (function, client and type signatures) | Central's public JSON API: `/2.0/registry/packages` and `/2.0/docs/<org>/<pkg>/<version>`. No HTML scraping is needed. |
@@ -122,6 +122,8 @@ without stopping the run.
 | `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
 | `sftgen graph sync` | Load the graph into the database and match each item's sources to scraped pages (also runs after every `scrape`) | item: `grounded` · `not_scraped` · `external_only` · `retired` |
 | `sftgen collect-repos` | Snapshot whole Ballerina repositories: the platform's module repos, `ballerina-guides`, wso2 and permissive external repos. Licence-gated, pinned, Swan Lake filter, dedup; up to `LIMIT_REPOS` clones per run. See [Code repositories](#code-repositories) | repo: `collected` · `excluded` · `licence_check` · `failed`; file: `kept` · `duplicate` · `near_duplicate` · `legacy` · `too_large` · `context` |
+| `sftgen plan-prompts` | Show the prompt plan for the graph nodes in scope (`prompts.nodes`): items, budget, accepted and open slots per node. Also builds the FTS5 index and the Central symbol table. No model calls | — |
+| `sftgen generate-prompts` | Fill open slots: the writer model (DeepSeek) writes prompts per graph item from its grounding; the judge model (another family) reviews them. Up to `LIMIT_GENERATING` prompts written per run. See [Item-driven prompts](#item-driven-prompts) | prompt: `accepted` · `rejected` · `duplicate` · `eval_overlap` |
 | `sftgen build-eval` | Build eval set v1 from Ballerina by Example: 30% of examples held out, tagged `node#item`, checked with `bal run`/`bal build`, and fingerprinted. Overlapping chunks, questions and repo files are flagged and left out of every export. See [Eval set and decontamination](#eval-set-and-decontamination) | eval item: `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; chunk: `eval_holdout` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
@@ -311,6 +313,9 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `item_sources` | an item's source URL matched to a scraped page (or spec section) | `matched` · `not_scraped` · `external` |
 | `eval_items` | held-out eval item (BBE example): files, `covers`, check result | `active` · `retired` |
 | `fingerprints` | exact hash, MinHash and shingles of each eval `.bal` file | — |
+| `prompts` | prompt written for a graph item: task type, difficulty, `covers`, grounding, review | `accepted` · `rejected` · `duplicate` · `eval_overlap` |
+| `symbols` | Central API entry (signatures, fields) by `module:Name`, parsed from Central pages | — |
+| `chunks_fts` | FTS5 (BM25) full-text index over chunks, for grounding | — |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -388,6 +393,42 @@ Outputs, in `data/eval/v1/`:
 `export-sft`'s `eval.jsonl` is still a validation split of the Q&A rows (by source page) for
 training; the benchmark eval set is `data/eval/`. Thresholds are in `eval:` in `pipeline.yaml`.
 
+### Item-driven prompts
+
+`sftgen generate-prompts` writes the training prompts **per knowledge-graph item**, rather than
+per scraped chunk, so coverage follows the graph.
+
+1. **Plan** (`sftgen plan-prompts`, no model calls). Scope is `prompts.nodes`; the pilot is the
+   HTTP cluster (`lib.http`, `topic.rest_api`, services and listeners, resource methods, client
+   objects, auth, jwt, oauth2, mime: 122 items, 884 prompts). Each item gets a budget by its
+   node's priority (core 10, important 6, long tail 3), split over the task mix (`write_code`,
+   `use_api`, `explain`, `fix_code`, `design`) and the item's own difficulties.
+2. **Ground** each item, up to ~3,500 tokens:
+   - **Own sources:** the item's own source pages (best-matching chunks; for the spec, only the
+     named section). GitHub files are read from the repos `collect-repos` snapshotted.
+   - **Central symbols:** exact signatures and fields for the names the item mentions.
+   - **Node sources:** the node's sources, for items without their own.
+   - **FTS5 neighbours:** the best BM25 matches anywhere in the corpus.
+
+   Nothing that overlaps the eval set is used.
+3. **Write:** one call per item to the writer, `PROMPT_WRITER_MODEL` (default
+   `ANSWER_GEN_MODEL`, the DeepSeek teacher), with the item, its grounding and the open slots.
+4. **Filter:**
+   - prompts that refer to "the excerpts";
+   - near-duplicates of prompts already in the set;
+   - prompts that overlap the eval set.
+5. **Review:** one call per item to the judge, `JUDGE_MODEL` (default `QUESTION_GEN_MODEL`). It
+   must be a different model family from the writer. It scores each prompt 1–5 for on-item,
+   answerable, clear, realistic and task fit, and a prompt is accepted only if every score is
+   at least 3.
+6. **Gap-fill:** rejected slots stay open. The next run writes them again and shows the writer
+   the prompts already accepted, up to 3 writer calls per item.
+
+Outputs, in `data/prompts/<set>/`: `accepted.jsonl` (with `covers`, task type, difficulty,
+grounding URLs and review scores), `rejected.jsonl` and `coverage.json` (planned and accepted
+per item). The report shows the plan per node, the task × difficulty mix, review scores,
+rejection reasons and 100 accepted prompts to read. Answers for these prompts come in M6.
+
 ### Local folder and cloud bucket
 
 Everything the pipeline writes lives under **`LOCAL_DATA_DIR`** (default `data/`). That folder is
@@ -452,10 +493,12 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── cli.py                # the commands
 │   │   ├── clean/                # extractors (page → Markdown) · question dedup
 │   │   ├── chunk/                # heading-aware chunker
-│   │   ├── generate/             # questions · answers · LLM client
+│   │   ├── generate/             # questions · answers · prompts (writer/reviewer) · LLM client
 │   │   ├── validate/             # bal compiler wrapper
 │   │   ├── export/               # dataset.jsonl · sft (chat messages)
 │   │   ├── eval/                 # build-eval: BBE split, eval items, bal run checks
+│   │   ├── plan/                 # planner: item budgets, slots, gaps
+│   │   ├── retrieval/            # FTS5 search · Central symbol table · grounding per item
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
 │   └── tests/
@@ -598,6 +641,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen graph validate` | Check the knowledge graph before using it |
 | `sftgen collect-repos --group guides` | Collect one repo group; `LIMIT_REPOS=0` for all of it |
 | `sftgen collect-repos --repo owner/name` | Collect one repository |
+| `sftgen plan-prompts` | See budgets, accepted and open prompt slots per node before spending anything |
+| `LIMIT_GENERATING=30 sftgen generate-prompts` | A small prompt batch (about 3 items) to check quality and cost |
 | `sftgen build-eval` | Rebuild the eval set and re-flag overlaps (after a new Swan Lake pin) |
 | `sftgen build-eval --recheck` | Re-run every `bal run`/`bal build` check, e.g. after installing a new `bal` |
 | `sftgen storage status` | See what's local only, changed, or only in the bucket |
@@ -615,7 +660,7 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 
 | Where | What | Committed? |
 |---|---|---|
-| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `GITHUB_TOKEN`, the run limits above, and the storage switch (`STORAGE_BUCKET`, `STORAGE_PROVIDER`, `BUCKET_NAME`, `BUCKET_PREFIX`, `LOCAL_DATA_DIR`, `AWS_*`, `S3_ENDPOINT_URL`) | ❌ never |
+| `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `PROMPT_WRITER_MODEL`, `JUDGE_MODEL`, `GITHUB_TOKEN`, the run limits above, and the storage switch (`STORAGE_BUCKET`, `STORAGE_PROVIDER`, `BUCKET_NAME`, `BUCKET_PREFIX`, `LOCAL_DATA_DIR`, `AWS_*`, `S3_ENDPOINT_URL`) | ❌ never |
 | `config/pipeline.yaml` | source filters, crawl politeness, chunk size, concurrency, temperatures, compiler settings, export, SFT export (eval share, system prompt, citation stripping), report, and bucket snapshot settings. Output paths are relative to `LOCAL_DATA_DIR` | ✅ |
 
 - Precedence: **environment > `.env` > `pipeline.yaml` > defaults**. Empty values in `.env` are

@@ -374,6 +374,2186 @@
    "commit": "0022f3fd2fc1e4ec5519d433fa4f8366192fbdc5",
    "locked_at": "2026-11-21T11:03:46Z"
   },
+  "ballerina-platform/module-ballerina-a2a": {
+   "ref": "main",
+   "commit": "66199a2f74e179a7451571539ec334b3b7d1a1d0",
+   "locked_at": "2026-11-21T17:27:59Z"
+  },
+  "ballerina-platform/module-ballerina-ai": {
+   "ref": "main",
+   "commit": "f64e3925290aee7e3a939736c66b9fcfdca141a8",
+   "locked_at": "2026-11-21T17:27:29Z"
+  },
+  "ballerina-platform/module-ballerina-ai.eval": {
+   "ref": "main",
+   "commit": "2df51b2b934e40dfedf2474e7762c0ea9005cbac",
+   "locked_at": "2026-11-21T17:31:45Z"
+  },
+  "ballerina-platform/module-ballerina-ai.np": {
+   "ref": "main",
+   "commit": "8b394561b6cf6d5782578299c332d75785ecbd85",
+   "locked_at": "2026-11-21T17:28:57Z"
+  },
+  "ballerina-platform/module-ballerina-auth": {
+   "ref": "master",
+   "commit": "4533849efa8170c555d19061430d288ad056fa0c",
+   "locked_at": "2026-11-21T17:25:43Z"
+  },
+  "ballerina-platform/module-ballerina-authzen": {
+   "ref": "main",
+   "commit": "2bcf8f2750d7eda8fcef2fa3abf2c21f536b1fcb",
+   "locked_at": "2026-11-21T17:33:17Z"
+  },
+  "ballerina-platform/module-ballerina-avro": {
+   "ref": "main",
+   "commit": "f4409db2ce81817f9191b8c11bf5922baad69bd9",
+   "locked_at": "2026-11-21T17:28:27Z"
+  },
+  "ballerina-platform/module-ballerina-c2c": {
+   "ref": "master",
+   "commit": "0a1c5f2332c6f840586ec0c2496bea07b3be273f",
+   "locked_at": "2026-11-21T17:26:07Z"
+  },
+  "ballerina-platform/module-ballerina-cache": {
+   "ref": "master",
+   "commit": "5702c48c9828bd4e42e589e6e3f22ace0638fb85",
+   "locked_at": "2026-11-21T17:25:59Z"
+  },
+  "ballerina-platform/module-ballerina-constraint": {
+   "ref": "main",
+   "commit": "6f144d7006708d994dfda58fef9fdc60c29272fa",
+   "locked_at": "2026-11-21T17:26:34Z"
+  },
+  "ballerina-platform/module-ballerina-crypto": {
+   "ref": "master",
+   "commit": "62c900a4516a917e8e404cdbe447423b518a195d",
+   "locked_at": "2026-11-21T17:25:44Z"
+  },
+  "ballerina-platform/module-ballerina-data.csv": {
+   "ref": "main",
+   "commit": "6f2e020fb3e9ba0cf49a5310ed298a3cac17944c",
+   "locked_at": "2026-11-21T17:27:53Z"
+  },
+  "ballerina-platform/module-ballerina-data.jsondata": {
+   "ref": "main",
+   "commit": "e6588506a6852b84b1ac9a3548d18c8ca5a604fb",
+   "locked_at": "2026-11-21T17:27:31Z"
+  },
+  "ballerina-platform/module-ballerina-data.toml": {
+   "ref": "main",
+   "commit": "df18346d409470458940dc47b75bec10fbe6a074",
+   "locked_at": "2026-11-21T17:30:07Z"
+  },
+  "ballerina-platform/module-ballerina-data.xmldata": {
+   "ref": "main",
+   "commit": "281b84f01052a88da9304695282d4cf137dafe50",
+   "locked_at": "2026-11-21T17:27:30Z"
+  },
+  "ballerina-platform/module-ballerina-data.yaml": {
+   "ref": "main",
+   "commit": "99ae71951449fecff69d5bf7d640f13c4ec1c6dc",
+   "locked_at": "2026-11-21T17:27:44Z"
+  },
+  "ballerina-platform/module-ballerina-dataservice": {
+   "ref": "main",
+   "commit": "0697299fbf6a79c9b3f2893d9283a457fcba3ba5",
+   "locked_at": "2026-11-21T17:29:29Z"
+  },
+  "ballerina-platform/module-ballerina-dataservice.graphql": {
+   "ref": "main",
+   "commit": "9a81ad8abb9b99c546c93e35fc61f6d2063e8155",
+   "locked_at": "2026-11-21T17:29:31Z"
+  },
+  "ballerina-platform/module-ballerina-dataservice.http": {
+   "ref": "main",
+   "commit": "bb8c862708fb9d1859d6ecfc52c37d58800c8494",
+   "locked_at": "2026-11-21T17:29:30Z"
+  },
+  "ballerina-platform/module-ballerina-docker": {
+   "ref": "master",
+   "commit": "d4cfaf2e640412d8fbf6d8dfdbf195a7794fbe5a",
+   "locked_at": "2026-11-21T17:25:23Z"
+  },
+  "ballerina-platform/module-ballerina-edi": {
+   "ref": "main",
+   "commit": "b4ef697b84df3dcc9bf8b089f8a64a284479cf73",
+   "locked_at": "2026-11-21T17:26:38Z"
+  },
+  "ballerina-platform/module-ballerina-email": {
+   "ref": "master",
+   "commit": "476d6523709a7bb3c835e90db5abfcded3aaf6a1",
+   "locked_at": "2026-11-21T17:25:38Z"
+  },
+  "ballerina-platform/module-ballerina-etl": {
+   "ref": "main",
+   "commit": "af844fa4acc827d78577c6c450877964fa29e455",
+   "locked_at": "2026-11-21T17:29:47Z"
+  },
+  "ballerina-platform/module-ballerina-file": {
+   "ref": "master",
+   "commit": "be5a29d292364f9db82da05252e2ee3bca9a36d7",
+   "locked_at": "2026-11-21T17:25:51Z"
+  },
+  "ballerina-platform/module-ballerina-ftp": {
+   "ref": "master",
+   "commit": "6b639e6874d7cd1dd39c9caf351e2b10bf83549b",
+   "locked_at": "2026-11-21T17:25:32Z"
+  },
+  "ballerina-platform/module-ballerina-graphql": {
+   "ref": "master",
+   "commit": "db393ffca5312766cb53d7c27e657141dce65a6c",
+   "locked_at": "2026-11-21T17:25:19Z"
+  },
+  "ballerina-platform/module-ballerina-grpc": {
+   "ref": "master",
+   "commit": "5eb0532d9b8512f1d2456a539f559c43bb11faca",
+   "locked_at": "2026-11-21T17:25:26Z"
+  },
+  "ballerina-platform/module-ballerina-http": {
+   "ref": "master",
+   "commit": "cf723ffed04d5f54db88baec737f85c69812822c",
+   "locked_at": "2026-11-21T17:25:20Z"
+  },
+  "ballerina-platform/module-ballerina-io": {
+   "ref": "master",
+   "commit": "5fa6c339521748c45e07974a3b95aeeaa62fd8ee",
+   "locked_at": "2026-11-21T17:25:37Z"
+  },
+  "ballerina-platform/module-ballerina-jballerina.java.arrays": {
+   "ref": "master",
+   "commit": "f546ba3df78d3e43857a4e2f8f07516671583f47",
+   "locked_at": "2026-11-21T17:26:21Z"
+  },
+  "ballerina-platform/module-ballerina-jwt": {
+   "ref": "master",
+   "commit": "29a35f5e4a67819abf93561482a46b1aebfe3566",
+   "locked_at": "2026-11-21T17:25:24Z"
+  },
+  "ballerina-platform/module-ballerina-kubernetes": {
+   "ref": "master",
+   "commit": "829ac89eeef36c720a79247b9e005fb254f2b7b5",
+   "locked_at": "2026-11-21T17:25:21Z"
+  },
+  "ballerina-platform/module-ballerina-ldap": {
+   "ref": "master",
+   "commit": "88905eb05b918eb98be27669ff8861d1ae82d5de",
+   "locked_at": "2026-11-21T17:27:48Z"
+  },
+  "ballerina-platform/module-ballerina-log": {
+   "ref": "master",
+   "commit": "f5c5b2afc8e81060967bd730bafab4d826372280",
+   "locked_at": "2026-11-21T17:25:53Z"
+  },
+  "ballerina-platform/module-ballerina-math.vector": {
+   "ref": "main",
+   "commit": "f2e26bcb26b0bee35b18b88764f17d307e7d9150",
+   "locked_at": "2026-11-21T17:27:15Z"
+  },
+  "ballerina-platform/module-ballerina-mcp": {
+   "ref": "main",
+   "commit": "a6097a42accccc0dc22ed93235ea018b908fc6fa",
+   "locked_at": "2026-11-21T17:27:40Z"
+  },
+  "ballerina-platform/module-ballerina-messaging": {
+   "ref": "main",
+   "commit": "757948a9e2d945cb4487d467edd89535461cb99f",
+   "locked_at": "2026-11-21T17:29:25Z"
+  },
+  "ballerina-platform/module-ballerina-mime": {
+   "ref": "master",
+   "commit": "d7fe33591e694f473d45b895a4cc799f185b607d",
+   "locked_at": "2026-11-21T17:25:40Z"
+  },
+  "ballerina-platform/module-ballerina-mqtt": {
+   "ref": "main",
+   "commit": "d3e3496978a9a8a07c02469957db18b44d5b48ee",
+   "locked_at": "2026-11-21T17:26:10Z"
+  },
+  "ballerina-platform/module-ballerina-oauth2": {
+   "ref": "master",
+   "commit": "604caa634a109f5cf81717cb80deb70a06a47c79",
+   "locked_at": "2026-11-21T17:25:36Z"
+  },
+  "ballerina-platform/module-ballerina-observe": {
+   "ref": "main",
+   "commit": "8c7ed230447a3d8db3aa15c8e1d545128dc36adb",
+   "locked_at": "2026-11-21T17:27:04Z"
+  },
+  "ballerina-platform/module-ballerina-os": {
+   "ref": "master",
+   "commit": "9860cb83ca9d7075db89fa44f5c22094da178121",
+   "locked_at": "2026-11-21T17:25:55Z"
+  },
+  "ballerina-platform/module-ballerina-otel": {
+   "ref": "main",
+   "commit": "dd0f0a734ca86cf81bd3fde0163736b4126201e9",
+   "locked_at": "2026-11-21T17:27:42Z"
+  },
+  "ballerina-platform/module-ballerina-pdf": {
+   "ref": "main",
+   "commit": "946007e638bfa3b185babc1dd7a1d754442c97d8",
+   "locked_at": "2026-11-21T17:28:22Z"
+  },
+  "ballerina-platform/module-ballerina-persist": {
+   "ref": "main",
+   "commit": "a9a8d9cb6f25ae8a1c5fc84936ae82ed7b3a3fbb",
+   "locked_at": "2026-11-21T17:26:24Z"
+  },
+  "ballerina-platform/module-ballerina-protobuf": {
+   "ref": "main",
+   "commit": "dab90169fa7495bf98c65a4694cd506a89e5f06d",
+   "locked_at": "2026-11-21T17:26:19Z"
+  },
+  "ballerina-platform/module-ballerina-random": {
+   "ref": "main",
+   "commit": "43185c29699da1f9d02ebc9274bf8d46d5f5cb22",
+   "locked_at": "2026-11-21T17:26:33Z"
+  },
+  "ballerina-platform/module-ballerina-regex": {
+   "ref": "main",
+   "commit": "6cd6b6899e89977af470df93b6128a25f8d6e1d7",
+   "locked_at": "2026-11-21T17:26:46Z"
+  },
+  "ballerina-platform/module-ballerina-scan": {
+   "ref": "main",
+   "commit": "f5c00406e1706ba71e27fbc79ace3ae2dba6fb16",
+   "locked_at": "2026-11-21T17:30:02Z"
+  },
+  "ballerina-platform/module-ballerina-serdes": {
+   "ref": "main",
+   "commit": "33beed977c409f9979dbe95477d632f5a3dc20b7",
+   "locked_at": "2026-11-21T17:26:42Z"
+  },
+  "ballerina-platform/module-ballerina-smb": {
+   "ref": "main",
+   "commit": "a68d92c59169b603c0d9bc5b66c96d259869e2e8",
+   "locked_at": "2026-11-21T17:29:27Z"
+  },
+  "ballerina-platform/module-ballerina-smpp": {
+   "ref": "main",
+   "commit": "1610d040ee8a33f11c765d0aea3454a00bc3be17",
+   "locked_at": "2026-11-21T17:31:57Z"
+  },
+  "ballerina-platform/module-ballerina-soap": {
+   "ref": "master",
+   "commit": "2ddf453c079b118a54de767abea14b7d895b4c1e",
+   "locked_at": "2026-11-21T17:25:47Z"
+  },
+  "ballerina-platform/module-ballerina-sql": {
+   "ref": "master",
+   "commit": "d441b540e62ab2ad4f4a4695c3b28d0257966ffb",
+   "locked_at": "2026-11-21T17:25:39Z"
+  },
+  "ballerina-platform/module-ballerina-task": {
+   "ref": "master",
+   "commit": "973e6309159b394bb8cf44134a200d3135209a3a",
+   "locked_at": "2026-11-21T17:26:00Z"
+  },
+  "ballerina-platform/module-ballerina-tcp": {
+   "ref": "master",
+   "commit": "b0e99686c5d3c367cf4442ce5486072fe806b461",
+   "locked_at": "2026-11-21T17:25:30Z"
+  },
+  "ballerina-platform/module-ballerina-time": {
+   "ref": "master",
+   "commit": "e9269e4e4f349abcfe8767413ca41bdb6fb88496",
+   "locked_at": "2026-11-21T17:26:08Z"
+  },
+  "ballerina-platform/module-ballerina-toml": {
+   "ref": "main",
+   "commit": "8a5a30de019952f64fab07e4b8e6ea3a3dacfd46",
+   "locked_at": "2026-11-21T17:27:06Z"
+  },
+  "ballerina-platform/module-ballerina-udp": {
+   "ref": "main",
+   "commit": "89e862e6f9384e25d20a8fbfb75a9b9a37da08bb",
+   "locked_at": "2026-11-21T17:25:56Z"
+  },
+  "ballerina-platform/module-ballerina-url": {
+   "ref": "master",
+   "commit": "10bd25e1341cdd72bbdf44b6b1fd954049f09cd7",
+   "locked_at": "2026-11-21T17:26:02Z"
+  },
+  "ballerina-platform/module-ballerina-uuid": {
+   "ref": "main",
+   "commit": "57eba446c89387b4e7d71d874d4a5ae8c7abdfbc",
+   "locked_at": "2026-11-21T17:26:17Z"
+  },
+  "ballerina-platform/module-ballerina-websocket": {
+   "ref": "main",
+   "commit": "06e22bdcd157552374beb38808a5853363420db6",
+   "locked_at": "2026-11-21T17:25:34Z"
+  },
+  "ballerina-platform/module-ballerina-websub": {
+   "ref": "master",
+   "commit": "139cc709c48a39ea2b4e94433aaf917c267b2b5e",
+   "locked_at": "2026-11-21T17:25:41Z"
+  },
+  "ballerina-platform/module-ballerina-websubhub": {
+   "ref": "main",
+   "commit": "7d2ff2d4fbe3ff17851b0f69adc130e976c3c3a3",
+   "locked_at": "2026-11-21T17:26:04Z"
+  },
+  "ballerina-platform/module-ballerina-workflow": {
+   "ref": "main",
+   "commit": "5f593f9e25100a5806287bdd82c9a829dc9685fa",
+   "locked_at": "2026-11-21T17:29:34Z"
+  },
+  "ballerina-platform/module-ballerina-xlsx": {
+   "ref": "main",
+   "commit": "8bd2bc1a0543818332958017ccabe2aef9c17050",
+   "locked_at": "2026-11-21T17:28:23Z"
+  },
+  "ballerina-platform/module-ballerina-xmldata": {
+   "ref": "master",
+   "commit": "30f5d11adc0075788c6fcee49276722eae6a153d",
+   "locked_at": "2026-11-21T17:26:20Z"
+  },
+  "ballerina-platform/module-ballerina-xslt": {
+   "ref": "master",
+   "commit": "1e10d8a8c286798769af050ec9af2678944728ef",
+   "locked_at": "2026-11-21T17:25:46Z"
+  },
+  "ballerina-platform/module-ballerina-yaml": {
+   "ref": "main",
+   "commit": "3ed0a5913f8201bd241d579280e55939f3e46989",
+   "locked_at": "2026-11-21T17:27:11Z"
+  },
+  "ballerina-platform/module-ballerina-zip": {
+   "ref": "main",
+   "commit": "9652fed167ff91c0d8542b087caad6dc0641ac02",
+   "locked_at": "2026-11-21T17:29:28Z"
+  },
+  "ballerina-platform/module-ballerinax-aayu.mftg.as2.trigger": {
+   "ref": "main",
+   "commit": "2e642edcc173746f15ae2c11f0976c6bbd5155a8",
+   "locked_at": "2026-11-21T17:32:32Z"
+  },
+  "ballerina-platform/module-ballerinax-activemq.artemis": {
+   "ref": "main",
+   "commit": "7a25ee46aaaa0bc5ad4757ec74d98b17d7f8f02b",
+   "locked_at": "2026-11-21T17:30:56Z"
+  },
+  "ballerina-platform/module-ballerinax-activemq.classic": {
+   "ref": "main",
+   "commit": "c11ba51452cb667d8adacc26b9d6b011f4b5cd94",
+   "locked_at": "2026-11-21T17:29:53Z"
+  },
+  "ballerina-platform/module-ballerinax-activemq.driver": {
+   "ref": "main",
+   "commit": "ef720e7ce900b335d1f409d625a59e4e7b36e3cb",
+   "locked_at": "2026-11-21T17:27:22Z"
+  },
+  "ballerina-platform/module-ballerinax-adobe.analytics": {
+   "ref": "main",
+   "commit": "dd7cf87cf961b1ebda0669468bb4dd2aa7586f31",
+   "locked_at": "2026-11-21T17:32:08Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.agent": {
+   "ref": "main",
+   "commit": "c4ec6ba82f0219e310b8783282ecbcd902a98cf7",
+   "locked_at": "2026-11-21T17:26:39Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.anthropic": {
+   "ref": "main",
+   "commit": "64417d9d92e9396eb4dc4b97d042552fd0d44b0e",
+   "locked_at": "2026-11-21T17:30:38Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.aws.bedrock": {
+   "ref": "main",
+   "commit": "55af7f8d7360bf4b3857af89216dd414f9e769b5",
+   "locked_at": "2026-11-21T17:31:34Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.aws.dynamodb": {
+   "ref": "main",
+   "commit": "cd999a6a85af477529fad5b353be0e7ad36488e3",
+   "locked_at": "2026-11-21T17:31:44Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.aws.opensearch": {
+   "ref": "main",
+   "commit": "26ec4c2d53c3142e7236c44f3487af32d6d03e05",
+   "locked_at": "2026-11-21T17:31:50Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.aws.s3": {
+   "ref": "main",
+   "commit": "ea8a26a9e7db7715bed4e32bf4a1ac32835b4aac",
+   "locked_at": "2026-11-21T17:30:01Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.azure": {
+   "ref": "main",
+   "commit": "f4abc4ebb748a06da229aa0c90315482b50afa8e",
+   "locked_at": "2026-11-21T17:29:38Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.azure.storage.blobs": {
+   "ref": "main",
+   "commit": "d6c3ba60a5be0230ad11c908b7568329752d9ff9",
+   "locked_at": "2026-11-21T17:31:40Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.azure.storage.files": {
+   "ref": "main",
+   "commit": "81b2308436c7f3ef9ee6075124c094bd00d31039",
+   "locked_at": "2026-11-21T17:31:41Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.deepseek": {
+   "ref": "main",
+   "commit": "0e25e7686346c9e768ebfd10af3c77dd4c14e3f1",
+   "locked_at": "2026-11-21T17:30:42Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.devant": {
+   "ref": "main",
+   "commit": "1f5232ce2ab82796974f2ac5bb7bebc7325c230c",
+   "locked_at": "2026-11-21T17:29:51Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.google.drive": {
+   "ref": "main",
+   "commit": "29f751737cb15dd5bb33f52ad6e609fa9108df57",
+   "locked_at": "2026-11-21T17:31:42Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.google.gemini": {
+   "ref": "main",
+   "commit": "de55169e81f3e7824886212a2278ccd0d587fb6a",
+   "locked_at": "2026-11-21T17:31:33Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.googleapis.vertex": {
+   "ref": "main",
+   "commit": "862f555ec212176df2babbf8edc0952cf87a829b",
+   "locked_at": "2026-11-21T17:31:10Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.memory.mssql": {
+   "ref": "main",
+   "commit": "00619f798ef01a912ff3b2d4d0873311c72c6b75",
+   "locked_at": "2026-11-21T17:29:54Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.memory.postgresql": {
+   "ref": "main",
+   "commit": "b7cf626acc6ad8b698399cea024c049e00643ad6",
+   "locked_at": "2026-11-21T17:31:11Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.memory.redis": {
+   "ref": "main",
+   "commit": "8a33dd4354c1a7bcb1a51065ced1eff42098e4f8",
+   "locked_at": "2026-11-21T17:31:09Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.microsoft.sharepoint": {
+   "ref": "main",
+   "commit": "cc5d45ffe4bf625042f47ed6d2b94152a9588df3",
+   "locked_at": "2026-11-21T17:31:24Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.milvus": {
+   "ref": "main",
+   "commit": "fd75737610bb4c6a94d94b07561f7cd9d2b62379",
+   "locked_at": "2026-11-21T17:30:50Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.mistral": {
+   "ref": "main",
+   "commit": "7a8dd28a9c808ca6fa19ccfd299fd32df345a3e5",
+   "locked_at": "2026-11-21T17:30:41Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.ollama": {
+   "ref": "main",
+   "commit": "87adf21912f5666ffef85f72418fc3f5fb784f73",
+   "locked_at": "2026-11-21T17:30:43Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.openai": {
+   "ref": "main",
+   "commit": "9290f868af20cd46bbc203f3fe53f2b8e771a52c",
+   "locked_at": "2026-11-21T17:30:37Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.openrouter": {
+   "ref": "main",
+   "commit": "9633195a2da91d470bdfaf5b0db3cf4591371a6b",
+   "locked_at": "2026-11-21T17:31:03Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.pgvector": {
+   "ref": "main",
+   "commit": "4efeb0fb18d27a1d7093e4fcc361887820c94545",
+   "locked_at": "2026-11-21T17:30:53Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.pinecone": {
+   "ref": "main",
+   "commit": "66e2a6e66cad76761796b56955fcc403aaac1cd9",
+   "locked_at": "2026-11-21T17:30:45Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.sqlite": {
+   "ref": "main",
+   "commit": "28007847451c4902cd4022ef7dae494a48098344",
+   "locked_at": "2026-11-21T17:31:43Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.weaviate": {
+   "ref": "main",
+   "commit": "ee81b152fc2b3ddc01be9d20a6397941f9fe1191",
+   "locked_at": "2026-11-21T17:29:49Z"
+  },
+  "ballerina-platform/module-ballerinax-ai.wso2.integration": {
+   "ref": "main",
+   "commit": "303fe493dabaf75e0b47a2868afc802b4c44b15e",
+   "locked_at": "2026-11-21T17:31:46Z"
+  },
+  "ballerina-platform/module-ballerinax-alfresco": {
+   "ref": "main",
+   "commit": "31a7fd065ae388743680bc8aeb98a3035363601f",
+   "locked_at": "2026-11-21T17:29:48Z"
+  },
+  "ballerina-platform/module-ballerinax-amadeus.flightcreateorders": {
+   "ref": "main",
+   "commit": "a19647d4402d0c8191924380a766a6b33618ac63",
+   "locked_at": "2026-11-21T17:32:44Z"
+  },
+  "ballerina-platform/module-ballerinax-amadeus.flightoffersprice": {
+   "ref": "main",
+   "commit": "18779d5f9d41d5c888337fae861642f1928f5fbc",
+   "locked_at": "2026-11-21T17:32:19Z"
+  },
+  "ballerina-platform/module-ballerinax-amadeus.flightofferssearch": {
+   "ref": "main",
+   "commit": "3f460ddcb26717ab457c97c41c05a5317ca5e9d5",
+   "locked_at": "2026-11-21T17:32:20Z"
+  },
+  "ballerina-platform/module-ballerinax-amp": {
+   "ref": "main",
+   "commit": "68c193553eb6a63ccb3ebc9401544c28fd0e36cb",
+   "locked_at": "2026-11-21T17:31:00Z"
+  },
+  "ballerina-platform/module-ballerinax-apideck.accounting": {
+   "ref": "main",
+   "commit": "922c09548e8f351ca735d8c44eb231c3bdbfc718",
+   "locked_at": "2026-11-21T17:32:47Z"
+  },
+  "ballerina-platform/module-ballerinax-apideck.lead": {
+   "ref": "main",
+   "commit": "70c9766a05a2c6237ed252d3e9e1d92d35eac4fa",
+   "locked_at": "2026-11-21T17:32:39Z"
+  },
+  "ballerina-platform/module-ballerinax-apideck.proxy": {
+   "ref": "main",
+   "commit": "990f06645cf522186c1f09877dca318294a65ed6",
+   "locked_at": "2026-11-21T17:32:46Z"
+  },
+  "ballerina-platform/module-ballerinax-apple.appstore": {
+   "ref": "main",
+   "commit": "7de5d0ed90aed846f60af3d6e6624a35adde39d7",
+   "locked_at": "2026-11-21T17:32:59Z"
+  },
+  "ballerina-platform/module-ballerinax-ardoq": {
+   "ref": "main",
+   "commit": "dc1ab62aa82ea09699b600e59c27cd6855d5ccdf",
+   "locked_at": "2026-11-21T17:31:37Z"
+  },
+  "ballerina-platform/module-ballerinax-asana": {
+   "ref": "main",
+   "commit": "480fb4c68089e27d603f36f75c35c687bc71c9ea",
+   "locked_at": "2026-11-21T17:28:06Z"
+  },
+  "ballerina-platform/module-ballerinax-asb": {
+   "ref": "main",
+   "commit": "20280314c7581de00ca02d63755f0cce7f8b0523",
+   "locked_at": "2026-11-21T17:26:16Z"
+  },
+  "ballerina-platform/module-ballerinax-avaza": {
+   "ref": "main",
+   "commit": "b7b20799abee5a88fcec6767cf83bc0153c53504",
+   "locked_at": "2026-11-21T17:32:56Z"
+  },
+  "ballerina-platform/module-ballerinax-aws": {
+   "ref": "main",
+   "commit": "a7ca78a02435ed2a0ad91d5d663894d62f4bff36",
+   "locked_at": "2026-11-21T17:31:35Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.dynamodb": {
+   "ref": "main",
+   "commit": "09504e4a44f4f9c57ed8f5b1ffe8de4b46dc652d",
+   "locked_at": "2026-11-21T17:26:36Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.dynamodbstreams": {
+   "ref": "main",
+   "commit": "04a5411b3cca5c01f2ac83e8ddb1a93b8d54c24e",
+   "locked_at": "2026-11-21T17:27:43Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.lambda": {
+   "ref": "master",
+   "commit": "bd9d2fc7b91a685d6feb9c34d7d57b9e5c9c67dd",
+   "locked_at": "2026-11-21T17:26:12Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.marketplace.mpe": {
+   "ref": "main",
+   "commit": "ac77fe90de1df8b5428f3cd96429898a97298a7f",
+   "locked_at": "2026-11-21T17:28:29Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.marketplace.mpm": {
+   "ref": "main",
+   "commit": "1ac109c7e621306f2ea026e3bdda87ef94a5f064",
+   "locked_at": "2026-11-21T17:28:28Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.redshift": {
+   "ref": "main",
+   "commit": "5062f40181898298e2ed0c59e9b54fd361b35578",
+   "locked_at": "2026-11-21T17:27:49Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.redshift.driver": {
+   "ref": "main",
+   "commit": "30fe2a1d76c433b8c8e6014d54630a5860cb67e1",
+   "locked_at": "2026-11-21T17:28:01Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.redshiftdata": {
+   "ref": "main",
+   "commit": "eff6eb118638058c2acd8c90c07108007c19bf03",
+   "locked_at": "2026-11-21T17:30:29Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.s3": {
+   "ref": "master",
+   "commit": "e5bc3d9652ca3e7c05babbe7a160f039eaa85e9b",
+   "locked_at": "2026-11-21T17:26:25Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.secretmanager": {
+   "ref": "main",
+   "commit": "1982b2e362159a77a518cad7f2a98c4995c8d359",
+   "locked_at": "2026-11-21T17:30:30Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.ses": {
+   "ref": "master",
+   "commit": "fd7556154cc04d1cd6c1e799c5c3b7225f55b08b",
+   "locked_at": "2026-11-21T17:26:41Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.simpledb": {
+   "ref": "main",
+   "commit": "fd34d9578f89f99047a34786d78939e695f22b8a",
+   "locked_at": "2026-11-21T17:27:12Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.sns": {
+   "ref": "main",
+   "commit": "b694cee7f4c09b5bd38bf16b44a04a5131329b24",
+   "locked_at": "2026-11-21T17:26:47Z"
+  },
+  "ballerina-platform/module-ballerinax-aws.sqs": {
+   "ref": "master",
+   "commit": "92d798cd3477d4a8f05f00834779336a301604db",
+   "locked_at": "2026-11-21T17:26:26Z"
+  },
+  "ballerina-platform/module-ballerinax-azure-cosmosdb": {
+   "ref": "main",
+   "commit": "22f33f062b292fa6c4f7ce9ce2e1a35c60fd7158",
+   "locked_at": "2026-11-21T17:26:22Z"
+  },
+  "ballerina-platform/module-ballerinax-azure-storage-service": {
+   "ref": "main",
+   "commit": "45a122bee17e748917d174a6c081238e93e46821",
+   "locked_at": "2026-11-21T17:26:50Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.ad": {
+   "ref": "master",
+   "commit": "865ba1ff69a2c67355bc5e8003e1ccd1282a582e",
+   "locked_at": "2026-11-21T17:26:44Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.ai.search": {
+   "ref": "main",
+   "commit": "9a0e264195ddf57371ffb2f8fb1627d35279dc5b",
+   "locked_at": "2026-11-21T17:30:54Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.ai.search.index": {
+   "ref": "main",
+   "commit": "9d93d4fa3269fa70446e15ec0c2f8c45db53b295",
+   "locked_at": "2026-11-21T17:30:55Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.datalake": {
+   "ref": "main",
+   "commit": "2013e2e7a2a1c2ffd8177ec1a7c8394983017328",
+   "locked_at": "2026-11-21T17:32:00Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.eventhub": {
+   "ref": "master",
+   "commit": "3d970ca20e28ae4e9e3c4b45a995a3fdfe788f4f",
+   "locked_at": "2026-11-21T17:26:40Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.functions": {
+   "ref": "master",
+   "commit": "0996e7cb51dd5f4d6d71494c5b1a60ff6deb7809",
+   "locked_at": "2026-11-21T17:26:14Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.keyvault": {
+   "ref": "main",
+   "commit": "5111ede0407313ce98e39b4c2503d21f41a36357",
+   "locked_at": "2026-11-21T17:31:58Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.openai.chat": {
+   "ref": "main",
+   "commit": "165775f0091f06577b23228f95f7c1ce0f74219b",
+   "locked_at": "2026-11-21T17:31:04Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.openai.responses": {
+   "ref": "main",
+   "commit": "4c90572fe8bab1534c98eb3faf2b5cbb4af6658d",
+   "locked_at": "2026-11-21T17:31:01Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.sqldb": {
+   "ref": "main",
+   "commit": "f4b722a0fed157284d9095cf9de4671aef97ea82",
+   "locked_at": "2026-11-21T17:32:01Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.storage.blob": {
+   "ref": "main",
+   "commit": "5dedc2bd82f79574622b4842ae297476b1e4f175",
+   "locked_at": "2026-11-21T17:29:58Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.storage.files": {
+   "ref": "main",
+   "commit": "d0b89d448b78f910a7d24c1ae3913421886b1313",
+   "locked_at": "2026-11-21T17:29:59Z"
+  },
+  "ballerina-platform/module-ballerinax-azure.textanalytics": {
+   "ref": "main",
+   "commit": "04d8151e19613c55fc50e8542888c67eb527aae6",
+   "locked_at": "2026-11-21T17:32:17Z"
+  },
+  "ballerina-platform/module-ballerinax-bintable": {
+   "ref": "main",
+   "commit": "db173c18454d9f55837dfd491d13afd28460bb1c",
+   "locked_at": "2026-11-21T17:33:16Z"
+  },
+  "ballerina-platform/module-ballerinax-bitbucket": {
+   "ref": "main",
+   "commit": "d25beb94328934ce38ed7007920106a91abab9d1",
+   "locked_at": "2026-11-21T17:30:16Z"
+  },
+  "ballerina-platform/module-ballerinax-bitly": {
+   "ref": "main",
+   "commit": "3b22dcb2ae7a41f0c7e7fa120c5cc878a041d178",
+   "locked_at": "2026-11-21T17:32:42Z"
+  },
+  "ballerina-platform/module-ballerinax-botify": {
+   "ref": "main",
+   "commit": "eb57ba31f4e984f9567650f5613d87538d45506a",
+   "locked_at": "2026-11-21T17:33:04Z"
+  },
+  "ballerina-platform/module-ballerinax-box": {
+   "ref": "main",
+   "commit": "ab9fa9a91cd78a5d5d77e1b7379c2727250fa634",
+   "locked_at": "2026-11-21T17:32:10Z"
+  },
+  "ballerina-platform/module-ballerinax-candid": {
+   "ref": "main",
+   "commit": "6100669243200b4aec362afad6a364a4ce6b3e0d",
+   "locked_at": "2026-11-21T17:28:00Z"
+  },
+  "ballerina-platform/module-ballerinax-cdata.connect": {
+   "ref": "main",
+   "commit": "b1b2e8a5aebfedea5c629e1b67c612a79465155a",
+   "locked_at": "2026-11-21T17:26:51Z"
+  },
+  "ballerina-platform/module-ballerinax-cdata.connect.driver": {
+   "ref": "main",
+   "commit": "4f7e8c7ea5935fe768b8d9a360b7fbf799cced47",
+   "locked_at": "2026-11-21T17:27:20Z"
+  },
+  "ballerina-platform/module-ballerinax-cdc": {
+   "ref": "main",
+   "commit": "7f1ec1bc3d28d47134867829495467c4494d7444",
+   "locked_at": "2026-11-21T17:27:47Z"
+  },
+  "ballerina-platform/module-ballerinax-cdc.schema.aws.s3.driver": {
+   "ref": "main",
+   "commit": "d7081a55d65babc21a71058b6a58d8e45e1033bb",
+   "locked_at": "2026-11-21T17:31:07Z"
+  },
+  "ballerina-platform/module-ballerinax-cdc.schema.azure.blob.driver": {
+   "ref": "main",
+   "commit": "19aff358e6158cb1cd16055d57f98da8a540a126",
+   "locked_at": "2026-11-21T17:31:06Z"
+  },
+  "ballerina-platform/module-ballerinax-cdc.schema.rocketmq.driver": {
+   "ref": "main",
+   "commit": "315ff233b26f40e0989eb00c089fb67a1199496d",
+   "locked_at": "2026-11-21T17:31:05Z"
+  },
+  "ballerina-platform/module-ballerinax-choreo": {
+   "ref": "main",
+   "commit": "1ab908fd339e77cbd90d99ab89f715ecb58cd9a5",
+   "locked_at": "2026-11-21T17:26:45Z"
+  },
+  "ballerina-platform/module-ballerinax-clever.data": {
+   "ref": "main",
+   "commit": "a5207b925e28304b66f587c454e721a89c35a779",
+   "locked_at": "2026-11-21T17:32:54Z"
+  },
+  "ballerina-platform/module-ballerinax-client.config": {
+   "ref": "main",
+   "commit": "868f766633110fb54c1fce34f695a1e54ed2f90e",
+   "locked_at": "2026-11-21T17:27:23Z"
+  },
+  "ballerina-platform/module-ballerinax-cloudmersive.barcode": {
+   "ref": "main",
+   "commit": "d0eab63eed6d02882f2d191ff88e846daf205a1c",
+   "locked_at": "2026-11-21T17:32:35Z"
+  },
+  "ballerina-platform/module-ballerinax-cloudmersive.currency": {
+   "ref": "main",
+   "commit": "84be7011ce1572e3cc0324d5368717a096925fda",
+   "locked_at": "2026-11-21T17:32:33Z"
+  },
+  "ballerina-platform/module-ballerinax-cloudmersive.security": {
+   "ref": "main",
+   "commit": "ea76078921f19602c88a402fc6ba5038ac36414d",
+   "locked_at": "2026-11-21T17:32:38Z"
+  },
+  "ballerina-platform/module-ballerinax-cloudmersive.validate": {
+   "ref": "main",
+   "commit": "37cfd249abfcace85e3481886262408539695759",
+   "locked_at": "2026-11-21T17:32:37Z"
+  },
+  "ballerina-platform/module-ballerinax-cloudmersive.virusscan": {
+   "ref": "main",
+   "commit": "6cf96526d0390d6af8bcad2f7eca843ca6f17a29",
+   "locked_at": "2026-11-21T17:32:45Z"
+  },
+  "ballerina-platform/module-ballerinax-commercetools.auditlog": {
+   "ref": "main",
+   "commit": "0ad79096ac88524ab59468790081bcfe9b9343fb",
+   "locked_at": "2026-11-21T17:32:21Z"
+  },
+  "ballerina-platform/module-ballerinax-commercetools.customizedata": {
+   "ref": "main",
+   "commit": "9d5da38f9a38aa75381c6d6e1abd2351ea147eb7",
+   "locked_at": "2026-11-21T17:32:22Z"
+  },
+  "ballerina-platform/module-ballerinax-commercetools.pricingdiscount": {
+   "ref": "main",
+   "commit": "196a629d3d254fc9cc1b484b5a3f7a6f75922f9f",
+   "locked_at": "2026-11-21T17:32:23Z"
+  },
+  "ballerina-platform/module-ballerinax-confluent.cavroserdes": {
+   "ref": "main",
+   "commit": "91571148d52789bec6de4571dd23db8cbe5bb475",
+   "locked_at": "2026-11-21T17:27:56Z"
+  },
+  "ballerina-platform/module-ballerinax-confluent.cregistry": {
+   "ref": "main",
+   "commit": "fb8d8e5aa6ef7683cdd2e493f76234f1b9266922",
+   "locked_at": "2026-11-21T17:27:55Z"
+  },
+  "ballerina-platform/module-ballerinax-constantcontact": {
+   "ref": "main",
+   "commit": "9849c49fd306fa78cbab55fd5ead4a0bdc011921",
+   "locked_at": "2026-11-21T17:32:12Z"
+  },
+  "ballerina-platform/module-ballerinax-copybook": {
+   "ref": "main",
+   "commit": "f0a096a5614e6b99622555a1666357c7e3e80def",
+   "locked_at": "2026-11-21T17:27:27Z"
+  },
+  "ballerina-platform/module-ballerinax-datamapper": {
+   "ref": "master",
+   "commit": "9849c08b637382320c89e8d5ce350f1a538de214",
+   "locked_at": "2026-11-21T17:26:27Z"
+  },
+  "ballerina-platform/module-ballerinax-dayforce": {
+   "ref": "main",
+   "commit": "c277bd0d3b0b57c51f48d40e4e8aaf38be6ee7f1",
+   "locked_at": "2026-11-21T17:27:46Z"
+  },
+  "ballerina-platform/module-ballerinax-discord": {
+   "ref": "main",
+   "commit": "46ee360e8c95624216e86f8a5d93eff857f5fe88",
+   "locked_at": "2026-11-21T17:28:08Z"
+  },
+  "ballerina-platform/module-ballerinax-docusign.dsadmin": {
+   "ref": "main",
+   "commit": "ac0813ec031f0f2f179045e93cf157399e246d84",
+   "locked_at": "2026-11-21T17:27:52Z"
+  },
+  "ballerina-platform/module-ballerinax-docusign.dsclick": {
+   "ref": "main",
+   "commit": "2b228cbdb09b51cdde5c98db4dc480398ccdfe94",
+   "locked_at": "2026-11-21T17:28:02Z"
+  },
+  "ballerina-platform/module-ballerinax-docusign.dsesign": {
+   "ref": "main",
+   "commit": "d8cbae2b87d4084e8ccf365466decf2eda1df84d",
+   "locked_at": "2026-11-21T17:27:50Z"
+  },
+  "ballerina-platform/module-ballerinax-docusign.dsrooms": {
+   "ref": "main",
+   "commit": "1e278d36905dd1b1769d483bb3d24ae949300807",
+   "locked_at": "2026-11-21T17:29:41Z"
+  },
+  "ballerina-platform/module-ballerinax-docusign.monitor": {
+   "ref": "main",
+   "commit": "0834040d62826da27a13a2b6b9a0d1e41758f548",
+   "locked_at": "2026-11-21T17:32:15Z"
+  },
+  "ballerina-platform/module-ballerinax-dropbox": {
+   "ref": "main",
+   "commit": "b977ef6d39e959721b43ab69c37661c6c5b3c426",
+   "locked_at": "2026-11-21T17:30:19Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.account": {
+   "ref": "main",
+   "commit": "992a5529daa20d8aea80d0b86487231665b502c8",
+   "locked_at": "2026-11-21T17:32:24Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.analytics": {
+   "ref": "main",
+   "commit": "d6b28991a7869d43dccca8d4a2a95ac78982b51d",
+   "locked_at": "2026-11-21T17:32:40Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.browse": {
+   "ref": "main",
+   "commit": "b02d53f2401e35dc48867696edcabc93060bb1f4",
+   "locked_at": "2026-11-21T17:32:24Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.finances": {
+   "ref": "main",
+   "commit": "b150ed5df4aad80b529b7a5ccf5ac461eb3d4342",
+   "locked_at": "2026-11-21T17:32:41Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.inventory": {
+   "ref": "main",
+   "commit": "7ca53bc822883754264fbe9b7536b28a8e4f794b",
+   "locked_at": "2026-11-21T17:33:01Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.listing": {
+   "ref": "main",
+   "commit": "bf38d5f4835ec9bdfb8e90beecb1374cf862eb5a",
+   "locked_at": "2026-11-21T17:32:49Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.logistics": {
+   "ref": "main",
+   "commit": "acbaf379bf3010246df0ca0704420aabe7f9e466",
+   "locked_at": "2026-11-21T17:33:02Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.metadata": {
+   "ref": "main",
+   "commit": "ed5aca0bdf95f4acc7c318aaf494b4529c92190d",
+   "locked_at": "2026-11-21T17:32:36Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.negotiation": {
+   "ref": "main",
+   "commit": "8e4beff708665b4b43fdce89bcdaa5538082c61c",
+   "locked_at": "2026-11-21T17:32:35Z"
+  },
+  "ballerina-platform/module-ballerinax-ebay.recommendation": {
+   "ref": "main",
+   "commit": "8ac17a96660bb7f38fa0372b6fba14b9684a77cb",
+   "locked_at": "2026-11-21T17:33:00Z"
+  },
+  "ballerina-platform/module-ballerinax-edifact": {
+   "ref": "main",
+   "commit": "08c21a993c188f5c6d2bb7e82a87e7a8ea100a89",
+   "locked_at": "2026-11-21T17:29:39Z"
+  },
+  "ballerina-platform/module-ballerinax-elastic.elasticcloud": {
+   "ref": "main",
+   "commit": "fd9858f7bb780c7555c9930a60d2341fee54915e",
+   "locked_at": "2026-11-21T17:28:20Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.bian": {
+   "ref": "main",
+   "commit": "06ab3432fa977da68cf9f6cbbefc3dabe569e82e",
+   "locked_at": "2026-11-21T17:31:12Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.iso20022": {
+   "ref": "main",
+   "commit": "56f85ed9f51488fdf1b629c1889ed3a09a01ddab",
+   "locked_at": "2026-11-21T17:30:13Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.iso20022-to-swiftmt": {
+   "ref": "main",
+   "commit": "ece3fb3c1bac6322e223c1c47fcc2d299491b06e",
+   "locked_at": "2026-11-21T17:29:46Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.iso8583": {
+   "ref": "main",
+   "commit": "cb3e7561ce84a8eb18b6b1cf8a7120e20f8cb9e9",
+   "locked_at": "2026-11-21T17:30:12Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.swiftmt": {
+   "ref": "main",
+   "commit": "30c368b8d31049c2e0ec77761330a6176a648e72",
+   "locked_at": "2026-11-21T17:30:14Z"
+  },
+  "ballerina-platform/module-ballerinax-financial.swiftmt-to-iso20022": {
+   "ref": "main",
+   "commit": "72cd117fc51a5b2b9bffe9507647272e10e06a37",
+   "locked_at": "2026-11-21T17:29:37Z"
+  },
+  "ballerina-platform/module-ballerinax-flatapi": {
+   "ref": "main",
+   "commit": "6b1f9c44a19ef031bedbb15ecf943b2689f80a1d",
+   "locked_at": "2026-11-21T17:33:11Z"
+  },
+  "ballerina-platform/module-ballerinax-freemarker": {
+   "ref": "main",
+   "commit": "45e3492e286d1e2e9a3e309e1158ef8342cbbf06",
+   "locked_at": "2026-11-21T17:31:13Z"
+  },
+  "ballerina-platform/module-ballerinax-gcalendar": {
+   "ref": "main",
+   "commit": "b73ea91d29eaadf1c38f600e1d3eab13e64313ad",
+   "locked_at": "2026-11-21T17:26:18Z"
+  },
+  "ballerina-platform/module-ballerinax-gcloud.pubsub": {
+   "ref": "main",
+   "commit": "bb1c59de4523334de1a62cc6c86ddb86f2fe119a",
+   "locked_at": "2026-11-21T17:29:40Z"
+  },
+  "ballerina-platform/module-ballerinax-github": {
+   "ref": "master",
+   "commit": "5938a08e1ed8f280bc053bd7738eac7f97bf5fe6",
+   "locked_at": "2026-11-21T17:25:33Z"
+  },
+  "ballerina-platform/module-ballerinax-github.trigger": {
+   "ref": "main",
+   "commit": "aa536b23460400b463be1cc2ca63150053f487ae",
+   "locked_at": "2026-11-21T17:31:47Z"
+  },
+  "ballerina-platform/module-ballerinax-gitlab": {
+   "ref": "main",
+   "commit": "1fc544dd2015914b30997265b917214815e902b0",
+   "locked_at": "2026-11-21T17:32:02Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.chat": {
+   "ref": "main",
+   "commit": "a3dbad49e38880addd4c36b608710e4b4a9da2f7",
+   "locked_at": "2026-11-21T17:31:08Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.drive": {
+   "ref": "main",
+   "commit": "3b53cf0633b7d252e3d00ee2caf64a1218ec6a30",
+   "locked_at": "2026-11-21T17:26:55Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.gdocs": {
+   "ref": "main",
+   "commit": "1f32920e9c5d5e97c3b9e287c0c7286a21ef8934",
+   "locked_at": "2026-11-21T17:30:26Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.gemini": {
+   "ref": "main",
+   "commit": "45f56bfbbd7af85ded36413e8c616b58ffa2636f",
+   "locked_at": "2026-11-21T17:30:28Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.gforms": {
+   "ref": "main",
+   "commit": "694fd6da40d2f13ad4c282790c683d378eff0afc",
+   "locked_at": "2026-11-21T17:30:27Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.gmail": {
+   "ref": "master",
+   "commit": "f36f520d2287b86411ecb844d8f2178c3a8e2500",
+   "locked_at": "2026-11-21T17:25:28Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.people": {
+   "ref": "main",
+   "commit": "a02ae7f73bce5fe29d0d2c67dcae6ae0191377df",
+   "locked_at": "2026-11-21T17:27:01Z"
+  },
+  "ballerina-platform/module-ballerinax-googleapis.sheets": {
+   "ref": "master",
+   "commit": "139c8d34d4952a6648f87b95517eb95be4fcd4fd",
+   "locked_at": "2026-11-21T17:26:11Z"
+  },
+  "ballerina-platform/module-ballerinax-graphhopper.directions": {
+   "ref": "main",
+   "commit": "704483c29b18ab1a9ec7e587535d1164e003dfc0",
+   "locked_at": "2026-11-21T17:32:53Z"
+  },
+  "ballerina-platform/module-ballerinax-guidewire.insnow": {
+   "ref": "main",
+   "commit": "53e2f5d47e21d1fbe91ec6887810c6ad7a619c8f",
+   "locked_at": "2026-11-21T17:28:26Z"
+  },
+  "ballerina-platform/module-ballerinax-h2.driver": {
+   "ref": "main",
+   "commit": "164644fdfd7a4dcfbdf5d6b3ef34c5fef4a4e4eb",
+   "locked_at": "2026-11-21T17:27:17Z"
+  },
+  "ballerina-platform/module-ballerinax-health.base": {
+   "ref": "main",
+   "commit": "603d964ce8dceea9519e5a7c03d02ba8b489e5cb",
+   "locked_at": "2026-11-21T17:27:24Z"
+  },
+  "ballerina-platform/module-ballerinax-health.ccda": {
+   "ref": "main",
+   "commit": "a4679d7bf4dc9e904839f999a44fa758e8a88e5a",
+   "locked_at": "2026-11-21T17:30:36Z"
+  },
+  "ballerina-platform/module-ballerinax-health.clients": {
+   "ref": "main",
+   "commit": "cb4c76cc7be7de19e7643a64d91595b8b1a0d6a0",
+   "locked_at": "2026-11-21T17:27:21Z"
+  },
+  "ballerina-platform/module-ballerinax-health.dicom": {
+   "ref": "main",
+   "commit": "60e84e81c7478a8e3d3a77f3b2ae58a6945c5fc1",
+   "locked_at": "2026-11-21T17:29:42Z"
+  },
+  "ballerina-platform/module-ballerinax-health.fhir.r4": {
+   "ref": "main",
+   "commit": "bea524de4bc646fa371878b1e6faca527e390dc2",
+   "locked_at": "2026-11-21T17:26:48Z"
+  },
+  "ballerina-platform/module-ballerinax-health.fhir.r5": {
+   "ref": "main",
+   "commit": "392344b9a23d6af778686598020bd673dd819bd3",
+   "locked_at": "2026-11-21T17:30:34Z"
+  },
+  "ballerina-platform/module-ballerinax-health.fhir.templates": {
+   "ref": "main",
+   "commit": "007354ad9b80424629a11a28fe58e18a14a1c210",
+   "locked_at": "2026-11-21T17:27:11Z"
+  },
+  "ballerina-platform/module-ballerinax-health.hl7v2": {
+   "ref": "main",
+   "commit": "9e846a4913fa705001e587eab70e40b091afd917",
+   "locked_at": "2026-11-21T17:27:16Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.automation.actions": {
+   "ref": "main",
+   "commit": "a8a0c3337918f6306dc385016f4fc01eef19a7a1",
+   "locked_at": "2026-11-21T17:28:36Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.associations": {
+   "ref": "main",
+   "commit": "ea73a5f5c03aed2ec7cdebf41c75edbbcfd6ce29",
+   "locked_at": "2026-11-21T17:28:18Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.associations.schema": {
+   "ref": "main",
+   "commit": "075cb5ffa95962c29105ecdccb464f29109564a8",
+   "locked_at": "2026-11-21T17:28:50Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.commerce.carts": {
+   "ref": "main",
+   "commit": "f967540a81bce6edf5425bad1019ad4c311b8192",
+   "locked_at": "2026-11-21T17:28:13Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.commerce.discounts": {
+   "ref": "main",
+   "commit": "06e86b94ef58e64175bd2c59c76b1f3edbabdabc",
+   "locked_at": "2026-11-21T17:28:45Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.commerce.orders": {
+   "ref": "main",
+   "commit": "9362273e3b795a53170b9cc8e3d77959348c0be4",
+   "locked_at": "2026-11-21T17:28:14Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.commerce.quotes": {
+   "ref": "main",
+   "commit": "f677cb62cde0510a5245ca48e788f211213a9ce9",
+   "locked_at": "2026-11-21T17:28:44Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.commerce.taxes": {
+   "ref": "main",
+   "commit": "f1093177062185cedb19a39e1b6ee808443d4355",
+   "locked_at": "2026-11-21T17:28:15Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagement.meeting": {
+   "ref": "main",
+   "commit": "4d80105c09502bf434b00b87d2b682614842fe55",
+   "locked_at": "2026-11-21T17:28:46Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagement.notes": {
+   "ref": "main",
+   "commit": "651dfc313b3c18720e0fba59772a0d389d6f1dc8",
+   "locked_at": "2026-11-21T17:28:16Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagements.calls": {
+   "ref": "main",
+   "commit": "ae7a1e4692d3e1c6e9a49c2c67537e9ba0b77d8f",
+   "locked_at": "2026-11-21T17:28:54Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagements.communications": {
+   "ref": "main",
+   "commit": "567d5a26366534ce2de07c3e3c11a6bbd4d8b038",
+   "locked_at": "2026-11-21T17:28:55Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagements.email": {
+   "ref": "main",
+   "commit": "8999e7ce9f51470367c60dbc3499c6c45f2e79aa",
+   "locked_at": "2026-11-21T17:28:53Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.engagements.tasks": {
+   "ref": "main",
+   "commit": "ebd44cab0d74d15fb7762db5ceb90654f679c67c",
+   "locked_at": "2026-11-21T17:28:56Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.extensions.timelines": {
+   "ref": "main",
+   "commit": "09b3d88dae0403a6075f171740b56497133a0f46",
+   "locked_at": "2026-11-21T17:28:19Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.extensions.videoconferencing": {
+   "ref": "main",
+   "commit": "2d275a3209299a727253b7b085c4b0ef7fed0661",
+   "locked_at": "2026-11-21T17:28:52Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.import": {
+   "ref": "main",
+   "commit": "4ab5820ece0bface0425746caaf9fc36b5a21f75",
+   "locked_at": "2026-11-21T17:28:47Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.lists": {
+   "ref": "main",
+   "commit": "3ed5eae85f47058c0ec5c77088c274f4ff3260e9",
+   "locked_at": "2026-11-21T17:28:17Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.companies": {
+   "ref": "main",
+   "commit": "ac0678896146d3ac246bf8e97c157e04be7394ce",
+   "locked_at": "2026-11-21T17:28:37Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.contacts": {
+   "ref": "main",
+   "commit": "256204aba0cf1cb1a8da48f2610842991d8821f8",
+   "locked_at": "2026-11-21T17:28:38Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.deals": {
+   "ref": "main",
+   "commit": "7d5199bf68ff84d3a09b51d7a42a7623725b37a9",
+   "locked_at": "2026-11-21T17:28:39Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.feedback": {
+   "ref": "main",
+   "commit": "54fd615f12a43c17b07682188e2a4d3f98445947",
+   "locked_at": "2026-11-21T17:28:11Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.leads": {
+   "ref": "main",
+   "commit": "1e6935d8f134070772baaa5be08458d7613b6253",
+   "locked_at": "2026-11-21T17:28:40Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.lineitems": {
+   "ref": "main",
+   "commit": "4b68cee6cd9ba16c84f9cbc17bc4e054c0d3b76e",
+   "locked_at": "2026-11-21T17:28:12Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.products": {
+   "ref": "main",
+   "commit": "e34a95d15f274da76d3e6872b4798c57621393be",
+   "locked_at": "2026-11-21T17:28:42Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.schemas": {
+   "ref": "main",
+   "commit": "0c097a642575c8df50db14b47984ea47fd439c9e",
+   "locked_at": "2026-11-21T17:28:41Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.obj.tickets": {
+   "ref": "main",
+   "commit": "8404362efabd388d5bc01b05f73e28c0785b4c50",
+   "locked_at": "2026-11-21T17:28:43Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.owners": {
+   "ref": "main",
+   "commit": "0675263bdc8cda2a322c7f06b74997f82e7b1025",
+   "locked_at": "2026-11-21T17:28:51Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.pipelines": {
+   "ref": "main",
+   "commit": "32f60093193e56e9315ae9bff741c24280bd8e9e",
+   "locked_at": "2026-11-21T17:28:48Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.crm.properties": {
+   "ref": "main",
+   "commit": "fe666a2cde51c54748b4e5db3e3aa0b81d0607bd",
+   "locked_at": "2026-11-21T17:28:49Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.events": {
+   "ref": "main",
+   "commit": "00587b152372a37f914d41a156edb4bfe8957c5d",
+   "locked_at": "2026-11-21T17:31:28Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.events.completions": {
+   "ref": "main",
+   "commit": "997797c42891e345fb2157d3ae539ac8d71bbce0",
+   "locked_at": "2026-11-21T17:31:32Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.events.definitions": {
+   "ref": "main",
+   "commit": "bfc6b7034b203e4d105376b33942540d7bbed2dd",
+   "locked_at": "2026-11-21T17:31:30Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.files": {
+   "ref": "main",
+   "commit": "077051f181a2727cd765f383bbb3a322eda5ae18",
+   "locked_at": "2026-11-21T17:31:29Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.campaigns": {
+   "ref": "main",
+   "commit": "2fb41a26a58e7bdadc385a80f05e9bf7129e4975",
+   "locked_at": "2026-11-21T17:28:34Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.emails": {
+   "ref": "main",
+   "commit": "d1d13dfcfc2dc4499a2bd652759f61486448bfc0",
+   "locked_at": "2026-11-21T17:28:32Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.events": {
+   "ref": "main",
+   "commit": "fa0be7492fe8dc7ca92d702d4dbdca75051e1cc8",
+   "locked_at": "2026-11-21T17:27:58Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.forms": {
+   "ref": "main",
+   "commit": "5c0663ad24ca111fbfabf2e241e8ab62e24f6d24",
+   "locked_at": "2026-11-21T17:28:35Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.subscriptions": {
+   "ref": "main",
+   "commit": "e484668de14e1b63c0805550977f7b26a0e6aa5e",
+   "locked_at": "2026-11-21T17:28:10Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.marketing.transactional": {
+   "ref": "main",
+   "commit": "042b0d8fe3aa8fb836e36cdefd2b7d45cf17df1f",
+   "locked_at": "2026-11-21T17:28:33Z"
+  },
+  "ballerina-platform/module-ballerinax-hubspot.trigger": {
+   "ref": "main",
+   "commit": "e8ba47c5cfaed9edc25465510f7487f0d206cc93",
+   "locked_at": "2026-11-21T17:31:50Z"
+  },
+  "ballerina-platform/module-ballerinax-huggingface.tgi": {
+   "ref": "main",
+   "commit": "0c62204f51003b4f4765a60198fa395b68ff6910",
+   "locked_at": "2026-11-21T17:31:28Z"
+  },
+  "ballerina-platform/module-ballerinax-ibm.ctg": {
+   "ref": "main",
+   "commit": "b850e40761c792e58af767a9ab6cf782128b06aa",
+   "locked_at": "2026-11-21T17:30:15Z"
+  },
+  "ballerina-platform/module-ballerinax-ibm.db2": {
+   "ref": "main",
+   "commit": "366601dc263dcde2e2b46c8b86cc6150fac3bdea",
+   "locked_at": "2026-11-21T17:33:18Z"
+  },
+  "ballerina-platform/module-ballerinax-ibm.db2.driver": {
+   "ref": "main",
+   "commit": "9d4f659de522f03388cc0d2f4508adac42c64d8f",
+   "locked_at": "2026-11-21T17:33:19Z"
+  },
+  "ballerina-platform/module-ballerinax-ibm.ibmmq": {
+   "ref": "main",
+   "commit": "a662ed25acafc80f84b4439ceab223159c42346b",
+   "locked_at": "2026-11-21T17:27:28Z"
+  },
+  "ballerina-platform/module-ballerinax-identityserver.trigger": {
+   "ref": "main",
+   "commit": "bf6aeed19224832f0cbf72cfa6e6c8f80a6c2cb9",
+   "locked_at": "2026-11-21T17:31:53Z"
+  },
+  "ballerina-platform/module-ballerinax-idetraceprovider": {
+   "ref": "main",
+   "commit": "2cd643dd1473208cc0efa7ef65d7a28f87f251a4",
+   "locked_at": "2026-11-21T17:30:57Z"
+  },
+  "ballerina-platform/module-ballerinax-intercom": {
+   "ref": "main",
+   "commit": "5c1f1a73de90f17ee19b692b357628f01a0dfbca",
+   "locked_at": "2026-11-21T17:30:24Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.currencyexchange": {
+   "ref": "main",
+   "commit": "30309f7a85f5c31a43b94ce63a56772d07bdad19",
+   "locked_at": "2026-11-21T17:33:09Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.currencyrate": {
+   "ref": "main",
+   "commit": "38bad2a152f5b8675b11f27e764ebc9a77cedc12",
+   "locked_at": "2026-11-21T17:32:57Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.emailinfo": {
+   "ref": "main",
+   "commit": "6a1bda57e7989256c279847f46084836ba0a839a",
+   "locked_at": "2026-11-21T17:32:55Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.globalnumberinfo": {
+   "ref": "main",
+   "commit": "6dbaf6b17d527ccec36cff61a1e3cee8ce32d2c8",
+   "locked_at": "2026-11-21T17:33:13Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.statedata": {
+   "ref": "main",
+   "commit": "d1915da8ace18bfcd49826af9a05cc70f34c4064",
+   "locked_at": "2026-11-21T17:33:10Z"
+  },
+  "ballerina-platform/module-ballerinax-interzoid.weatherzip": {
+   "ref": "main",
+   "commit": "e801af3b24be7e7151c70004e88ef349a9588d02",
+   "locked_at": "2026-11-21T17:32:50Z"
+  },
+  "ballerina-platform/module-ballerinax-jaeger": {
+   "ref": "main",
+   "commit": "4e98f5f98ceb1d3fbdb380c4b97df58d30c2a933",
+   "locked_at": "2026-11-21T17:26:30Z"
+  },
+  "ballerina-platform/module-ballerinax-java.jdbc": {
+   "ref": "master",
+   "commit": "c3d0fe25ca76be4044ca4e70665dc20b07dd5787",
+   "locked_at": "2026-11-21T17:25:58Z"
+  },
+  "ballerina-platform/module-ballerinax-java.jms": {
+   "ref": "master",
+   "commit": "ac104f295371f60517ac912974593caabae1e01f",
+   "locked_at": "2026-11-21T17:26:05Z"
+  },
+  "ballerina-platform/module-ballerinax-jira": {
+   "ref": "main",
+   "commit": "fac3bd9e1d695c9a2980abedfad3c134599b0de5",
+   "locked_at": "2026-11-21T17:28:30Z"
+  },
+  "ballerina-platform/module-ballerinax-jira.servicemanagement": {
+   "ref": "main",
+   "commit": "48a9ffd0886f406f41785e88ad0aa6d34b139e7b",
+   "locked_at": "2026-11-21T17:32:05Z"
+  },
+  "ballerina-platform/module-ballerinax-kafka": {
+   "ref": "master",
+   "commit": "ececee316070d5209a649beddbb2c788f1a3d0bf",
+   "locked_at": "2026-11-21T17:25:45Z"
+  },
+  "ballerina-platform/module-ballerinax-karbon": {
+   "ref": "main",
+   "commit": "c1d3b2ae782cb95b53e46fa1b43ab16b88da3363",
+   "locked_at": "2026-11-21T17:32:43Z"
+  },
+  "ballerina-platform/module-ballerinax-linkedin": {
+   "ref": "main",
+   "commit": "b03f79ec8b13039f8301de83c1a132a0e29de8fd",
+   "locked_at": "2026-11-21T17:30:23Z"
+  },
+  "ballerina-platform/module-ballerinax-listennotes": {
+   "ref": "main",
+   "commit": "183c6279e2e6c1137669ced9f363910e3842d7e3",
+   "locked_at": "2026-11-21T17:33:06Z"
+  },
+  "ballerina-platform/module-ballerinax-mailchimp": {
+   "ref": "main",
+   "commit": "4f8ca0474af3fa442c491b803f28bca6937da926",
+   "locked_at": "2026-11-21T17:30:17Z"
+  },
+  "ballerina-platform/module-ballerinax-mailchimp.marketing": {
+   "ref": "main",
+   "commit": "bab2ffaa6d31d350e24ef37130c9ae03ae7346c2",
+   "locked_at": "2026-11-21T17:29:19Z"
+  },
+  "ballerina-platform/module-ballerinax-mailchimp.transactional": {
+   "ref": "main",
+   "commit": "3c2e419f2968b439ac7f78173d26271758bb18dd",
+   "locked_at": "2026-11-21T17:29:20Z"
+  },
+  "ballerina-platform/module-ballerinax-metrics.logs": {
+   "ref": "main",
+   "commit": "d2b8067a2e5b73ad6a6679b7eac2f551f69b3e66",
+   "locked_at": "2026-11-21T17:30:31Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.assetmanagement": {
+   "ref": "main",
+   "commit": "1eb1b68ddd3a3fc7a77bac4422caaf8b9c082588",
+   "locked_at": "2026-11-21T17:31:14Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.bc": {
+   "ref": "main",
+   "commit": "922445536c1091fb2415727496b5f23bd1a23c2b",
+   "locked_at": "2026-11-21T17:31:17Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.commerce": {
+   "ref": "main",
+   "commit": "336cd4ace4e46131824190b4d64bbf767596c5ed",
+   "locked_at": "2026-11-21T17:31:15Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.finance": {
+   "ref": "main",
+   "commit": "fb15cb2f34749e8a031344943c107e115b93d7c4",
+   "locked_at": "2026-11-21T17:30:47Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.hr": {
+   "ref": "main",
+   "commit": "4360449880dfb52a7a8c6b1cfcb50977146d61b2",
+   "locked_at": "2026-11-21T17:31:16Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.dynamics365.scm": {
+   "ref": "main",
+   "commit": "bf1929984148aaf0b3ff12f3cd1662947f925d87",
+   "locked_at": "2026-11-21T17:29:57Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.excel": {
+   "ref": "master",
+   "commit": "bfd57fc16d13cd3af9bb4bf7dac4ec719ab9f11c",
+   "locked_at": "2026-11-21T17:26:35Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.onedrive": {
+   "ref": "master",
+   "commit": "08691651803afe9344245711a1f0a618ad6e3fe7",
+   "locked_at": "2026-11-21T17:26:06Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.onenote": {
+   "ref": "main",
+   "commit": "74a6c7b8f743a1fd49817e60c5f1fcf52b3316f5",
+   "locked_at": "2026-11-21T17:27:10Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.outlook.calendar": {
+   "ref": "main",
+   "commit": "4a0a76a341775b87cddb3a5f659322388a264a01",
+   "locked_at": "2026-11-21T17:27:18Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.outlook.mail": {
+   "ref": "main",
+   "commit": "3f29cd54cb6eaa179a3d5785f5dd74d9e8c623da",
+   "locked_at": "2026-11-21T17:27:19Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint": {
+   "ref": "main",
+   "commit": "988169086aaa784b68f1fb3c8d5c8511422a2303",
+   "locked_at": "2026-11-21T17:31:18Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.admin": {
+   "ref": "main",
+   "commit": "b961195dbb38a8f5b78025bfe91c7a0bf66e43d2",
+   "locked_at": "2026-11-21T17:31:22Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.embedded": {
+   "ref": "main",
+   "commit": "b84782c5ddedb9054b449dd27a7183f7c5e5c480",
+   "locked_at": "2026-11-21T17:31:21Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.lists": {
+   "ref": "main",
+   "commit": "5e36373a0d30ef2a6932109b2077dbdf1e0591a4",
+   "locked_at": "2026-11-21T17:31:25Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.onenote": {
+   "ref": "main",
+   "commit": "a8579a03bff819ea78844b4261f4ac837abcd2d6",
+   "locked_at": "2026-11-21T17:31:23Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.pages": {
+   "ref": "main",
+   "commit": "9366d9412c4a5f297cf0b66f8d49597ea72f001b",
+   "locked_at": "2026-11-21T17:31:20Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.sites": {
+   "ref": "main",
+   "commit": "83079cf75a8a5fc360b4350c422d665379c9f3c0",
+   "locked_at": "2026-11-21T17:31:19Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.sharepoint.termstore": {
+   "ref": "main",
+   "commit": "f38243f10249af5bdd4af3f6c01569a1432ef136",
+   "locked_at": "2026-11-21T17:31:26Z"
+  },
+  "ballerina-platform/module-ballerinax-microsoft.teams": {
+   "ref": "main",
+   "commit": "b22b7d6384c9d6f8230e155ef27058baff7e98c7",
+   "locked_at": "2026-11-21T17:27:09Z"
+  },
+  "ballerina-platform/module-ballerinax-milvus": {
+   "ref": "main",
+   "commit": "3ca8864ec0bde1a800949a295da2bd69150a6caf",
+   "locked_at": "2026-11-21T17:30:51Z"
+  },
+  "ballerina-platform/module-ballerinax-mistral": {
+   "ref": "main",
+   "commit": "a3c29e6cd1d6803c46812911b296980498634b79",
+   "locked_at": "2026-11-21T17:30:18Z"
+  },
+  "ballerina-platform/module-ballerinax-moesif": {
+   "ref": "main",
+   "commit": "883b9cce485f52eb1cb10186eaaae54c23bfc161",
+   "locked_at": "2026-11-21T17:30:46Z"
+  },
+  "ballerina-platform/module-ballerinax-mongodb": {
+   "ref": "master",
+   "commit": "42a8ccc0033108503f5c21ac067d26b4c6de153e",
+   "locked_at": "2026-11-21T17:25:28Z"
+  },
+  "ballerina-platform/module-ballerinax-mssql": {
+   "ref": "main",
+   "commit": "3d6c4493da7792dafe79c6a0bab8b6f6a4b252a0",
+   "locked_at": "2026-11-21T17:26:32Z"
+  },
+  "ballerina-platform/module-ballerinax-mssql.cdc.driver": {
+   "ref": "main",
+   "commit": "00bccd49e9f2c72052920b6990603ec818b21ae8",
+   "locked_at": "2026-11-21T17:28:59Z"
+  },
+  "ballerina-platform/module-ballerinax-mssql.driver": {
+   "ref": "main",
+   "commit": "1594f477ed2371a4ffd0cbf1cafaa163ec31c4fa",
+   "locked_at": "2026-11-21T17:26:43Z"
+  },
+  "ballerina-platform/module-ballerinax-mysql": {
+   "ref": "master",
+   "commit": "1b94a662a8c74f52f264eee7ecc994c656580ff3",
+   "locked_at": "2026-11-21T17:25:52Z"
+  },
+  "ballerina-platform/module-ballerinax-mysql.cdc.driver": {
+   "ref": "main",
+   "commit": "5e663ec52cf83191df2abacfb6b78017c1dd12b3",
+   "locked_at": "2026-11-21T17:28:58Z"
+  },
+  "ballerina-platform/module-ballerinax-mysql.driver": {
+   "ref": "main",
+   "commit": "616544f44ebf4a64a1bb25e394f68ceabebcfb41",
+   "locked_at": "2026-11-21T17:26:36Z"
+  },
+  "ballerina-platform/module-ballerinax-nats": {
+   "ref": "master",
+   "commit": "712d438f34050a6138e877311879064b8652f05c",
+   "locked_at": "2026-11-21T17:25:31Z"
+  },
+  "ballerina-platform/module-ballerinax-netsuite": {
+   "ref": "master",
+   "commit": "0c641db20ee949c44d09ce4137128f6973d489b2",
+   "locked_at": "2026-11-21T17:25:57Z"
+  },
+  "ballerina-platform/module-ballerinax-newrelic": {
+   "ref": "main",
+   "commit": "c4a1d21ba9560e86f7eb9cee8f3adef53fbf3ec2",
+   "locked_at": "2026-11-21T17:28:24Z"
+  },
+  "ballerina-platform/module-ballerinax-notion": {
+   "ref": "main",
+   "commit": "e655d62043cba2f5347cb181fefeb91c6a2043d3",
+   "locked_at": "2026-11-21T17:30:25Z"
+  },
+  "ballerina-platform/module-ballerinax-np": {
+   "ref": "main",
+   "commit": "2c4821a06978f617c389048f2067b54a0c752ff5",
+   "locked_at": "2026-11-21T17:30:32Z"
+  },
+  "ballerina-platform/module-ballerinax-onepassword": {
+   "ref": "main",
+   "commit": "7657b15c35179a4a0076a09090afc2123abc81c4",
+   "locked_at": "2026-11-21T17:32:25Z"
+  },
+  "ballerina-platform/module-ballerinax-openai": {
+   "ref": "main",
+   "commit": "baa5a0527a943c453e2aeafa2ce310398644ad5b",
+   "locked_at": "2026-11-21T17:29:01Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.assistants": {
+   "ref": "main",
+   "commit": "b9b2febbf0265d384439fefdbf4dc256666a5638",
+   "locked_at": "2026-11-21T17:30:10Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.audio": {
+   "ref": "main",
+   "commit": "a72f7d4814fcefd8cd8fe4614d99de961b19e344",
+   "locked_at": "2026-11-21T17:30:09Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.chat": {
+   "ref": "main",
+   "commit": "f41c5ab1627cb069709098ad7f33d08955e0262c",
+   "locked_at": "2026-11-21T17:30:08Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.finetunes": {
+   "ref": "main",
+   "commit": "0ee920928fe6088c95b6c8064061fb34128f3d03",
+   "locked_at": "2026-11-21T17:30:11Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.images": {
+   "ref": "main",
+   "commit": "87f0f5cbdc08b8101faaedf65c1f7cc66d4a3eff",
+   "locked_at": "2026-11-21T17:29:44Z"
+  },
+  "ballerina-platform/module-ballerinax-openai.responses": {
+   "ref": "main",
+   "commit": "4b2b745645253ff76b2184345ada638c3dd0c068",
+   "locked_at": "2026-11-21T17:31:02Z"
+  },
+  "ballerina-platform/module-ballerinax-openrouter": {
+   "ref": "main",
+   "commit": "be1ad1ef741a1ff2a3bcd9d831d8078797c04e0e",
+   "locked_at": "2026-11-21T17:29:56Z"
+  },
+  "ballerina-platform/module-ballerinax-oracledb": {
+   "ref": "main",
+   "commit": "22002292fdf134afb400be1f00c204f89c615bc9",
+   "locked_at": "2026-11-21T17:26:31Z"
+  },
+  "ballerina-platform/module-ballerinax-oracledb.cdc.driver": {
+   "ref": "main",
+   "commit": "88bb8590082ab86efa3ef5a3a729e25b46d00c47",
+   "locked_at": "2026-11-21T17:30:44Z"
+  },
+  "ballerina-platform/module-ballerinax-oracledb.driver": {
+   "ref": "main",
+   "commit": "3a20dc4ab260340b5bb2134e5cfdf46741cac2f5",
+   "locked_at": "2026-11-21T17:26:52Z"
+  },
+  "ballerina-platform/module-ballerinax-oraclefusion.common.scheduler": {
+   "ref": "main",
+   "commit": "6b17828b3f81bba11a27e1b3d22060f150d82653",
+   "locked_at": "2026-11-21T17:31:48Z"
+  },
+  "ballerina-platform/module-ballerinax-oraclefusion.erp.integrations": {
+   "ref": "main",
+   "commit": "2070d09ef5af01217ea6a50de15f37efd7a7b9fc",
+   "locked_at": "2026-11-21T17:31:49Z"
+  },
+  "ballerina-platform/module-ballerinax-pandadoc": {
+   "ref": "main",
+   "commit": "858541f46176f64659cc2e21de502081ecf0ffe7",
+   "locked_at": "2026-11-21T17:32:31Z"
+  },
+  "ballerina-platform/module-ballerinax-paypal.invoices": {
+   "ref": "main",
+   "commit": "fe54e2dcb6a0c5334589284f5e25ff6dca59f84a",
+   "locked_at": "2026-11-21T17:28:21Z"
+  },
+  "ballerina-platform/module-ballerinax-paypal.orders": {
+   "ref": "main",
+   "commit": "3915cd120fd8088a9bf758cbb45e8d5e83eef326",
+   "locked_at": "2026-11-21T17:29:22Z"
+  },
+  "ballerina-platform/module-ballerinax-paypal.payments": {
+   "ref": "main",
+   "commit": "3fb66bd0dc91c6a6391cd84a4b6905619a728302",
+   "locked_at": "2026-11-21T17:29:23Z"
+  },
+  "ballerina-platform/module-ballerinax-paypal.subscriptions": {
+   "ref": "main",
+   "commit": "d6b97a9b67696cf7ab49f1f738ac3b937182d38c",
+   "locked_at": "2026-11-21T17:28:09Z"
+  },
+  "ballerina-platform/module-ballerinax-peoplehr": {
+   "ref": "main",
+   "commit": "4758dfb7cb506d491a0f100e752ac323a24e743f",
+   "locked_at": "2026-11-21T17:27:03Z"
+  },
+  "ballerina-platform/module-ballerinax-persist.googlesheets": {
+   "ref": "main",
+   "commit": "f1278c912ff9f0e6c6eebdbfadd2e35539b59662",
+   "locked_at": "2026-11-21T17:27:07Z"
+  },
+  "ballerina-platform/module-ballerinax-persist.inmemory": {
+   "ref": "main",
+   "commit": "3ef5386e1ad4bb3316dce8aa56dc1a996237b7a8",
+   "locked_at": "2026-11-21T17:27:08Z"
+  },
+  "ballerina-platform/module-ballerinax-persist.redis": {
+   "ref": "main",
+   "commit": "72a1085fc196f47efb65c8f36857bbc50515fbfd",
+   "locked_at": "2026-11-21T17:27:51Z"
+  },
+  "ballerina-platform/module-ballerinax-persist.sql": {
+   "ref": "main",
+   "commit": "284bc9168a44b4704f0abfb9022ddc61c0e019de",
+   "locked_at": "2026-11-21T17:26:49Z"
+  },
+  "ballerina-platform/module-ballerinax-pgvector": {
+   "ref": "main",
+   "commit": "44cd6db2119b68c30469399a102a5e1efdb43818",
+   "locked_at": "2026-11-21T17:30:35Z"
+  },
+  "ballerina-platform/module-ballerinax-pipedrive": {
+   "ref": "main",
+   "commit": "0d9853e1197894fa04bb81c4ac24f85691f29a3b",
+   "locked_at": "2026-11-21T17:32:18Z"
+  },
+  "ballerina-platform/module-ballerinax-plaid": {
+   "ref": "main",
+   "commit": "dd6871f1a0b9d5d57ed205269896ec2b9e99fe01",
+   "locked_at": "2026-11-21T17:32:06Z"
+  },
+  "ballerina-platform/module-ballerinax-pocketsmith": {
+   "ref": "main",
+   "commit": "c3a1f3fddfb21333164210e035492914260c4e92",
+   "locked_at": "2026-11-21T17:32:51Z"
+  },
+  "ballerina-platform/module-ballerinax-postgresql": {
+   "ref": "main",
+   "commit": "94887585285470d4eeca56f434db23b5eecc1e84",
+   "locked_at": "2026-11-21T17:26:23Z"
+  },
+  "ballerina-platform/module-ballerinax-postgresql.cdc.driver": {
+   "ref": "main",
+   "commit": "be59ee5075f03ab97daa0791a5bcddc909ab2a38",
+   "locked_at": "2026-11-21T17:28:59Z"
+  },
+  "ballerina-platform/module-ballerinax-postgresql.driver": {
+   "ref": "main",
+   "commit": "0e735c717284eb7b4013b514abca1a014821cc57",
+   "locked_at": "2026-11-21T17:26:53Z"
+  },
+  "ballerina-platform/module-ballerinax-power.bi": {
+   "ref": "main",
+   "commit": "adee32912a8e402a72ada1a34feaab350abf515d",
+   "locked_at": "2026-11-21T17:32:04Z"
+  },
+  "ballerina-platform/module-ballerinax-pricefx": {
+   "ref": "main",
+   "commit": "9ad3ef3ebd4e879cdcf854a15dd91128fcd89dac",
+   "locked_at": "2026-11-21T17:31:39Z"
+  },
+  "ballerina-platform/module-ballerinax-prometheus": {
+   "ref": "main",
+   "commit": "fd3f1ab591c5f93e0bf575d77601aabc01b15afe",
+   "locked_at": "2026-11-21T17:26:29Z"
+  },
+  "ballerina-platform/module-ballerinax-quickbooks.trigger": {
+   "ref": "main",
+   "commit": "4f4122bdc5399972891a7d4e847f0f742a165cf0",
+   "locked_at": "2026-11-21T17:31:51Z"
+  },
+  "ballerina-platform/module-ballerinax-rabbitmq": {
+   "ref": "master",
+   "commit": "f25b7399036e0c90f792527de1a9ec3a1d52c27f",
+   "locked_at": "2026-11-21T17:26:15Z"
+  },
+  "ballerina-platform/module-ballerinax-reckon.one": {
+   "ref": "main",
+   "commit": "4425e574a309c6aaee60f85f1a91678d5b6b4370",
+   "locked_at": "2026-11-21T17:33:05Z"
+  },
+  "ballerina-platform/module-ballerinax-recurly": {
+   "ref": "main",
+   "commit": "f0b6c3a86f04e79206dde6d6d810c90138bce63f",
+   "locked_at": "2026-11-21T17:32:13Z"
+  },
+  "ballerina-platform/module-ballerinax-redis": {
+   "ref": "master",
+   "commit": "9d601b67551a37150d5f78dd7bf7a2c70f5c7f84",
+   "locked_at": "2026-11-21T17:25:48Z"
+  },
+  "ballerina-platform/module-ballerinax-rudderstack": {
+   "ref": "main",
+   "commit": "52b0784caad9d7c2b417e255d7cc0f26348213a2",
+   "locked_at": "2026-11-21T17:33:12Z"
+  },
+  "ballerina-platform/module-ballerinax-runzero": {
+   "ref": "main",
+   "commit": "a3b73f8513ce1b06b1676f35c10b2c9d9a143239",
+   "locked_at": "2026-11-21T17:33:16Z"
+  },
+  "ballerina-platform/module-ballerinax-sakari.sms": {
+   "ref": "main",
+   "commit": "32f109a8829210948812ee3b532e5b80a81ad979",
+   "locked_at": "2026-11-21T17:33:03Z"
+  },
+  "ballerina-platform/module-ballerinax-salesforce": {
+   "ref": "master",
+   "commit": "3939cc5661c2fd379db3ede32ade58cc2c267434",
+   "locked_at": "2026-11-21T17:25:49Z"
+  },
+  "ballerina-platform/module-ballerinax-salesforce.datacloud": {
+   "ref": "main",
+   "commit": "098c9749cbc3fb11c819bdda934a3d2464353ed2",
+   "locked_at": "2026-11-21T17:33:12Z"
+  },
+  "ballerina-platform/module-ballerinax-salesforce.marketingcloud": {
+   "ref": "main",
+   "commit": "535625c818566b2b736fd26cfd3fa42c4b25f16b",
+   "locked_at": "2026-11-21T17:29:24Z"
+  },
+  "ballerina-platform/module-ballerinax-salesforce.pubsub": {
+   "ref": "main",
+   "commit": "0844484ee73534a7e4d702bab731f15d1a060a1b",
+   "locked_at": "2026-11-21T17:31:57Z"
+  },
+  "ballerina-platform/module-ballerinax-sap": {
+   "ref": "main",
+   "commit": "56cbaff46f419a7576a310dd4f8c4ea0c857c694",
+   "locked_at": "2026-11-21T17:27:54Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.businessone": {
+   "ref": "main",
+   "commit": "f06691e0e4e9e571e0c1855c69ed6e224e125b07",
+   "locked_at": "2026-11-21T17:31:27Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.commerce.webservices": {
+   "ref": "main",
+   "commit": "1587f347951d25a1f46e699cf7cecefd06949ffa",
+   "locked_at": "2026-11-21T17:30:58Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.concur.sharedapis": {
+   "ref": "main",
+   "commit": "905105ceb152b04779da7585466406a6ade008fd",
+   "locked_at": "2026-11-21T17:30:48Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.jco": {
+   "ref": "main",
+   "commit": "f208113ce4df7ef0d9e2019890d974ace1b4a5f7",
+   "locked_at": "2026-11-21T17:29:33Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.delivery": {
+   "ref": "main",
+   "commit": "c4aecc11a81d4cb64903edfb6a057e9403a0657f",
+   "locked_at": "2026-11-21T17:30:05Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.inventory": {
+   "ref": "main",
+   "commit": "a418abc882991d989d50c73dfbf718d7723d7121",
+   "locked_at": "2026-11-21T17:30:04Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.masterdata": {
+   "ref": "main",
+   "commit": "60d4d5c394508e47789650ede94b19c50741e3dc",
+   "locked_at": "2026-11-21T17:33:20Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.procurement": {
+   "ref": "main",
+   "commit": "498ca589fc937b57a86488781b87d056739f575a",
+   "locked_at": "2026-11-21T17:30:03Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.qm": {
+   "ref": "main",
+   "commit": "75c062b4d437be1e1d69ba428ed2fea9ac779f1f",
+   "locked_at": "2026-11-21T17:30:06Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.s4hana.sales": {
+   "ref": "main",
+   "commit": "8b37e63e267dc0c619926b2c93d99a61ea47c92f",
+   "locked_at": "2026-11-21T17:28:07Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.signavio": {
+   "ref": "main",
+   "commit": "bcca8b613ed0fbdddc7b2a11863dbd8a5dcffe2d",
+   "locked_at": "2026-11-21T17:31:38Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.successfactors.employeecentral": {
+   "ref": "main",
+   "commit": "61d18ad06259a0f0ff80227a02adf01537c85a95",
+   "locked_at": "2026-11-21T17:30:49Z"
+  },
+  "ballerina-platform/module-ballerinax-sap.successfactors.recruiting": {
+   "ref": "main",
+   "commit": "a98b9402d7702e60d00304709398120ce7939944",
+   "locked_at": "2026-11-21T17:33:08Z"
+  },
+  "ballerina-platform/module-ballerinax-scim": {
+   "ref": "main",
+   "commit": "c15a9f73b8c025e7de6090cd7c6f899053465e51",
+   "locked_at": "2026-11-21T17:27:14Z"
+  },
+  "ballerina-platform/module-ballerinax-sendgrid": {
+   "ref": "main",
+   "commit": "3ff9d2ceda8870af5348896dc6993f58a90cf7de",
+   "locked_at": "2026-11-21T17:30:21Z"
+  },
+  "ballerina-platform/module-ballerinax-shipwire.receivings": {
+   "ref": "main",
+   "commit": "3f4adbcd97d45c2181c488916d1167e43e4a0580",
+   "locked_at": "2026-11-21T17:32:58Z"
+  },
+  "ballerina-platform/module-ballerinax-shopify.admin": {
+   "ref": "main",
+   "commit": "a18884ecdf9168fe9507cb2ccc87a6b502b6e519",
+   "locked_at": "2026-11-21T17:29:35Z"
+  },
+  "ballerina-platform/module-ballerinax-shopify.trigger": {
+   "ref": "main",
+   "commit": "5639b0c48a1efcac8eb79c65a8e4e237b2315206",
+   "locked_at": "2026-11-21T17:31:54Z"
+  },
+  "ballerina-platform/module-ballerinax-shortcut": {
+   "ref": "main",
+   "commit": "f1b8fe7d94941a8ac877251815f623a39bb2eb4c",
+   "locked_at": "2026-11-21T17:32:26Z"
+  },
+  "ballerina-platform/module-ballerinax-slack": {
+   "ref": "master",
+   "commit": "51ae33e28866de203126c7373380202992bf974b",
+   "locked_at": "2026-11-21T17:26:01Z"
+  },
+  "ballerina-platform/module-ballerinax-slack.trigger": {
+   "ref": "main",
+   "commit": "466c212563c71f8126db2acdea788ce9e3074cbe",
+   "locked_at": "2026-11-21T17:31:56Z"
+  },
+  "ballerina-platform/module-ballerinax-smartsheet": {
+   "ref": "main",
+   "commit": "ba6252e7f5fc23060bbedbb9cfc5df54c2916341",
+   "locked_at": "2026-11-21T17:28:31Z"
+  },
+  "ballerina-platform/module-ballerinax-snowflake": {
+   "ref": "main",
+   "commit": "b4e5429196181628457a4db3749d0cd2e6711f92",
+   "locked_at": "2026-11-21T17:27:05Z"
+  },
+  "ballerina-platform/module-ballerinax-snowflake.driver": {
+   "ref": "main",
+   "commit": "ee9da96f1e34380f9e4022d0572039abfb88026e",
+   "locked_at": "2026-11-21T17:27:02Z"
+  },
+  "ballerina-platform/module-ballerinax-solace": {
+   "ref": "main",
+   "commit": "338cd7562b9222f76e3b60b380bddf10e153774e",
+   "locked_at": "2026-11-21T17:30:59Z"
+  },
+  "ballerina-platform/module-ballerinax-solace.jms": {
+   "ref": "main",
+   "commit": "479fe0db8f7f038269e1140c90a530f90a87b9e8",
+   "locked_at": "2026-11-21T17:29:52Z"
+  },
+  "ballerina-platform/module-ballerinax-soundcloud": {
+   "ref": "main",
+   "commit": "842f50c7501aa835593d2f356d3f71f5063a84b6",
+   "locked_at": "2026-11-21T17:33:15Z"
+  },
+  "ballerina-platform/module-ballerinax-spotify": {
+   "ref": "main",
+   "commit": "76ffc2d50fe6cae8c57a16caf4bf8f083a375245",
+   "locked_at": "2026-11-21T17:29:45Z"
+  },
+  "ballerina-platform/module-ballerinax-square": {
+   "ref": "main",
+   "commit": "d7c9b6ada401d8751223e6e70ec533df81b882c6",
+   "locked_at": "2026-11-21T17:32:16Z"
+  },
+  "ballerina-platform/module-ballerinax-storecove": {
+   "ref": "main",
+   "commit": "12228927138114def240634021e48365f0119bcd",
+   "locked_at": "2026-11-21T17:32:48Z"
+  },
+  "ballerina-platform/module-ballerinax-stripe": {
+   "ref": "main",
+   "commit": "bf765221a3b9bdcc5bb886bd89a0031628b66b21",
+   "locked_at": "2026-11-21T17:28:04Z"
+  },
+  "ballerina-platform/module-ballerinax-tableau": {
+   "ref": "main",
+   "commit": "77763070610f974b4330cb3e9d2a7a26703b94bc",
+   "locked_at": "2026-11-21T17:30:22Z"
+  },
+  "ballerina-platform/module-ballerinax-telegram": {
+   "ref": "main",
+   "commit": "7f398b53e8963cf3cc30c1c15464a34e5430951a",
+   "locked_at": "2026-11-21T17:31:36Z"
+  },
+  "ballerina-platform/module-ballerinax-temporal": {
+   "ref": "main",
+   "commit": "016e9d53b753883bffd9c5324f888e938a1fe7b2",
+   "locked_at": "2026-11-21T17:29:55Z"
+  },
+  "ballerina-platform/module-ballerinax-themoviedb": {
+   "ref": "main",
+   "commit": "cc08788318b4dca5bf1ba4798a86bd8b8db62029",
+   "locked_at": "2026-11-21T17:32:52Z"
+  },
+  "ballerina-platform/module-ballerinax-trello": {
+   "ref": "main",
+   "commit": "f0476ba82cc92486f7686009505760fa67473c7e",
+   "locked_at": "2026-11-21T17:27:57Z"
+  },
+  "ballerina-platform/module-ballerinax-twilio": {
+   "ref": "master",
+   "commit": "cc3a1916f6206e9fa1f601167b7464c3eeb1f188",
+   "locked_at": "2026-11-21T17:25:50Z"
+  },
+  "ballerina-platform/module-ballerinax-twilio.trigger": {
+   "ref": "main",
+   "commit": "59d32a71caefd54bb829decc3a5a973b0bf61757",
+   "locked_at": "2026-11-21T17:31:55Z"
+  },
+  "ballerina-platform/module-ballerinax-twitter": {
+   "ref": "main",
+   "commit": "47ff9cd5a98a5aaee6e27d0ca0fb4e86739f2601",
+   "locked_at": "2026-11-21T17:26:09Z"
+  },
+  "ballerina-platform/module-ballerinax-weaviate": {
+   "ref": "main",
+   "commit": "b92f8d766ff3baa1cb5a4f0cf01fafa17fc1839b",
+   "locked_at": "2026-11-21T17:32:27Z"
+  },
+  "ballerina-platform/module-ballerinax-webscraping.ai": {
+   "ref": "main",
+   "commit": "79e4361cb5ef6a4a508d1e0dda018bb349b2556b",
+   "locked_at": "2026-11-21T17:33:07Z"
+  },
+  "ballerina-platform/module-ballerinax-whatsapp.business": {
+   "ref": "main",
+   "commit": "2eaa8f59f42cb9965dea369b5c0ed55a44c0c65f",
+   "locked_at": "2026-11-21T17:31:35Z"
+  },
+  "ballerina-platform/module-ballerinax-wso2.apim.catalog": {
+   "ref": "main",
+   "commit": "c524be7a6c245eaec81a4d0d3e13210176c119ab",
+   "locked_at": "2026-11-21T17:29:44Z"
+  },
+  "ballerina-platform/module-ballerinax-wso2.controlplane": {
+   "ref": "main",
+   "commit": "8ff3303013fc6a802ec85b1d8e16ea1d91494061",
+   "locked_at": "2026-11-21T17:27:45Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.accounts": {
+   "ref": "main",
+   "commit": "b7ab105708c69ba481a783f570ce78931d287566",
+   "locked_at": "2026-11-21T17:31:59Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.appstore": {
+   "ref": "main",
+   "commit": "cf44f008abd3e313045c701297309f64c624fa47",
+   "locked_at": "2026-11-21T17:32:11Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.assets": {
+   "ref": "main",
+   "commit": "af48b8da6137ea102e8c01c2638cf66c42623727",
+   "locked_at": "2026-11-21T17:32:28Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.bankfeeds": {
+   "ref": "main",
+   "commit": "16f28b10eae6259241cf3c656485daa3591e1aab",
+   "locked_at": "2026-11-21T17:32:03Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.files": {
+   "ref": "main",
+   "commit": "db8a90d69f9fa87cd0886fae494dcb8ba78ffc7d",
+   "locked_at": "2026-11-21T17:32:09Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.finance": {
+   "ref": "main",
+   "commit": "82d7d52f734c7665edf75b2485dece001a634d05",
+   "locked_at": "2026-11-21T17:32:07Z"
+  },
+  "ballerina-platform/module-ballerinax-xero.projects": {
+   "ref": "main",
+   "commit": "507eb5eccf1cf570c2bd43ae106ec7978eecad44",
+   "locked_at": "2026-11-21T17:32:14Z"
+  },
+  "ballerina-platform/module-ballerinax-ynab": {
+   "ref": "main",
+   "commit": "9e8f7407241925a6f595584611e385f7f37fcec4",
+   "locked_at": "2026-11-21T17:32:49Z"
+  },
+  "ballerina-platform/module-ballerinax-zendesk": {
+   "ref": "main",
+   "commit": "480c27d203cbd9f9536d58fc3a41a1473c1300b9",
+   "locked_at": "2026-11-21T17:28:05Z"
+  },
+  "ballerina-platform/module-ballerinax-zipkin": {
+   "ref": "main",
+   "commit": "c6da4c857785c1508f6cda332748706e4a30006d",
+   "locked_at": "2026-11-21T17:27:26Z"
+  },
+  "ballerina-platform/module-ballerinax-zoom.meetings": {
+   "ref": "main",
+   "commit": "57521eb8e9b2d1c478a41bae15faec6d68429906",
+   "locked_at": "2026-11-21T17:29:21Z"
+  },
+  "ballerina-platform/module-ballerinax-zoom.scheduler": {
+   "ref": "main",
+   "commit": "1950a13a3ed1eea0c5bc229892ad5bdcf3a6486c",
+   "locked_at": "2026-11-21T17:29:32Z"
+  },
+  "ballerina-platform/module-ballerinax-zoom.zmeeting": {
+   "ref": "main",
+   "commit": "58d60cf34171c0b69b398563b66a0acbefc1d9b0",
+   "locked_at": "2026-11-21T17:30:18Z"
+  },
+  "ballerina-platform/module-ballerinax-zuora": {
+   "ref": "main",
+   "commit": "e960cdffa84f15bf495a1b90d2f8483a1b4b5637",
+   "locked_at": "2026-11-21T17:29:36Z"
+  },
+  "ballerina-platform/module-ballerinax-zuora.collection": {
+   "ref": "main",
+   "commit": "3f0d4755b132ea0901454088bda4e5fe09ef462d",
+   "locked_at": "2026-11-21T17:32:29Z"
+  },
+  "ballerina-platform/module-ballerinax-zuora.revenue": {
+   "ref": "main",
+   "commit": "a85c3a1056c7497e0022a6d7275f315a5c4aabd4",
+   "locked_at": "2026-11-21T17:32:30Z"
+  },
   "byorfeature/isuru1": {
    "ref": "main",
    "commit": "d454486e4dca4e8b4527f9c69a7512cef2e5d38e",

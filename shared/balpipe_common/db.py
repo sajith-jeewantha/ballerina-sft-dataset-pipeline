@@ -12,8 +12,11 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * repo_files files from those repos: Swan Lake filter, dedup status, fingerprints
 * eval_items held-out evaluation items (BBE 30%): files, expected output, `covers`, verification
 * fingerprints code fingerprints of the eval items, used to keep near-copies out of training
+* prompts    prompts planned per graph item, written by the writer model, reviewed by the judge
+* symbols    Central API entries (signatures, fields), looked up by `module:Name`
+* chunks_fts full-text index (FTS5, BM25) over chunk text, for grounding
 
-`chunks`, `questions` and `repo_files` carry `eval_overlap` (the eval item they copy, or
+`chunks`, `questions`, `repo_files` and `prompts` carry `eval_overlap` (the eval item they copy, or
 NULL) and `decontam_key` (the fingerprint set they were last checked against).
 
 Writes are committed immediately, so an interrupted command loses at most the
@@ -245,6 +248,52 @@ CREATE TABLE IF NOT EXISTS fingerprints (
 );
 CREATE INDEX IF NOT EXISTS ix_fingerprints_hash ON fingerprints(code_hash);
 
+CREATE TABLE IF NOT EXISTS prompts (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    set_name         TEXT NOT NULL,         -- prompts.set_name, e.g. pilot
+    ref              TEXT NOT NULL,         -- node#item the prompt is planned for
+    node_id          TEXT NOT NULL,
+    task_type        TEXT NOT NULL,         -- write_code | use_api | explain | fix_code | design
+    difficulty       TEXT NOT NULL,         -- beginner | intermediate | advanced
+    context_mode     TEXT NOT NULL DEFAULT 'standalone',  -- standalone | codebase (M7)
+    prompt           TEXT NOT NULL,
+    prompt_hash      TEXT NOT NULL UNIQUE,
+    covers           TEXT NOT NULL DEFAULT '[]', -- JSON: node#item refs
+    grounding        TEXT NOT NULL DEFAULT '{}', -- JSON: urls, chunk ids, repo file ids, symbols used
+    round            INTEGER NOT NULL DEFAULT 1, -- writer call for this item (gap-fill rounds > 1)
+    writer_model     TEXT,
+    reviewer_model   TEXT,
+    review           TEXT,                  -- JSON: verdict, scores, reason
+    status           TEXT NOT NULL,         -- accepted | rejected | duplicate | eval_overlap
+    error            TEXT,
+    eval_overlap     TEXT,
+    decontam_key     TEXT,
+    run_id           INTEGER,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_prompts_ref ON prompts(set_name, ref, status);
+
+CREATE TABLE IF NOT EXISTS symbols (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    module           TEXT NOT NULL,         -- ballerina/http
+    prefix           TEXT NOT NULL,         -- http (as used in code: http:Client)
+    name             TEXT NOT NULL,
+    kind             TEXT NOT NULL,         -- Client | Record | Function | Union | ...
+    text             TEXT NOT NULL,         -- the API reference entry (signatures, fields, docs)
+    page_id          INTEGER REFERENCES pages(id),
+    status           TEXT NOT NULL DEFAULT 'active',
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (module, kind, name)
+);
+CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols(prefix, name);
+
+CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT);  -- small markers (index build state)
+
+CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
+    text, heading_path, content='chunks', content_rowid='id', tokenize='porter unicode61');
+
 CREATE TABLE IF NOT EXISTS llm_usage (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id            INTEGER,
@@ -305,10 +354,16 @@ class Database:
         return self.conn.execute(sql, params).fetchall()
 
     def one(self, sql: str, params: tuple | dict = ()) -> sqlite3.Row | None:
-        return self.conn.execute(sql, params).fetchone()
+        # Close the cursor: an unfinished SELECT keeps a read transaction open, and a later write on
+        # this connection then fails with "database is locked" once another process has committed.
+        cur = self.conn.execute(sql, params)
+        try:
+            return cur.fetchone()
+        finally:
+            cur.close()
 
     def scalar(self, sql: str, params: tuple | dict = ()) -> Any:
-        row = self.conn.execute(sql, params).fetchone()
+        row = self.one(sql, params)
         return row[0] if row else None
 
     def insert(self, table: str, values: dict[str, Any]) -> int:

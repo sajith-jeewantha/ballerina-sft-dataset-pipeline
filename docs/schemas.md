@@ -12,6 +12,8 @@ erDiagram
     runs ||--o{ llm_usage : "records"
     repos ||--o{ repo_files : "snapshot"
     eval_items ||--o{ fingerprints : "fingerprinted by"
+    graph_items ||--o{ prompts : "planned for"
+    pages ||--o{ symbols : "API reference of"
     pages {
         int id
         text source
@@ -119,7 +121,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `build-eval` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -204,7 +206,7 @@ One row per file in a collected repo's snapshot.
 
 ## Decontamination columns
 
-`chunks`, `questions` and `repo_files` also have:
+`chunks`, `questions`, `repo_files` and `prompts` also have:
 
 | Column | Meaning |
 |---|---|
@@ -238,6 +240,40 @@ One row per eval `.bal` file.
 | `minhash` | 128 × uint32 MinHash of 5-token shingles |
 | `shingles` | Sorted uint32 hashes of the file's 5-token shingles, minus those in `eval.common_df` or more BBE examples |
 
+## `prompts`
+
+One row per prompt written by `generate-prompts` (whatever its outcome).
+
+| Column | Meaning |
+|---|---|
+| `set_name` | The prompt set (`prompts.set_name`, e.g. `pilot`) |
+| `ref`, `node_id` | The graph item (`node#item`) the prompt was planned for, and its node |
+| `task_type`, `difficulty` | The slot it fills: `write_code` · `use_api` · `explain` · `fix_code` · `design`; `beginner` · `intermediate` · `advanced` |
+| `context_mode` | `standalone` (codebase-attached prompts come in M7) |
+| `prompt`, `prompt_hash` | The prompt text and its hash (unique) |
+| `covers` | JSON list of `node#item` refs the prompt exercises |
+| `grounding` | JSON: `urls`, `chunk_ids`, `repo_file_ids`, `symbols`, `tokens`, `kinds` of the excerpts the writer and reviewer saw |
+| `round` | Writer call for the item (1 = first, more = gap-fill) |
+| `writer_model`, `reviewer_model` | The models that wrote and reviewed it |
+| `review` | JSON: `on_item`, `answerable`, `clear`, `realistic`, `task_fit` (1–5), `verdict`, `reason`; or `filter` when it never reached review |
+| `status` | `accepted` · `rejected` (filter or review) · `duplicate` (near-duplicate of a prompt in the set) · `eval_overlap` |
+
+## `symbols`
+
+Central API entries, rebuilt from the scraped Central pages by `plan-prompts` and `generate-prompts`.
+
+| Column | Meaning |
+|---|---|
+| `module`, `prefix` | `ballerina/http` and `http` (as in `http:Client`) |
+| `name`, `kind` | Symbol name and its section kind (`Client`, `Record`, `Function`, `Annotation`, `Union`, …) |
+| `text` | The API reference entry: signatures, fields and docs (up to 2,500 characters) |
+| `page_id` | The Central page it came from |
+
+## `chunks_fts`
+
+An FTS5 index over `chunks(text, heading_path)` (external content, Porter stemming), rebuilt
+when the chunks change (`kv` records the last build). Grounding uses it for BM25 search.
+
 ## `docs/licence-register.csv`
 
 Tracked in git. One row per repo reviewed: `owner`, `repo`, `spdx`, `verdict`, `intended_use`,
@@ -266,6 +302,14 @@ unless `export.include_invalid` is true, and always leaving out questions that o
 
 The split is decided by a hash of `source_url`, so all questions from one page land on the same
 side. Questions that overlap the eval set are in neither file.
+
+## `data/prompts/<set>/` (from `sftgen generate-prompts`)
+
+| File | One line per | Fields |
+|---|---|---|
+| `accepted.jsonl` | accepted prompt | `id`, `ref`, `node`, `covers`, `task_type`, `difficulty`, `context_mode`, `prompt`, `grounding_urls`, `symbols`, `review`, `status`, `round`, `writer_model`, `reviewer_model` |
+| `rejected.jsonl` | prompt not accepted | the same fields |
+| `coverage.json` | — | totals and per node (`items`, `budget`, `accepted`, `missing`, `given_up`), plus per item `budget`, `missing`, `rounds` |
 
 ## `data/eval/<version>/` (from `sftgen build-eval`)
 
