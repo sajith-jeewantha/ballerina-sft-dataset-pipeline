@@ -8,6 +8,8 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * questions  generated questions (pending -> answered | failed)
 * answers    one per answered question (not_checked -> valid | invalid)
 * llm_usage  tokens and cost of every model call, per phase
+* repos      collected code repositories: licence verdict, pinned commit, snapshot
+* repo_files files from those repos: Swan Lake filter, dedup status, fingerprints
 
 Writes are committed immediately, so an interrupted command loses at most the
 item it was working on, and the next run picks up from the statuses.
@@ -153,6 +155,56 @@ CREATE TABLE IF NOT EXISTS item_sources (
 );
 CREATE INDEX IF NOT EXISTS ix_item_sources_ref ON item_sources(ref);
 CREATE INDEX IF NOT EXISTS ix_item_sources_page ON item_sources(page_id);
+
+CREATE TABLE IF NOT EXISTS repos (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name        TEXT NOT NULL UNIQUE,  -- owner/name
+    grp              TEXT NOT NULL,         -- platform | guides | wso2 | external | manual
+    priority         INTEGER NOT NULL,      -- group order; lower wins when files are duplicates
+    url              TEXT NOT NULL,
+    default_branch   TEXT,
+    commit_sha       TEXT,                  -- pinned commit (also in sources.lock.json)
+    spdx_reported    TEXT,                  -- what GitHub reports
+    spdx             TEXT,                  -- licence used (from the LICENSE file when found)
+    verdict          TEXT,                  -- safe | check | exclude
+    licence_note     TEXT,
+    licence_sha256   TEXT,
+    stars            INTEGER,
+    size_kb          INTEGER,
+    pushed_at        TEXT,
+    files            INTEGER,               -- files in the sparse snapshot
+    bal_files        INTEGER,
+    snapshot         TEXT,                  -- data-relative path of the .tar.gz snapshot
+    meta             TEXT NOT NULL DEFAULT '{}',
+    status           TEXT NOT NULL,         -- collected | excluded | licence_check | failed
+    error            TEXT,
+    collected_at     TEXT,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_repos_status ON repos(status);
+
+CREATE TABLE IF NOT EXISTS repo_files (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    repo_id          INTEGER NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
+    path             TEXT NOT NULL,
+    kind             TEXT NOT NULL,         -- bal | toml | out | md
+    bytes            INTEGER NOT NULL,
+    text             TEXT,                  -- NULL when too_large
+    project_root     TEXT,                  -- folder of the nearest Ballerina.toml ('' = repo root)
+    distribution     TEXT,                  -- from that Ballerina.toml
+    syntax           TEXT,                  -- swan_lake | legacy | unknown (.bal only)
+    generated        INTEGER NOT NULL DEFAULT 0,
+    code_hash        TEXT,                  -- tokens without comments/whitespace (.bal only)
+    minhash          BLOB,                  -- 128 x uint32 MinHash signature (.bal only)
+    dup_of           INTEGER,               -- repo_files.id this file duplicates
+    status           TEXT NOT NULL,         -- kept | duplicate | near_duplicate | legacy | too_large | context
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (repo_id, path)
+);
+CREATE INDEX IF NOT EXISTS ix_repo_files_status ON repo_files(status);
+CREATE INDEX IF NOT EXISTS ix_repo_files_hash ON repo_files(code_hash);
 
 CREATE TABLE IF NOT EXISTS llm_usage (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,

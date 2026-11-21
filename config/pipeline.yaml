@@ -89,6 +89,29 @@ report:
   path: reports/report.html
   samples: 5
 
+repos:                                # collect-repos (LIMIT_REPOS in .env caps clones per run)
+  register_file: docs/licence-register.csv
+  groups:                             # earlier groups win when the same file is in several repos
+    - name: platform
+      org: ballerina-platform
+      include: ["^module-ballerina-", "^module-ballerinax-"]
+      intended_use: "corpus; commit-mining"
+    - name: guides
+      org: ballerina-guides
+      intended_use: "codebase-pool; commit-mining"
+    - name: wso2
+      query: "org:wso2 language:Ballerina fork:false"
+      intended_use: "codebase-pool; corpus"
+    - name: external                  # Swan Lake era (GA 2022-02), most-starred first
+      query: "language:Ballerina fork:false archived:false pushed:>=2022-02-01 -org:ballerina-platform -org:ballerina-guides -org:wso2 -org:wso2-enterprise"
+      intended_use: "corpus; codebase-pool candidate"
+  sparse_patterns: ["*.bal", "Ballerina.toml", "*.out", "README.md", "Package.md", "Module.md",
+                    "/LICENSE*", "/LICENCE*", "/COPYING*"]
+  max_file_bytes: 300000              # larger files: recorded as too_large, text not stored
+  workers: 4                          # parallel clones
+  keep_snapshots: true                # data/repos/<owner>__<repo>@<sha12>.tar.gz
+  near_duplicate_threshold: 0.8       # MinHash similarity of .bal files
+
 storage:                              # used only when STORAGE_BUCKET=true (.env)
   snapshot_db: true                  # upload db/pipeline-<time>.db.gz after each command
   keep_db_snapshots: 20              # delete older snapshots from the bucket; 0 = keep all

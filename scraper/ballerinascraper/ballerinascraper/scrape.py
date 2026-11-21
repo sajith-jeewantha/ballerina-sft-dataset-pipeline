@@ -37,20 +37,29 @@ def open_lock(s: Settings) -> SourceLock:
     return SourceLock(s.path(s.sources.lock_file), s.sources.swan_lake)
 
 
-def build_collectors(s: Settings, lock: SourceLock, *, update_lock: bool = False) -> dict[str, Collector]:
+def _session_args(s: Settings) -> dict[str, Any]:
     c = s.crawl
-    common: dict[str, Any] = dict(
-        delay_s=s.request_delay_seconds, timeout_s=c.timeout_s, retries=c.retries,
-        respect_robots=c.respect_robots, robots_exempt_hosts=tuple(c.robots_exempt_hosts),
-        cache_dir=s.cache_dir / "http",
-    )
-    web = PoliteSession(c.user_agent, **common)
+    return dict(delay_s=s.request_delay_seconds, timeout_s=c.timeout_s, retries=c.retries,
+                respect_robots=c.respect_robots, robots_exempt_hosts=tuple(c.robots_exempt_hosts),
+                cache_dir=s.cache_dir / "http")
+
+
+def github_api(s: Settings) -> GithubApi:
+    """GitHub REST client, authenticated with GITHUB_TOKEN when it is set."""
     gh_headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
     if s.github_token:
         gh_headers["Authorization"] = f"Bearer {s.github_token.get_secret_value()}"
     else:
         log.warning("GITHUB_TOKEN is not set: the GitHub API allows only 60 requests per hour")
-    github = GithubApi(PoliteSession(c.user_agent, headers=gh_headers, **common), c.listing_cache_hours)
+    return GithubApi(PoliteSession(s.crawl.user_agent, headers=gh_headers, **_session_args(s)),
+                     s.crawl.listing_cache_hours)
+
+
+def build_collectors(s: Settings, lock: SourceLock, *, update_lock: bool = False) -> dict[str, Collector]:
+    c = s.crawl
+    common = _session_args(s)
+    web = PoliteSession(c.user_agent, **common)
+    github = github_api(s)
     central = PoliteSession(c.user_agent, headers={"Accept": "application/json"}, **common)
     sitemap = Sitemap(web, s.sources.ballerina_io, c.listing_cache_hours)
     return {

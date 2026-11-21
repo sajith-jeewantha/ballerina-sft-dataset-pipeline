@@ -10,6 +10,7 @@ erDiagram
     chunks ||--o{ questions : "generates"
     questions ||--o| answers : "answered by"
     runs ||--o{ llm_usage : "records"
+    repos ||--o{ repo_files : "snapshot"
     pages {
         int id
         text source
@@ -117,7 +118,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -164,6 +165,48 @@ has none.
 | `page_id` | The matching scraped page. Matching rules: ballerina.io by URL (anchor dropped); Central `/<org>/<pkg>/...` to the package page; GitHub blob to the module file (branch ignored); tree and repo links to a file below them; `ballerina-distribution/examples/<name>` to the BBE page |
 | `chunk_ids` | For the spec, the chunks of the section the source points at (by its note or `#section_N.N` anchor) |
 | `status` | `matched` · `not_scraped` · `external` |
+
+## `repos`
+
+One row per repository `collect-repos` has seen.
+
+| Column | Meaning |
+|---|---|
+| `full_name`, `url` | `owner/name` and clone URL |
+| `grp`, `priority` | Group from `repos.groups` (`platform` · `guides` · `wso2` · `external` · `manual`) and its order; lower wins in dedup |
+| `default_branch`, `commit_sha` | Pinned commit (also in `config/sources.lock.json` under `repos`) |
+| `spdx_reported`, `spdx` | Licence GitHub reports, and the licence used (read from the LICENSE file when recognised) |
+| `verdict`, `licence_note` | `safe` · `check` · `exclude`, and why |
+| `licence_sha256` | sha256 of the root LICENSE file |
+| `stars`, `size_kb`, `pushed_at` | From GitHub |
+| `files`, `bal_files` | Files in the sparse snapshot |
+| `snapshot` | `repos/<owner>__<repo>@<sha12>.tar.gz` under `LOCAL_DATA_DIR` |
+| `meta` | JSON: legacy, generated and too_large counts |
+| `status` | `collected` (safe, files stored) · `excluded` (licence) · `licence_check` (needs a person) · `failed` (retried next run) |
+
+## `repo_files`
+
+One row per file in a collected repo's snapshot.
+
+| Column | Meaning |
+|---|---|
+| `repo_id`, `path` | Where the file is |
+| `kind` | `bal` · `toml` · `out` · `md` |
+| `bytes`, `text` | Size and content (`NULL` text when over `repos.max_file_bytes`) |
+| `project_root`, `distribution` | Folder of the nearest `Ballerina.toml` (`''` = repo root) and its `distribution` |
+| `syntax` | `.bal` only: `swan_lake` · `legacy` (Ballerina 1.x / Swan Lake previews) · `unknown` |
+| `generated` | 1 for generated code (header comments, `openapi-connectors`), to be down-weighted |
+| `code_hash`, `minhash` | Fingerprints: sha256 of tokens without comments/whitespace; 128 × uint32 MinHash of 5-token shingles |
+| `dup_of` | The `repo_files.id` this file duplicates |
+| `status` | `kept` · `duplicate` · `near_duplicate` (MinHash ≥ `repos.near_duplicate_threshold`) · `legacy` · `too_large` · `context` (non-`.bal` files kept as project context) |
+
+## `docs/licence-register.csv`
+
+Tracked in git. One row per repo reviewed: `owner`, `repo`, `spdx`, `verdict`, `intended_use`,
+`size_kb`, `pinned_sha`, `checked_on`, `notes`, `licence_file_sha256` and `files`. Extra columns
+that people add are kept.
+- A row set to `exclude` is never collected.
+- `safe` with notes starting `verified:` overrides the automatic gate.
 
 ---
 

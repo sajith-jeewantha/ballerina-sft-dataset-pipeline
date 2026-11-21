@@ -13,6 +13,9 @@ Commands (run in this order, or all at once with `run-all`):
   graph stats          node, item and edge counts of the knowledge graph
   graph sync           load the graph into the database and match item sources to scraped pages
                        (also runs automatically at the end of `scrape`)
+  collect-repos        snapshot Ballerina repositories (platform modules, ballerina-guides, wso2,
+                       permissive external repos): licence-gated, pinned, Swan Lake filter, dedup;
+                       up to LIMIT_REPOS clones per run. Updates docs/licence-register.csv
   storage status       compare the local data folder with the bucket
   storage push         upload new or changed outputs and a database snapshot
   storage pull         download what is missing locally (newest database snapshot, outputs);
@@ -44,7 +47,7 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
+COMMANDS = ["scrape", "collect-repos", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
@@ -65,6 +68,8 @@ def print_startup(s: Settings, command: str, store: Storage | None = None) -> No
         f"  LIMIT_GENERATING       {limit(s.limit_generating, 'questions per run')}",
         f"  QUESTIONS_PER_CHUNK    {s.questions_per_chunk}",
         f"  REQUEST_DELAY_SECONDS  {s.request_delay_seconds:g}",
+        *([f"  LIMIT_REPOS            {limit(s.limit_repos, 'repos cloned per run')}"] if command == "collect-repos"
+          else []),
         f"  GITHUB_TOKEN           {'set' if s.github_token else 'not set (GitHub API: 60 requests/hour)'}",
         f"  question model         {s.question_gen_model or '(not set)'}",
         f"  answer model           {s.answer_gen_model or '(not set)'}",
@@ -85,6 +90,13 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             fetched = scrape_sources(s, db, run, refresh=a.refresh, only=a.source, update_lock=a.update_lock)
             processed = process_pages(s, db, run)
             return {"fetch": fetched, "process": processed, "graph": _sync_graph_quietly(s, db)}
+        if command == "collect-repos":
+            from ballerinascraper.repos import collect_repos
+            from ballerinascraper.scrape import github_api, open_lock
+
+            out = collect_repos(s, db, run, github_api(s), open_lock(s), groups=a.group, extra=a.repo,
+                                update_lock=a.update_lock, refresh=a.refresh)
+            return out
         if command == "graph-sync":
             from sftgen.graph.coverage import sync
 
@@ -216,9 +228,16 @@ def main(argv: list[str] | None = None) -> int:
                    help="graph: validate (default) | stats | sync · storage: status (default) | push | pull")
     p.add_argument("--overwrite", action="store_true",
                    help="storage pull: replace local files (the local database is backed up first)")
-    p.add_argument("--refresh", action="store_true", help="scrape: re-check pages already downloaded for changes")
+    p.add_argument("--refresh", action="store_true",
+                   help="scrape: re-check pages already downloaded · collect-repos: re-clone collected repos")
     p.add_argument("--update-lock", action="store_true",
-                   help="scrape: re-resolve pinned commits and package versions in config/sources.lock.json")
+                   help="scrape, collect-repos: re-resolve pinned commits and package versions in "
+                        "config/sources.lock.json")
+    p.add_argument("--group", action="append", default=None,
+                   help="collect-repos: only this group from repos.groups (platform, guides, wso2, external; "
+                        "repeatable)")
+    p.add_argument("--repo", action="append", default=None, metavar="OWNER/NAME",
+                   help="collect-repos: also collect this repository (repeatable)")
     p.add_argument("--source", action="append", choices=["bbe", "spec", "learn", "central", "github"],
                    help="scrape: only this source (repeatable)")
     p.add_argument("--retry-failed", action="store_true", help="generate-answers: retry questions that failed")

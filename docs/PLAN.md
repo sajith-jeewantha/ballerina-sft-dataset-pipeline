@@ -500,7 +500,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M0** ✅ | Hygiene and pinning | Commit `graph/` and the `.gitignore` change. Add `sources.lock.json` (Swan Lake 2201.14.1), pin BBE to the distribution tag, set the OpenRouter provider pin for the teacher | `sftgen scrape --refresh` shows pinned versions in the report |
 | **M1** ✅ | Graph integration + coverage | `graph.py` loader and validator, `sftgen graph validate/stats`, item↔page matching from source URLs, and a **coverage section in the report** (items with or without grounding and samples) | `sftgen graph validate` → `OK 242/3257/1704`; the report shows coverage per node and priority |
 | **M2** ✅ | Storage switch | `storage.py`, `.env` keys, push and pull after each command | Run with `false`, then `true` against a test bucket: identical layout |
-| **M3** | Licence register + repo collector | `sftgen collect-repos`: sparse, pinned, licence-gated, Swan Lake filter, dedup. It covers ballerina-platform, ballerina-guides, wso2 and **permissive external repos**, and keeps the register CSV up to date | Collect `ballerina-guides` (15 repos), then 20 external repos; counts and licences in the report |
+| **M3** ✅ | Licence register + repo collector | `sftgen collect-repos`: sparse, pinned, licence-gated, Swan Lake filter, dedup. It covers ballerina-platform, ballerina-guides, wso2 and **permissive external repos**, and keeps the register CSV up to date | Collect `ballerina-guides` (15 repos), then 20 external repos; counts and licences in the report |
 | **M4** | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; ~180 BBE eval items each pass `bal run` against their `.out` |
 | **M5** | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
 | **M6** | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
@@ -519,6 +519,35 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 - Today's outputs keep their current names under `LOCAL_DATA_DIR`. The §4.3 paths for later
   artifacts (`corpus/`, `codebases/`, `eval/`, `datasets/<version>/` …) are added by the
   milestones that produce them.
+
+**Done (2026-11-21):** M3 is built and tested.
+- `sftgen collect-repos` covers the `platform`, `guides`, `wso2` and `external` groups, plus
+  `--repo`.
+- **Pre-gate:** repos whose GitHub licence is missing or copyleft are excluded without a clone.
+- **Pinning:** each repo is pinned with `git ls-remote` into `sources.lock.json`.
+- **Snapshots:** blobless shallow sparse clones (`*.bal`, `Ballerina.toml`, `*.out`, READMEs,
+  LICENSE).
+- **Licence gate:** reads the LICENSE text, then writes the licence register. People's
+  `exclude` and `verified:` entries win.
+- **Swan Lake filter:** from `distribution`, the `[package]`/`[project]` layout and syntax
+  markers.
+- **Generated code:** flagged.
+- **Dedup:** exact (tokens without comments) and MinHash (5-gram, 128 permutations, LSH
+  16×8, similarity ≥ 0.8).
+- **Live results, with no GitHub token:**
+  - `ballerina-guides`: 15 of 15 collected in 19 s. Every LICENSE file was confirmed as
+    Apache-2.0, which settles the 11 `check` rows in the seed register. 429 unique `.bal`
+    files, ~0.3M tokens.
+  - `external`: the search's 1,000 results were checked; one run went past the planned 20.
+    - 873 were excluded without a clone for having no licence.
+    - 123 were collected: 93 Apache-2.0, 26 MIT, one each of BSD-2, BSD-3, BSL-1.0 and CC0.
+    - 4 wait for a manual licence check.
+    - 2,371 unique `.bal` files remain after removing 1,187 duplicates; 16 are legacy.
+      That's ~2.9M tokens.
+  - In total, 138 repos and about 2,800 unique `.bal` files (~3.1M tokens), with 3.6 MB of
+    snapshots.
+- **Not run yet:** the `platform` group (436 module repos) and `wso2`. Use `LIMIT_REPOS=0` with
+  a `GITHUB_TOKEN`.
 - With the current database, 1,227 of 3,231 active items are grounded (core: 412 of 676).
 - Most of the rest are only "not scraped yet", which more scraping (M3) closes.
 

@@ -121,6 +121,7 @@ without stopping the run.
 | `sftgen graph validate` | Check `graph/graph.json`: schema 0.2 and the graph rules from [ballerina-ecosystem](https://github.com/sajith-jeewantha/ballerina-ecosystem), plus the hash recorded in `graph/SOURCE.json` | — |
 | `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
 | `sftgen graph sync` | Load the graph into the database and match each item's sources to scraped pages (also runs after every `scrape`) | item: `grounded` · `not_scraped` · `external_only` · `retired` |
+| `sftgen collect-repos` | Snapshot whole Ballerina repositories: the platform's module repos, `ballerina-guides`, wso2 and permissive external repos. Licence-gated, pinned, Swan Lake filter, dedup; up to `LIMIT_REPOS` clones per run. See [Code repositories](#code-repositories) | repo: `collected` · `excluded` · `licence_check` · `failed`; file: `kept` · `duplicate` · `near_duplicate` · `legacy` · `too_large` · `context` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
 | `sftgen storage pull` | Download what's missing locally: the newest database snapshot and the outputs. `--overwrite` replaces local files; the local database is backed up first | — |
@@ -129,6 +130,8 @@ Flags:
 - `scrape --refresh`: re-check downloaded pages for changes.
 - `scrape --update-lock`: re-resolve the pinned versions in `config/sources.lock.json`.
 - `scrape --source bbe`: one source only (repeatable).
+- `collect-repos --group guides`: one group only (repeatable). `--repo owner/name` adds one repo.
+  `--refresh` re-clones. `--update-lock` re-pins to the latest default-branch commit.
 - `generate-answers --retry-failed`
 - `validate --recheck`
 - `storage pull --overwrite`
@@ -170,6 +173,7 @@ Set these in `.env`. Every command prints them at startup, so you can confirm wh
 | `LIMIT_GENERATING` | `10` | Max questions to generate per run. `0` = no limit. |
 | `QUESTIONS_PER_CHUNK` | `3` | Questions generated from each chunk |
 | `REQUEST_DELAY_SECONDS` | `1` | Polite delay between requests |
+| `LIMIT_REPOS` | `20` | `collect-repos`: max repositories cloned per run. `0` = no limit. Repos excluded by licence without cloning don't count. |
 | `GITHUB_TOKEN` | — | GitHub API token: 5,000 requests/hour instead of 60 |
 
 The answer phase answers every saved question that has no answer yet, so it is naturally limited
@@ -218,6 +222,12 @@ It shows:
     section), by priority and node type
   - which source pages to scrape next
   - the core items that are not grounded yet
+- **code repositories:**
+  - repos and unique `.bal` files per group
+  - duplicates, legacy files and generated files
+  - estimated tokens
+  - licences of collected repos
+  - the repos that need a manual licence check
 - 5 random Q&A samples, so you can spot-check quality
 
 Terminal summary (illustrative numbers):
@@ -296,6 +306,47 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
 
+### Code repositories
+
+`sftgen collect-repos` adds whole repositories, for the raw code corpus and the codebase pool
+in later milestones. Groups are set in `repos.groups` in `pipeline.yaml`; earlier groups win
+when files are duplicated:
+
+| Group | Repos |
+|---|---|
+| `platform` | `ballerina-platform/module-ballerina-*` and `module-ballerinax-*` |
+| `guides` | every `ballerina-guides` repo |
+| `wso2` | `wso2` repos whose main language is Ballerina |
+| `external` | other Ballerina repos pushed since Swan Lake GA (2022-02), most-starred first, not forks or archived |
+
+For each repo:
+
+1. **Licence pre-gate.** If GitHub reports no licence or a copyleft licence, the repo is
+   excluded without downloading anything.
+2. **Pin.** The default branch is pinned to a commit with `git ls-remote` (no API quota) in
+   `config/sources.lock.json`.
+3. **Snapshot.** A blobless, shallow, sparse clone downloads only `*.bal`, `Ballerina.toml`,
+   `*.out`, READMEs and the root LICENSE.
+4. **Licence gate on the LICENSE text.**
+   - `safe` (a permissive licence that agrees with GitHub): the files are kept.
+   - `check` (no file, unrecognised text, or a mismatch): the repo waits for a person.
+   - `exclude` (copyleft, or no licence at all).
+5. **Classify each `.bal` file** as `swan_lake`, `legacy` (1.x) or `unknown`, using the
+   project's `distribution`, the `Ballerina.toml` layout and syntax markers. Generated files are
+   flagged so later steps can down-weight them.
+6. **Dedup** across all repos: an exact match on code without comments or whitespace, then
+   MinHash near-duplicates (similarity ≥ 0.8).
+
+Files are stored in `repo_files`, and a `.tar.gz` snapshot of each repo goes to
+`data/repos/`.
+
+**The licence register** is `docs/licence-register.csv`. It has one row per repo reviewed:
+licence, verdict, pinned commit, sha256 of the LICENSE file and file count. Unlicensed search
+results stay in the database only. People can edit it:
+- **Block a repo:** set its row to `exclude`.
+- **Allow a `check` repo after reading its licence:** set the row to `safe` and start `notes`
+  with `verified:`.
+
 ### Local folder and cloud bucket
 
 Everything the pipeline writes lives under **`LOCAL_DATA_DIR`** (default `data/`). That folder is
@@ -349,10 +400,11 @@ ballerina-sft-dataset-pipeline/
 ├── docs/
 │   ├── recommendations.md        # design research (v2; partly superseded, see note inside)
 │   └── schemas.md                # SQLite tables and columns
-├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · ids · logging
+├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · licences · dedup · ids · logging
 ├── scraper/ballerinascraper/
 │   └── ballerinascraper/
 │       ├── scrape.py             # fetch loop: limits, caching, change detection, failures
+│       ├── repos.py              # collect-repos: licence gate, sparse snapshots, Swan Lake filter, dedup
 │       └── collectors/           # ballerina_io (sitemap) · github · central · http · robots
 ├── sft-dataset-generator/
 │   ├── src/sftgen/
@@ -502,6 +554,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen scrape --refresh` | Re-check pages you already have for upstream changes |
 | `sftgen scrape --update-lock` | Re-resolve the pinned commits and Central versions in `config/sources.lock.json` |
 | `sftgen graph validate` | Check the knowledge graph before using it |
+| `sftgen collect-repos --group guides` | Collect one repo group; `LIMIT_REPOS=0` for all of it |
+| `sftgen collect-repos --repo owner/name` | Collect one repository |
 | `sftgen storage status` | See what's local only, changed, or only in the bucket |
 | `sftgen storage pull` | On a new machine: get the database and outputs from the bucket |
 | `sftgen generate-answers --retry-failed` | Retry questions whose answer call failed |

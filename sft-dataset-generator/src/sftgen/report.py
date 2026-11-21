@@ -40,6 +40,7 @@ class ReportData:
     limits: dict[str, Any] = field(default_factory=dict)
     coverage: dict[str, Any] | None = None  # knowledge-graph coverage (graph/coverage.py)
     swan_lake: str = ""
+    repos: dict[str, Any] | None = None     # collect-repos (ballerinascraper/repos.py)
 
     @property
     def total_pages(self) -> int:
@@ -86,8 +87,32 @@ def collect(s: Settings, db: Database) -> ReportData:
         questions_by_difficulty=by("difficulty"), question_status=by("status"),
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
-        swan_lake=s.sources.swan_lake,
+        swan_lake=s.sources.swan_lake, repos=_repos(db),
     )
+
+
+def _repos(db: Database) -> dict[str, Any] | None:
+    if not db.scalar("SELECT COUNT(*) FROM repos"):
+        return None
+    groups = _grouped(db.query("SELECT grp, status, COUNT(*) FROM repos GROUP BY 1, 2"))
+    files = _grouped(db.query(
+        "SELECT r.grp, f.status, COUNT(*) FROM repo_files f JOIN repos r ON r.id = f.repo_id "
+        "WHERE f.kind = 'bal' GROUP BY 1, 2"))
+    kept = {r[0]: (r[1], r[2] or 0, r[3] or 0) for r in db.query(
+        "SELECT r.grp, COUNT(*), SUM(LENGTH(f.text)), SUM(f.generated) FROM repo_files f "
+        "JOIN repos r ON r.id = f.repo_id WHERE f.kind = 'bal' AND f.status = 'kept' GROUP BY 1")}
+    licences = {r[0] or "none": r[1] for r in db.query(
+        "SELECT spdx, COUNT(*) FROM repos WHERE status = 'collected' GROUP BY 1 ORDER BY 2 DESC")}
+    verdicts = {r[0] or "—": r[1] for r in db.query("SELECT verdict, COUNT(*) FROM repos GROUP BY 1 ORDER BY 2 DESC")}
+    check = [dict(r) for r in db.query(
+        "SELECT full_name, grp, spdx_reported, licence_note FROM repos WHERE status = 'licence_check' "
+        "ORDER BY priority, stars DESC LIMIT 25")]
+    failed = [dict(r) for r in db.query(
+        "SELECT full_name, grp, error FROM repos WHERE status = 'failed' ORDER BY updated_at DESC LIMIT 25")]
+    projects = db.scalar("SELECT COUNT(*) FROM repo_files f JOIN repos r ON r.id = f.repo_id "
+                         "WHERE f.kind = 'toml' AND r.status = 'collected' AND f.distribution LIKE '2201.%'")
+    return {"groups": groups, "files": files, "kept": kept, "licences": licences, "verdicts": verdicts,
+            "check": check, "failed": failed, "swan_lake_projects": projects or 0}
 
 
 # --------------------------------------------------------------------------- #
@@ -123,11 +148,22 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
            f"(core {d.coverage['by_priority'].get('core', {}).get('grounded', 0)}/"
            f"{d.coverage['by_priority'].get('core', {}).get('items', 0)}) · graph {d.coverage['graph_version']}"]
           if d.coverage else []),
+        *([_repos_line(d.repos)] if d.repos else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
     ]
     return "\n".join(lines)
+
+
+def _repos_line(r: dict[str, Any]) -> str:
+    collected = sum(v.get("collected", 0) for v in r["groups"].values())
+    total = sum(sum(v.values()) for v in r["groups"].values())
+    kept = sum(v[0] for v in r["kept"].values())
+    tokens = sum(v[1] for v in r["kept"].values()) // 4
+    check = sum(v.get("licence_check", 0) for v in r["groups"].values())
+    return (f"Repos      {collected}/{total} collected, {check} need a licence check  |  "
+            f"{kept:,} unique .bal files, ~{tokens / 1e6:.1f}M tokens")
 
 
 # --------------------------------------------------------------------------- #
@@ -241,6 +277,53 @@ def _coverage_html(d: ReportData) -> list[str]:
     ]
 
 
+def _repos_html(d: ReportData) -> list[str]:
+    r = d.repos
+    if not r:
+        return ["<h2>Code repositories</h2>",
+                '<div class="card"><p class="muted">None collected yet: run <code>sftgen collect-repos</code>.'
+                "</p></div>"]
+    rows = []
+    for g in sorted(r["groups"], key=lambda g: ["platform", "guides", "wso2", "external", "manual"].index(g)
+                    if g in ("platform", "guides", "wso2", "external", "manual") else 9):
+        st, fs = r["groups"][g], r["files"].get(g, {})
+        n, chars, gen = r["kept"].get(g, (0, 0, 0))
+        rows.append([_e(g), str(sum(st.values())), str(st.get("collected", 0)), str(st.get("excluded", 0)),
+                     str(st.get("licence_check", 0)), str(st.get("failed", 0)), f"{n:,}",
+                     f"{fs.get('duplicate', 0) + fs.get('near_duplicate', 0):,}", f"{fs.get('legacy', 0):,}",
+                     f"{gen:,}", f"{chars // 4 / 1e6:.2f}M"])
+    check = r["check"]
+    failed = r["failed"]
+    return [
+        "<h2>Code repositories</h2>",
+        '<p class="muted">From <code>sftgen collect-repos</code>: blobless sparse snapshots pinned in '
+        "<code>config/sources.lock.json</code>. Only repos whose LICENSE file reads as a permissive licence keep "
+        "their files (<code>docs/licence-register.csv</code>). <b>Unique</b> = Swan Lake or unclassified "
+        ".bal files left after exact and near-duplicate removal; earlier groups win. Generated files are "
+        "counted in unique but flagged for down-weighting. Tokens ≈ characters ÷ 4.</p>",
+        '<div class="card scroll">' + _table(
+            ["Group", "Repos", "Collected", "Excluded", "Licence check", "Failed", "Unique .bal", "Duplicates",
+             "Legacy (1.x)", "Generated", "Tokens"], rows, numeric=set(range(1, 11))) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Licences of collected repos</h3>{_bars(r["licences"])}</div>',
+        f'<div class="card"><h3>Licence verdicts (all repos seen)</h3>{_bars(r["verdicts"], alt=True)}'
+        f'<p class="muted">Swan Lake projects (Ballerina.toml with distribution 2201.*): '
+        f'{r["swan_lake_projects"]:,}</p></div>',
+        "</div>",
+        *([f'<h3 style="margin-top:16px">Need a licence check ({len(check)} shown)</h3>',
+           '<div class="card scroll">' + _table(["Repo", "Group", "GitHub reports", "Why"], [
+               [f'<span class="url">{_e(c["full_name"])}</span>', _e(c["grp"]), _e(c["spdx_reported"] or "none"),
+                _e(c["licence_note"])] for c in check]) + "</div>",
+           '<p class="muted">After reading the licence, set the row in docs/licence-register.csv to '
+           "<code>safe</code> with notes starting <code>verified:</code>, or to <code>exclude</code>.</p>"]
+          if check else []),
+        *([f'<h3 style="margin-top:16px">Failed ({len(failed)} shown; retried next run)</h3>',
+           '<div class="card scroll">' + _table(["Repo", "Group", "Error"], [
+               [_e(f["full_name"]), _e(f["grp"]), f'<span class="err">{_e(f["error"])}</span>'] for f in failed])
+           + "</div>"] if failed else []),
+    ]
+
+
 def render_html(d: ReportData) -> str:
     srcs = [x for x in d.sources if x in d.pages or x in d.chunks] + sorted(
         (set(d.pages) | set(d.chunks)) - set(d.sources))
@@ -277,6 +360,7 @@ def render_html(d: ReportData) -> str:
              f'<span class="err">{_e(f["error"])}</span>', _e(f["fetched_at"])] for f in d.failed_pages])
             if d.failed_pages else '<p class="muted">None.</p>') + "</div>",
         *_coverage_html(d),
+        *_repos_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0, M1 and M2 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M3 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -70,9 +70,52 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
   live in one folder that mirrors the bucket. The old `reports/` folder can be deleted.
 - Older configs with `data/…` paths keep working: the prefix is dropped.
 
+### M3: licence register and repo collector
+
+- **`sftgen collect-repos`** takes whole Ballerina repositories in four groups
+  (`repos.groups`): `platform` (module repos), `guides` (`ballerina-guides`), `wso2`, and
+  `external` (GitHub search, Swan Lake era, not forks).
+  - `--group` and `--repo owner/name` narrow a run; `--refresh` and `--update-lock` re-collect.
+  - New `LIMIT_REPOS` (default 20) caps clones per run.
+- **Licence gate** (`balpipe_common/licences.py`):
+  - A pre-gate on GitHub's licence: no licence or copyleft means no clone.
+  - The root LICENSE text is then read and recognised: Apache-2.0, MIT, BSD, ISC, BSL-1.0,
+    CC0, Unlicense, GPL family, MPL, EPL.
+  - Verdicts are `safe`, `check` or `exclude`; only `safe` repos keep their files.
+- **The licence register** (`docs/licence-register.csv`) is updated every run.
+  - New columns: `licence_file_sha256` and `files`. Extra columns people add are kept.
+  - `exclude` rows always win.
+  - `safe` with notes starting `verified:` overrides the gate after a manual check.
+  - Unlicensed search hits stay in the database only.
+- **Pinning and snapshots:**
+  - The default branch is pinned with `git ls-remote` in `sources.lock.json` (`repos`).
+  - Blobless shallow sparse clone of `*.bal`, `Ballerina.toml`, `*.out`, READMEs and LICENSE.
+  - A `.tar.gz` snapshot goes to `data/repos/` and is synced to the bucket.
+- **Swan Lake filter per file:** `swan_lake`, `legacy` or `unknown`, from the project's
+  `distribution`, the `[package]`/`[project]` layout of `Ballerina.toml`, and 1.x or Swan Lake
+  syntax markers. Generated files are flagged.
+- **Dedup across repos** (`balpipe_common/dedup.py`):
+  - Exact: sha256 of tokens without comments or whitespace.
+  - Near-duplicates: MinHash with 128 permutations over 5-token shingles, LSH, similarity ≥ 0.8.
+  - Earlier groups keep the original.
+  - M4's decontamination will reuse the same fingerprints.
+- **New tables** `repos` and `repo_files`.
+- **The report** gets a *Code repositories* section, and the terminal summary a Repos line.
+- `numpy` is a new core dependency, for MinHash.
+
+**Live run (no GitHub token):**
+- `ballerina-guides`: 15 of 15 collected, all confirmed Apache-2.0.
+- `external`: 123 of 1,000 collected; 873 excluded for having no licence; 4 need a licence check.
+- In total, about 2,800 unique `.bal` files (~3.1M tokens).
+
 ### Tests
 
-80 tests in total (+8 for M2: bucket layout, change-only uploads, pull to a fresh machine,
+89 tests in total (+9 for M3: licence detection and verdicts, the pre-gate, the register,
+fingerprints and LSH; a collect run against local git repos covering the licence gate, sparse
+snapshot, lockfile, register, tarball, Swan Lake classification, exact and near dedup, re-run
+skips and the clone limit).
+
+M2: 80 tests (+8 for M2: bucket layout, change-only uploads, pull to a fresh machine,
 snapshot pruning, missing client library, data-relative paths, and the CLI end to end with
 `STORAGE_BUCKET=false` then `true`).
 

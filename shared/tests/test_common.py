@@ -28,7 +28,7 @@ def _clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_limits_have_defaults(tmp_path: Path) -> None:
     s = load_settings(root=_repo(tmp_path))
     assert s.limits() == {"LIMIT_SCRAPE_PAGES": 20, "LIMIT_GENERATING": 10, "QUESTIONS_PER_CHUNK": 3,
-                          "REQUEST_DELAY_SECONDS": 1.0}
+                          "REQUEST_DELAY_SECONDS": 1.0, "LIMIT_REPOS": 20}
 
 
 def test_limits_from_env_file_with_inline_comments(tmp_path: Path) -> None:

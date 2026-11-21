@@ -95,6 +95,49 @@ class SourcesCfg(BaseModel):
     central: CentralCfg = Field(default_factory=CentralCfg)
 
 
+class RepoGroupCfg(BaseModel):
+    """One group of repositories for `collect-repos`."""
+
+    name: str
+    org: str | None = None            # list every public repo of this org ...
+    query: str | None = None          # ... or a GitHub repository search (sorted by stars)
+    repos: list[str] = Field(default_factory=list)  # ... or an explicit owner/name list
+    include: list[str] = Field(default_factory=list)  # regexes on the repo name; empty = all
+    exclude: list[str] = Field(default_factory=list)
+    intended_use: str = "corpus"      # written to the licence register for new rows
+    max_search_results: int = 1000    # GitHub search returns at most 1,000
+
+
+class ReposCfg(BaseModel):
+    """`collect-repos`: blobless sparse snapshots of Ballerina repositories, licence-gated."""
+
+    register_file: str = "docs/licence-register.csv"
+    # earlier groups win when the same file appears in several repos
+    groups: list[RepoGroupCfg] = Field(default_factory=lambda: [
+        RepoGroupCfg(name="platform", org="ballerina-platform",
+                     include=[r"^module-ballerina-", r"^module-ballerinax-"],
+                     intended_use="corpus; commit-mining"),
+        RepoGroupCfg(name="guides", org="ballerina-guides", intended_use="codebase-pool; commit-mining"),
+        RepoGroupCfg(name="wso2", query="org:wso2 language:Ballerina fork:false",
+                     intended_use="codebase-pool; corpus"),
+        RepoGroupCfg(name="external",
+                     query=("language:Ballerina fork:false archived:false pushed:>=2022-02-01 "
+                            "-org:ballerina-platform -org:ballerina-guides -org:wso2 -org:wso2-enterprise"),
+                     intended_use="corpus; codebase-pool candidate"),
+    ])
+    # git sparse-checkout patterns (gitignore syntax): only these blobs are downloaded
+    sparse_patterns: list[str] = Field(default_factory=lambda: [
+        "*.bal", "Ballerina.toml", "*.out", "README.md", "Package.md", "Module.md",
+        "/LICENSE*", "/LICENCE*", "/COPYING*"])
+    exclude_paths: list[str] = Field(default_factory=lambda: ["**/target/**", "**/node_modules/**", "**/.git/**"])
+    max_file_bytes: int = 300_000     # larger files are recorded as too_large, text not stored
+    max_repo_kb: int = 0              # skip repos larger than this (GitHub size, KB); 0 = no limit
+    workers: int = 4                  # parallel clones
+    clone_timeout_s: int = 900
+    keep_snapshots: bool = True       # write data/repos/<owner>__<repo>@<sha12>.tar.gz
+    near_duplicate_threshold: float = 0.8  # MinHash similarity of .bal files
+
+
 class CrawlCfg(BaseModel):
     user_agent: str = (
         "BallerinaCorpusBot/2.1 (+https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline)"
@@ -237,6 +280,7 @@ class Settings(BaseSettings):
     limit_scrape_pages: int = Field(default=20, ge=0, validation_alias=AliasChoices("LIMIT_SCRAPE_PAGES"))
     questions_per_chunk: int = Field(default=3, ge=1, le=20, validation_alias=AliasChoices("QUESTIONS_PER_CHUNK"))
     request_delay_seconds: float = Field(default=1.0, ge=0, validation_alias=AliasChoices("REQUEST_DELAY_SECONDS"))
+    limit_repos: int = Field(default=20, ge=0, validation_alias=AliasChoices("LIMIT_REPOS"))
 
     # --- storage switch (.env) ---
     storage_bucket: bool = Field(default=False, validation_alias=AliasChoices("STORAGE_BUCKET"))
@@ -259,6 +303,7 @@ class Settings(BaseSettings):
     export: ExportCfg = Field(default_factory=ExportCfg)
     sft: SftCfg = Field(default_factory=SftCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
+    repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
     storage: StorageCfg = Field(default_factory=StorageCfg)
     logging: LoggingCfg = Field(default_factory=LoggingCfg)
@@ -325,6 +370,7 @@ class Settings(BaseSettings):
             "LIMIT_GENERATING": self.limit_generating,
             "QUESTIONS_PER_CHUNK": self.questions_per_chunk,
             "REQUEST_DELAY_SECONDS": self.request_delay_seconds,
+            "LIMIT_REPOS": self.limit_repos,
         }
 
     def require(self, *fields: str) -> None:

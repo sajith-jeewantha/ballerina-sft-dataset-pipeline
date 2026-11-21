@@ -1,0 +1,718 @@
+{
+ "lock_version": 1,
+ "swan_lake": "2201.14.1",
+ "bbe": {},
+ "repos": {
+  "3nethz/ballerina-pipelines-connector": {
+   "ref": "main",
+   "commit": "a0d279eb28fbab06bca7755651a4cd852a9ab30f",
+   "locked_at": "2026-11-21T11:06:52Z"
+  },
+  "Adhishtanaka/gemilib": {
+   "ref": "main",
+   "commit": "48b0965771d718d45c100fcd6ab181796d144ff3",
+   "locked_at": "2026-11-21T11:06:36Z"
+  },
+  "Aneesh495/coffer": {
+   "ref": "main",
+   "commit": "e26b0e33a9d368c4025e29645ed6435404cf3f92",
+   "locked_at": "2026-11-21T11:05:17Z"
+  },
+  "Ballroom-Platform/ballroom-backend": {
+   "ref": "m2",
+   "commit": "35c6ec81256c6e45d3461ae6d73229b3ac65498f",
+   "locked_at": "2026-11-21T11:05:17Z"
+  },
+  "Bhashinee/dayforce": {
+   "ref": "master",
+   "commit": "9ade5443545bf7dddff219e364e7bb44e5aa0888",
+   "locked_at": "2026-11-21T11:07:40Z"
+  },
+  "CodaCit/Learn-Ballerina": {
+   "ref": "main",
+   "commit": "9e1225c74ba69b8f82703c69a2110ec033de44c3",
+   "locked_at": "2026-11-21T11:08:27Z"
+  },
+  "DInuwan97/ballerina-covid19-sample": {
+   "ref": "main",
+   "commit": "84a17868e1fbdcfe388279e5c12567d66a467920",
+   "locked_at": "2026-11-21T11:06:31Z"
+  },
+  "DanKibwikaAkillix/Distributed-System": {
+   "ref": "main",
+   "commit": "5a7311855eca47fdcf0fb3e956dac76753731eb6",
+   "locked_at": "2026-11-21T11:04:15Z"
+  },
+  "Dineth-Basura/RescuePulse": {
+   "ref": "main",
+   "commit": "ac4791dc87720ebdf15f404b061e997ce92de797",
+   "locked_at": "2026-11-21T11:06:19Z"
+  },
+  "G5andeepD/module-ballerinax-openai-images": {
+   "ref": "main",
+   "commit": "2a9691b200987db4f82f57dcfe43bac7b3b40615",
+   "locked_at": "2026-11-21T11:07:12Z"
+  },
+  "GevinHasmitha/TestCernerConnect": {
+   "ref": "main",
+   "commit": "e8fc0ff7ef0a6f2094b69eef24c394e3a7c34744",
+   "locked_at": "2026-11-21T11:07:31Z"
+  },
+  "HasithaErandika/module-ballerinax-huggingface.tei": {
+   "ref": "main",
+   "commit": "afa496541a86cd5e883acba553c68eb9c73c39cf",
+   "locked_at": "2026-11-21T11:07:45Z"
+  },
+  "Jose01001011/DSA_Assignment": {
+   "ref": "main",
+   "commit": "ab3ebd7d52a813ca76e92dc89eb631e71bdc616b",
+   "locked_at": "2026-11-21T11:05:53Z"
+  },
+  "Josera19/API-Prueba-II": {
+   "ref": "master",
+   "commit": "88092cb1185d5211e59ae3c11efa552b823e2f9c",
+   "locked_at": "2026-11-21T11:08:00Z"
+  },
+  "KavinduZoysa/music-for-weather": {
+   "ref": "main",
+   "commit": "46a342c51060c7e2014b69f44db6c1a3f6d1fd9e",
+   "locked_at": "2026-11-21T11:06:37Z"
+  },
+  "KillovSky/Hathor": {
+   "ref": "main",
+   "commit": "b7556dc3e5790b7d4745a3b86b9d0706219afc73",
+   "locked_at": "2026-11-21T11:06:17Z"
+  },
+  "Kruutteri1/RabbitGate": {
+   "ref": "main",
+   "commit": "cf3638a76dba727162102cf537442f19f9dac018",
+   "locked_at": "2026-11-21T11:06:05Z"
+  },
+  "Moses-Elias/Smart-Ticketing-System": {
+   "ref": "main",
+   "commit": "aad697f2064e0f009519e7e21352cd55897847a6",
+   "locked_at": "2026-11-21T11:07:26Z"
+  },
+  "NipunFernando/ballerina-configurations-testing": {
+   "ref": "main",
+   "commit": "05c7918393b4e009357eabf133ce8f170533d87f",
+   "locked_at": "2026-11-21T11:06:36Z"
+  },
+  "NipunaMadhushan/ballerina-observability-samples": {
+   "ref": "main",
+   "commit": "64cb7e063fb443525397b54603e544d4407a5525",
+   "locked_at": "2026-11-21T11:06:16Z"
+  },
+  "NipunaRanasinghe/ballerina-generated-clients": {
+   "ref": "main",
+   "commit": "083295e4577a9114d2b24aff8fe6f326d7a78ee5",
+   "locked_at": "2026-11-21T11:07:27Z"
+  },
+  "NipunaRanasinghe/choreo-samples": {
+   "ref": "main",
+   "commit": "23d4a3c8b0cffebd260a227fd1fbd6a52a8a6c00",
+   "locked_at": "2026-11-21T11:07:25Z"
+  },
+  "NirmalKBandara/securescan": {
+   "ref": "main",
+   "commit": "0f90c64a9b62d2140c4856fb58441e32f93cd571",
+   "locked_at": "2026-11-21T11:04:25Z"
+  },
+  "Nuvindu/module-pipe": {
+   "ref": "main",
+   "commit": "9916f831ce30685421a2ccd58e9e45d73f99acab",
+   "locked_at": "2026-11-21T11:05:57Z"
+  },
+  "Nuvindu/module-pubsub-archived": {
+   "ref": "main",
+   "commit": "c3eaae4124ab29b9a63587ac44bf8c5aca793245",
+   "locked_at": "2026-11-21T11:05:16Z"
+  },
+  "OkothPius/Choreo": {
+   "ref": "main",
+   "commit": "7761848e741e6236e3617fcabddcd4174747d15d",
+   "locked_at": "2026-11-21T11:05:52Z"
+  },
+  "OkothPius/SalesforceZendesk": {
+   "ref": "main",
+   "commit": "55a862e7e8c0c26b22b92fe77fc3ef57a0832be0",
+   "locked_at": "2026-11-21T11:08:18Z"
+  },
+  "PacktPublishing/Practical-Site-Reliability-Engineering": {
+   "ref": "master",
+   "commit": "79a7b43486659f8122d66a46c75451a9a568b781",
+   "locked_at": "2026-11-21T11:04:08Z"
+  },
+  "PasanAbeysekara/RestClientX": {
+   "ref": "main",
+   "commit": "7749f967d4e2a4bb87687f0213d12ab4ce078023",
+   "locked_at": "2026-11-21T11:07:42Z"
+  },
+  "Pulkit1822/ballerina-first-connector": {
+   "ref": "main",
+   "commit": "a66b48cc65d96e85a74c07ebb33445ad75a03e3d",
+   "locked_at": "2026-11-21T11:05:55Z"
+  },
+  "RDPerera/module-ballerinax-api2pdf": {
+   "ref": "main",
+   "commit": "7c8dab0ce458020038428817ae2eac5be5c8b28c",
+   "locked_at": "2026-11-21T11:05:41Z"
+  },
+  "RDPerera/module-ballerinax-sap.concur.expense": {
+   "ref": "main",
+   "commit": "b7b045d118fde5d6fce9c1aeb82fc35e8dd2ccab",
+   "locked_at": "2026-11-21T11:06:35Z"
+  },
+  "RivinduM/iso8583-iso20022-data-mapper": {
+   "ref": "main",
+   "commit": "e1f4e04b89eb7185747e25fa2f743e9f2520d496",
+   "locked_at": "2026-11-21T11:06:34Z"
+  },
+  "SahanjithD/bedrock-integrator-inquiry-agent": {
+   "ref": "main",
+   "commit": "4a12bf6f2bc3836e117aa22e963a3f57996f8b95",
+   "locked_at": "2026-11-21T11:08:30Z"
+  },
+  "TRNSYSJP/TRNSYS.JP": {
+   "ref": "master",
+   "commit": "f4c19a97edf4c627d25e47a5bb3e45ac0ce02d15",
+   "locked_at": "2026-11-21T11:04:09Z"
+  },
+  "Team-OrByte/ride-service": {
+   "ref": "main",
+   "commit": "844b87e69600506fc3ce35120a18f5e2d2f3e10d",
+   "locked_at": "2026-11-21T11:05:44Z"
+  },
+  "TharinduNanayakkara28/ballerinax-ai.azure.storage.file": {
+   "ref": "main",
+   "commit": "0014ebc46dba650d3334ea7eee720e7892e62eec",
+   "locked_at": "2026-11-21T11:06:38Z"
+  },
+  "TharmiganK/module-ballerinax-h2.driver": {
+   "ref": "main",
+   "commit": "854bccd2fa0a3fd1709d0bbf4371263fcf803b82",
+   "locked_at": "2026-11-21T11:06:32Z"
+  },
+  "ThisaruGuruge/apollo-and-ballerina": {
+   "ref": "main",
+   "commit": "563c8ca0a0e1192e227f4ac3def709b9dd3a7461",
+   "locked_at": "2026-11-21T11:05:21Z"
+  },
+  "ThisaruGuruge/ballerina-graphql-federation-products-subgraph": {
+   "ref": "main",
+   "commit": "50b6d7a65754eb55e457515d7c7fb6eec5004be2",
+   "locked_at": "2026-11-21T11:05:20Z"
+  },
+  "ThisaruGuruge/ballerina-graphql-federation-reviews-subgraph": {
+   "ref": "main",
+   "commit": "ff5aa78b2f50deee93df7c8b5b4fd58505a13724",
+   "locked_at": "2026-11-21T11:05:19Z"
+  },
+  "ThisaruGuruge/ballerina-graphql-federation-users-subgraph": {
+   "ref": "main",
+   "commit": "be371902d882c3764b6a0993b3bfdb6e68ef9112",
+   "locked_at": "2026-11-21T11:05:19Z"
+  },
+  "ThisaruGuruge/extract-ballerina-package-details": {
+   "ref": "master",
+   "commit": "b7531cbb776433d087b7088677e9126ad7325d48",
+   "locked_at": "2026-11-21T11:05:50Z"
+  },
+  "ThisaruGuruge/github-repos-by-language": {
+   "ref": "main",
+   "commit": "01ad01bb211cc304a46985f3855ee8e3b94060ed",
+   "locked_at": "2026-11-21T11:06:29Z"
+  },
+  "ThisaruGuruge/prettify": {
+   "ref": "main",
+   "commit": "9ed3c25bafa48d2eee15b0d22598534846b900cc",
+   "locked_at": "2026-11-21T11:04:16Z"
+  },
+  "ThisaruGuruge/weather-rest-api-to-graphql": {
+   "ref": "main",
+   "commit": "127970eb292078b221b9cef3f0cd761b92b7a5e3",
+   "locked_at": "2026-11-21T11:04:23Z"
+  },
+  "UST-QuAntiL/qhana-backend": {
+   "ref": "main",
+   "commit": "6720b80d85b1207959cc5a87b428dbca369efdf5",
+   "locked_at": "2026-11-21T11:06:11Z"
+  },
+  "YASSERRMD/vectorhub-gateway": {
+   "ref": "main",
+   "commit": "e6a5430362b649d3a4a73f7edd2cbe725baf33e7",
+   "locked_at": "2026-11-21T11:05:56Z"
+  },
+  "YujithIsura/pt-global-data": {
+   "ref": "main",
+   "commit": "89132b273558d39513af71b13655abe70409cb68",
+   "locked_at": "2026-11-21T11:07:41Z"
+  },
+  "asankaa/apitest": {
+   "ref": "main",
+   "commit": "4cff4c62b5ecccd3fbb1eef276da4f74dc29dd1a",
+   "locked_at": "2026-11-21T11:08:24Z"
+  },
+  "asgardeo-samples/asgardeo-react-workshop": {
+   "ref": "main",
+   "commit": "ab9aab751c2500c072d04710ddf1fc4dda4cbdea",
+   "locked_at": "2026-11-21T11:06:06Z"
+  },
+  "avinyafoundation/SMS-HRMS-API": {
+   "ref": "main",
+   "commit": "d9150725490dd167ab1c53302ee6ccb6a67c93a9",
+   "locked_at": "2026-11-21T11:04:21Z"
+  },
+  "avinyafoundation/campus-apps-bff": {
+   "ref": "main",
+   "commit": "92f4e1e6cfa036484cb90d93e17eb9d75f1bc3d2",
+   "locked_at": "2026-11-21T11:07:34Z"
+  },
+  "avinyafoundation/campus-attendance-bff": {
+   "ref": "main",
+   "commit": "7cdf30099e02897adf8e43b63b789739cf486004",
+   "locked_at": "2026-11-21T11:07:18Z"
+  },
+  "avinyafoundation/global-data": {
+   "ref": "main",
+   "commit": "b68456988ae75731a6ec53860e3535da1a8e7e0a",
+   "locked_at": "2026-11-21T11:06:13Z"
+  },
+  "ayeshLK/event-integration-dashboard": {
+   "ref": "master",
+   "commit": "9e5c7bea70037c88a27e17708c4c004d97013738",
+   "locked_at": "2026-11-21T11:07:01Z"
+  },
+  "ayeshLK/inventory-management": {
+   "ref": "master",
+   "commit": "3455a77a0b934734dfb67b61e2c25fd606b5e1bd",
+   "locked_at": "2026-11-21T11:05:45Z"
+  },
+  "bal-commons/module-commons-attachment": {
+   "ref": "main",
+   "commit": "79949e1cb06295c28a52c7460d4e31470ed51d3f",
+   "locked_at": "2026-11-21T11:07:48Z"
+  },
+  "ballerina-guides/ai-samples": {
+   "ref": "main",
+   "commit": "cd5e3fcea18bcb8bcef0d6878e21c29aa295278c",
+   "locked_at": "2026-11-21T11:03:42Z"
+  },
+  "ballerina-guides/azure-functions-demo": {
+   "ref": "main",
+   "commit": "d290a51701abf9071001d7751d65069d2ded8fd4",
+   "locked_at": "2026-11-21T11:03:50Z"
+  },
+  "ballerina-guides/b2b-samples": {
+   "ref": "main",
+   "commit": "1bb02b96e9fac902be22dc1d1dbb170421ebad30",
+   "locked_at": "2026-11-21T11:03:51Z"
+  },
+  "ballerina-guides/ballerina-tech-talks": {
+   "ref": "main",
+   "commit": "114703c9658e18c1b39544b1b48b5e659007b81c",
+   "locked_at": "2026-11-21T11:03:52Z"
+  },
+  "ballerina-guides/bff-samples": {
+   "ref": "main",
+   "commit": "a591e82b880b5cc3b8ff38596836fa7d2ac2d16f",
+   "locked_at": "2026-11-21T11:03:48Z"
+  },
+  "ballerina-guides/enterprise-integration-patterns": {
+   "ref": "main",
+   "commit": "be7559efccee75b4152ead80a2916319c1ad4eb7",
+   "locked_at": "2026-11-21T11:03:38Z"
+  },
+  "ballerina-guides/etl-samples": {
+   "ref": "main",
+   "commit": "3e4e45bbeaf07bccfc6a0d57461ada0886af2770",
+   "locked_at": "2026-11-21T11:03:49Z"
+  },
+  "ballerina-guides/ftgo-microservices-example": {
+   "ref": "main",
+   "commit": "63e2cb9dcaeed4b990e25dfb4a84b8e56209d30d",
+   "locked_at": "2026-11-21T11:03:47Z"
+  },
+  "ballerina-guides/gcp-microservices-demo": {
+   "ref": "main",
+   "commit": "52a614e9174eae447c288f818612455df2c80eba",
+   "locked_at": "2026-11-21T11:03:39Z"
+  },
+  "ballerina-guides/healthcare-samples": {
+   "ref": "main",
+   "commit": "5ba434d82a1ded5280296d8186231ead1e4bc6e2",
+   "locked_at": "2026-11-21T11:03:43Z"
+  },
+  "ballerina-guides/hotel-reservation-demo": {
+   "ref": "main",
+   "commit": "97c644553dcb891dd090d37f5f122f61ae25cdb3",
+   "locked_at": "2026-11-21T11:03:44Z"
+  },
+  "ballerina-guides/integration-samples": {
+   "ref": "main",
+   "commit": "97d0149997f7a59a52a86b78a0de9d6f2ba961fa",
+   "locked_at": "2026-11-21T11:03:41Z"
+  },
+  "ballerina-guides/integration-tutorials": {
+   "ref": "main",
+   "commit": "468afa041d1ba475cfecbc523f1cefabdb4c8653",
+   "locked_at": "2026-11-21T11:03:45Z"
+  },
+  "ballerina-guides/social-media-demo": {
+   "ref": "main",
+   "commit": "67034d4e5061cc2cb06299842a12bff6693476b8",
+   "locked_at": "2026-11-21T11:03:40Z"
+  },
+  "ballerina-guides/training-content": {
+   "ref": "main",
+   "commit": "0022f3fd2fc1e4ec5519d433fa4f8366192fbdc5",
+   "locked_at": "2026-11-21T11:03:46Z"
+  },
+  "byorfeature/isuru1": {
+   "ref": "main",
+   "commit": "d454486e4dca4e8b4527f9c69a7512cef2e5d38e",
+   "locked_at": "2026-11-21T11:06:21Z"
+  },
+  "chamals3n4/module-ballerinax-huggingface": {
+   "ref": "main",
+   "commit": "a1b1d3e62542540340ba50f73cbabedb1b8d4e50",
+   "locked_at": "2026-11-21T11:07:44Z"
+  },
+  "chanakaudaya/awesome-ballerina": {
+   "ref": "main",
+   "commit": "a78dbeeb1f8a1478f05bf89a99a40bcdac2a4f01",
+   "locked_at": "2026-11-21T11:04:25Z"
+  },
+  "daneshk/choreo_byoc_projects": {
+   "ref": "main",
+   "commit": "44e367121e500b0032b333d9380eaca86c47416b",
+   "locked_at": "2026-11-21T11:08:16Z"
+  },
+  "darshanasbg/23-1-amm": {
+   "ref": "main",
+   "commit": "e1956759ba9af9baf460e6e6fd86bb6c3d7e10b0",
+   "locked_at": "2026-11-21T11:07:33Z"
+  },
+  "edubencz/nexdom-integration-control-plane": {
+   "ref": "main",
+   "commit": "e38f5a402ed4458be0b0c54503e9207f513ba849",
+   "locked_at": "2026-11-21T11:06:40Z"
+  },
+  "exercism/ballerina": {
+   "ref": "main",
+   "commit": "42937e1df8a834e55020dc86ccc2c725ab97c0b3",
+   "locked_at": "2026-11-21T11:04:10Z"
+  },
+  "gagd-inetum/choreo-samples": {
+   "ref": "main",
+   "commit": "cf629cc0cbbcd7ca4d24570b776e8cfb8641a63d",
+   "locked_at": "2026-11-21T11:07:51Z"
+  },
+  "godwinamila/wso2-samples": {
+   "ref": "main",
+   "commit": "3052d5d764e25b3f939f678d18520a7614a52401",
+   "locked_at": "2026-11-21T11:08:28Z"
+  },
+  "guna3006/ballerina-container": {
+   "ref": "main",
+   "commit": "ab701db95b8c5438ada55d3f6317e8b1432f70b1",
+   "locked_at": "2026-11-21T11:06:18Z"
+  },
+  "hasathcharu/persist-sql-load-tests": {
+   "ref": "main",
+   "commit": "b8c61a1521eb6e89034e3f3d5855ee8198146f48",
+   "locked_at": "2026-11-21T11:07:59Z"
+  },
+  "hasathcharu/persist-tools-tests": {
+   "ref": "main",
+   "commit": "665dd6f47726087ebeb0eb662282d9838fcd8bca",
+   "locked_at": "2026-11-21T11:06:14Z"
+  },
+  "hasithaa/ballerina-service-descriptors": {
+   "ref": "main",
+   "commit": "db090f52dce2e5aeb27492155ac3868f35018eef",
+   "locked_at": "2026-11-21T11:06:53Z"
+  },
+  "hasithaa/wf-durable-agent-demo": {
+   "ref": "main",
+   "commit": "c1e45241bac27ff185a7ab4d3378de96d211ee19",
+   "locked_at": "2026-11-21T11:07:46Z"
+  },
+  "heshanpadmasiri/bal-bench": {
+   "ref": "main",
+   "commit": "d6d2aa063b3f07fa168a1027b2ac75e29da99223",
+   "locked_at": "2026-11-21T11:06:49Z"
+  },
+  "hirunaofficial/tasktrek-backend": {
+   "ref": "main",
+   "commit": "d76b57ef046e4e377ca38d6bd20714e31895f0d0",
+   "locked_at": "2026-11-21T11:08:04Z"
+  },
+  "iServeSL/iServeSL-Services": {
+   "ref": "main",
+   "commit": "3199f0f5d017a77e3aeff6267c1f83c3cbfdf8e9",
+   "locked_at": "2026-11-21T11:05:49Z"
+  },
+  "janihur/bal-bowling-score-calculator": {
+   "ref": "main",
+   "commit": "83158c3beec5eb22446925e0e5ee6b862be69a96",
+   "locked_at": "2026-11-21T11:08:05Z"
+  },
+  "janihur/bal-game-of-life": {
+   "ref": "main",
+   "commit": "b83915491e4c70fea96e30f84e3ab6a782b6de47",
+   "locked_at": "2026-11-21T11:06:15Z"
+  },
+  "janihur/bal-jokes-api": {
+   "ref": "main",
+   "commit": "83c5ab356df4ce41e9ad046ab031975cbbd43d40",
+   "locked_at": "2026-11-21T11:05:46Z"
+  },
+  "knefeh/devantagentdemo": {
+   "ref": "main",
+   "commit": "f9ca15f6adb55ddf2ee115e2d7670926ecf0b655",
+   "locked_at": "2026-11-21T11:08:01Z"
+  },
+  "laslowso2/integration-samples": {
+   "ref": "main",
+   "commit": "4f317839a6e3f5ae341090f820a3cf8ca5c655f4",
+   "locked_at": "2026-11-21T11:06:54Z"
+  },
+  "lathlk/workforce-back": {
+   "ref": "main",
+   "commit": "6e3a8ba96186dee5db2edf108f923b98ba958d98",
+   "locked_at": "2026-11-21T11:06:47Z"
+  },
+  "ldclakmal/ballerina-oauth1.0a": {
+   "ref": "master",
+   "commit": "c8a854faa426ed0bd4438af8bc203b8ec598d6a1",
+   "locked_at": "2026-11-21T11:05:48Z"
+  },
+  "ldclakmal/ballerina-samples": {
+   "ref": "master",
+   "commit": "e2ab9a95f49145ee6c38504e022a390838aac1ec",
+   "locked_at": "2026-11-21T11:04:14Z"
+  },
+  "mindula/languageServer": {
+   "ref": "master",
+   "commit": "dea649540b66e44bc93916221f259ecd3b2396e5",
+   "locked_at": "2026-11-21T11:04:19Z"
+  },
+  "mohanvive/cake-service": {
+   "ref": "main",
+   "commit": "25e858ac149c97e191a0cc27a60fe7477edaff73",
+   "locked_at": "2026-11-21T11:07:16Z"
+  },
+  "nadheesh/agent-demo": {
+   "ref": "main",
+   "commit": "40b8bbcd8e09c7aabde9f0f4b6ab39ed94c249ce",
+   "locked_at": "2026-11-21T11:06:33Z"
+  },
+  "nadheesh/ballerina-ai-agent-demo": {
+   "ref": "main",
+   "commit": "e662bd9b1d0b04aa439d3963d866b0ae980a011a",
+   "locked_at": "2026-11-21T11:07:05Z"
+  },
+  "nivindulakshitha/Ballerina-Fundamentals": {
+   "ref": "Master",
+   "commit": "277cfc16bbbd4df802dd78121982090fb773dfd0",
+   "locked_at": "2026-11-21T11:04:24Z"
+  },
+  "pasinduh2002/MediLink-Smart-Medical-API-Hub": {
+   "ref": "main",
+   "commit": "6dca33214e7ab9eff21a5380337f80facc59805b",
+   "locked_at": "2026-11-21T11:04:12Z"
+  },
+  "pubudu91/choreo-samples": {
+   "ref": "main",
+   "commit": "4496001d042d742c92aac03cccc8fd61ff26aa7b",
+   "locked_at": "2026-11-21T11:06:30Z"
+  },
+  "pubudu91/mediation-policies": {
+   "ref": "main",
+   "commit": "8ce6c6e44556247e39103039a4603f6f1e81f332",
+   "locked_at": "2026-11-21T11:08:09Z"
+  },
+  "ramith/awsome-wso2-claude-agents": {
+   "ref": "main",
+   "commit": "471a917014b33532c1cf2a13fd82142f56e7b726",
+   "locked_at": "2026-11-21T11:05:24Z"
+  },
+  "ramith/country-profile": {
+   "ref": "main",
+   "commit": "89329633f54ac221ff550e63609e2a9368e8c3fa",
+   "locked_at": "2026-11-21T11:06:23Z"
+  },
+  "ramith/enhanced-url-rewrite-mediation-policy": {
+   "ref": "main",
+   "commit": "cb58e768a6ee2da2c99a60fe202cb5391a28d780",
+   "locked_at": "2026-11-21T11:06:10Z"
+  },
+  "ramith/nadac-data": {
+   "ref": "main",
+   "commit": "2351781c22ff8c308a02a464f73f95323ca6e071",
+   "locked_at": "2026-11-21T11:06:04Z"
+  },
+  "ramith/number-verification-flow": {
+   "ref": "main",
+   "commit": "503a9247522539afd0717bbc73760fb879aac210",
+   "locked_at": "2026-11-21T11:08:07Z"
+  },
+  "ramith/payment-initiation-demo": {
+   "ref": "main",
+   "commit": "04e93853ba430d9a4332c9f8d817672ae7d9e09c",
+   "locked_at": "2026-11-21T11:07:57Z"
+  },
+  "ramith/smpp-ballerina-example": {
+   "ref": "main",
+   "commit": "342ea7d02fa666a11cbcf983235f5a47239bbd6c",
+   "locked_at": "2026-11-21T11:06:08Z"
+  },
+  "ramith/snowflakedemo": {
+   "ref": "main",
+   "commit": "6ac519c7d1c512cc731e84b5fbe57c679ad55a26",
+   "locked_at": "2026-11-21T11:05:52Z"
+  },
+  "renaote/DSA-Group-Assignment": {
+   "ref": "main",
+   "commit": "8847375ea0dd0434f51cf96c9c9e38ba9ac420d7",
+   "locked_at": "2026-11-21T11:06:12Z"
+  },
+  "renuka-fernando/go-control-plane-custom": {
+   "ref": "main",
+   "commit": "a6229d9e473986979f2a6fbe400e4f9e32423979",
+   "locked_at": "2026-11-21T11:06:20Z"
+  },
+  "saivignesh-bassure/ballerina": {
+   "ref": "main",
+   "commit": "76254e4e055766107ccabaaabc0fe869249fb1ad",
+   "locked_at": "2026-11-21T11:07:49Z"
+  },
+  "salif/ballerina-rosettacode": {
+   "ref": "main",
+   "commit": "3062405c6f251ea68d0bbedae900e0a614129d38",
+   "locked_at": "2026-11-21T11:07:30Z"
+  },
+  "sameerajayasoma/choreo-sample-2": {
+   "ref": "main",
+   "commit": "4556d6559997e1433c662d6e28f6fc03094668f1",
+   "locked_at": "2026-11-21T11:07:14Z"
+  },
+  "sameerajayasoma/eggplant": {
+   "ref": "main",
+   "commit": "29d189d286bd730e194ad579187ef957adbcccaa",
+   "locked_at": "2026-11-21T11:06:07Z"
+  },
+  "sarindaSenevirathne/customer-kyc-demo": {
+   "ref": "main",
+   "commit": "d0da885d562710c0cb48050470fff53d0774f052",
+   "locked_at": "2026-11-21T11:06:51Z"
+  },
+  "seanpm2001/SNU_2D_ProgrammingTools_IDE_Ballerina": {
+   "ref": "main",
+   "commit": "ab6a5953c3f3afb731a8f463038465a21527b9aa",
+   "locked_at": "2026-11-21T11:04:26Z"
+  },
+  "shafreenAnfar/social-media-demo-observability": {
+   "ref": "main",
+   "commit": "9480ff60a8de95c55de86a4ee754f29dc94dc829",
+   "locked_at": "2026-11-21T11:05:58Z"
+  },
+  "sm1990/secret-santa-app": {
+   "ref": "main",
+   "commit": "2e58402d6811228cfd10128b20114f7e9bb8fa3f",
+   "locked_at": "2026-11-21T11:04:17Z"
+  },
+  "sonic-smith-2pm0/module-ballerina-crypto": {
+   "ref": "master",
+   "commit": "e77192ff754898a58687ffae8069bf14241f80a1",
+   "locked_at": "2026-11-21T11:07:28Z"
+  },
+  "tedneward/TicTacToeREST": {
+   "ref": "main",
+   "commit": "167911f0d3884fa668c1182c23dff42ed3fa22f6",
+   "locked_at": "2026-11-21T11:04:13Z"
+  },
+  "thambaru/ballerina-newrelic": {
+   "ref": "main",
+   "commit": "f67acb251ef856d65d40fea9be6e681e93a4ccd5",
+   "locked_at": "2026-11-21T11:07:43Z"
+  },
+  "tishan89/choreo-orchestration": {
+   "ref": "main",
+   "commit": "d67d6062da994d7346d0972a3b9167c7666bee06",
+   "locked_at": "2026-11-21T11:08:21Z"
+  },
+  "uthaiyashankar/2025-02-devant-samples": {
+   "ref": "main",
+   "commit": "429204d5e3d509b8f5c35a733e623e6be6f405f0",
+   "locked_at": "2026-11-21T11:07:29Z"
+  },
+  "uvindra/byor-greetings-app1": {
+   "ref": "main",
+   "commit": "78a29b23ef89ebc0544999ca1d559d050d224465",
+   "locked_at": "2026-11-21T11:07:32Z"
+  },
+  "wso2-incubator/2023-07-app-architecture-hackathon": {
+   "ref": "main",
+   "commit": "5a8d168379ded2de69fc7fa783cf6830ef5a4398",
+   "locked_at": "2026-11-21T11:07:03Z"
+  },
+  "wso2-open-operations/marketing-tools": {
+   "ref": "main",
+   "commit": "b0f7346246b17ed451160a1ccd69b2b2ea3db950",
+   "locked_at": "2026-11-21T11:04:08Z"
+  },
+  "wx-yz/ai-gateway": {
+   "ref": "main",
+   "commit": "7e51f983602ebc518fdf1f47b58cccadbcba512a",
+   "locked_at": "2026-11-21T11:04:07Z"
+  },
+  "xlibb/graphql-schema-registry": {
+   "ref": "main",
+   "commit": "e131072b7dbf8ebe4342006355f45eac8207401f",
+   "locked_at": "2026-11-21T11:04:18Z"
+  },
+  "xlibb/module-pipe": {
+   "ref": "main",
+   "commit": "d37d7521dea2b363cc6fa3c03db99611aaf24d57",
+   "locked_at": "2026-11-21T11:04:22Z"
+  },
+  "xlibb/module-pipeline": {
+   "ref": "main",
+   "commit": "63092f7be52aa2cc4370670772a8a48b6d40b386",
+   "locked_at": "2026-11-21T11:05:47Z"
+  },
+  "xlibb/module-pubsub": {
+   "ref": "main",
+   "commit": "74049aa6adc1d0363aded2808eb9d0604711c519",
+   "locked_at": "2026-11-21T11:05:23Z"
+  },
+  "yuk7hi/choreo-byor-test": {
+   "ref": "main",
+   "commit": "b2a2ad238c0cd98bef78f1bb3e49009a70219793",
+   "locked_at": "2026-11-21T11:08:19Z"
+  },
+  "yuriylesyuk/pdf-converter-bal-run": {
+   "ref": "main",
+   "commit": "2eb0dbc05da4caa657e78cd4685ea9c8cd6991d4",
+   "locked_at": "2026-11-21T11:05:54Z"
+  },
+  "zeionara/neeko": {
+   "ref": "main",
+   "commit": "0e338c9a67c888466f2cce30c19b2c82cbc96da2",
+   "locked_at": "2026-11-21T11:06:07Z"
+  },
+  "zot-internal/medichive-backend": {
+   "ref": "main",
+   "commit": "2e546b0c236a033787d6690d80c263ab093f764b",
+   "locked_at": "2026-11-21T11:05:22Z"
+  },
+  "zul-m/Ballerina-Olympics2020": {
+   "ref": "main",
+   "commit": "0061e6f90826105ab19201f13aa915cf5b2933df",
+   "locked_at": "2026-11-21T11:07:17Z"
+  }
+ },
+ "central": {}
+}
