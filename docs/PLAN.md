@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **revised proposal, awaiting approval**. No project code was changed for this plan.
+status: **approved; M0–M4 done (2026-11-21), M5 next**. See [Progress](#progress).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -19,9 +19,23 @@ decontamination.
 | Topic | Decision | Effect on the plan |
 |---|---|---|
 | Prompt writer | **DeepSeek V4.1 Flash 1017 writes the prompts.** A judge model of a different family reviews them. Claude is not used to produce dataset content. | The Anthropic "competing models" question no longer applies to the data (§2.0). Prompt writing costs about $5–10. |
-| BBE examples | **Split 30% eval / 70% train, by example.** A deterministic hash of the example name decides the side. | The eval set holds ~180 runnable examples with `.out` files. Fingerprints keep near-copies of them out of training (M4). |
+| BBE examples | **Split 30% eval / 70% train, by example.** A deterministic hash of the example name decides the side. | The eval set holds 188 BBE examples (74 with a runnable `.out` transcript, 76 build-checked). Fingerprints keep near-copies of them out of training (M4). |
 | Student deployment | **Server**: Qwen3.8-27B on GPUs (vLLM) | Context packing budget up to **~16k tokens** per sample. The dataset follows Qwen3.8's own chat template (§2.0). |
 | Scope | **Build here:** eval set, codebase pool, raw pretraining corpus, and **include permissive external repos** | Milestones M4, M7 and M9 are firm, not optional. The corpus target is ~25–40M tokens (§2.A). |
+
+### Progress
+
+| M | Milestone | State | Command |
+|---|---|---|---|
+| M0 | Hygiene and pinning | ✅ done 2026-11-19 | `sftgen scrape --update-lock` |
+| M1 | Graph integration + coverage | ✅ done 2026-11-19 | `sftgen graph validate` · `graph sync` |
+| M2 | Storage switch | ✅ done 2026-11-21 | `sftgen storage status/push/pull` |
+| M3 | Licence register + repo collector | ✅ done 2026-11-21 (`platform` and `wso2` groups not run yet) | `sftgen collect-repos` |
+| M4 | Eval set v1 + decontamination | ✅ done 2026-11-21 | `sftgen build-eval` |
+| M5 | Item-driven prompts (pilot) | next | — |
+| M6–M10 | Verified answers → dataset v1 | not started | — |
+
+Details per milestone are in the "Done" notes under §6.
 
 **Contents**
 
@@ -37,6 +51,9 @@ decontamination.
 ---
 
 ## 1. Current state of the repo
+
+> This section is the starting point the plan was written from (v2.1). Since then M0 pinned
+> the sources, M1 integrated the graph, and M4 built the eval set; see [Progress](#progress).
 
 ### 1.1 What exists today (v2.1, branch `feat/sqlite-qa-pipeline`, commit `58b7d23`)
 
@@ -54,10 +71,10 @@ The repo has a **source-driven Q&A generator**. Its main pieces:
 | 0 | Sources | **Partly built** | Spec 2024R1, BBE (from `ballerina-distribution`), learn docs, Central README + API docs, `module-ballerina(x)-*` READMEs and `.bal` APIs; robots.txt, caching, change detection | **Not pinned**: BBE comes from the default branch head and Central from the latest package versions. No licence register beyond a per-page `license` column. No raw code corpus. No benchmark problems. |
 | 1 | Knowledge graph | **Present, not integrated** | `graph/graph.json` (untracked) | No loader, validation or tagging; nothing in the code reads it. Questions carry `category`/`difficulty` but no `node#item` |
 | 2 | Codebase pool | **Missing** | — | Projects, states, commit miner, tagger, verification, split |
-| 3 | Evaluation set | **Missing** | `export-sft` holds out ~5% of pages | Benchmarks, ecosystem tasks, eval runner, **decontamination list** |
+| 3 | Evaluation set | **Missing** → **v1 built (M4)** | `export-sft` holds out ~5% of pages. *Since M4:* BBE 30% eval set (`sftgen build-eval`, `data/eval/v1/`), `bal run`/`bal build` checks, fingerprints, decontamination of chunks, questions, repo files and exports | Benchmarks, ecosystem tasks, eval runner (M8) |
 | 4 | Prompt generation | **Partly (different approach)** | Questions are generated **per chunk** (source-driven), round-robin by source, with near-duplicates skipped | Coverage-driven planner per graph item, item budgets, codebase attachment, writer/reviewer, pilot/gap-fill |
 | 5 | Answer generation | **Partly** | Teacher answers from question + chunk (OpenRouter); `bal build` check; citation | Context packing for codebases, `bal test`/`bal run`, **repair loop with real errors**, judge for non-code answers, preference pairs, answer-format contract |
-| 6 | Dataset assembly | **Partly** | `export` (review JSONL), `export-sft` (chat `messages`, split by page, `Source:` stripped) | Balancing by item/task/difficulty, decontamination, dataset cards, `covers` tags |
+| 6 | Dataset assembly | **Partly** | `export` (review JSONL), `export-sft` (chat `messages`, split by page, `Source:` stripped). *Since M4:* both exports leave out eval overlaps | Balancing by item/task/difficulty, dataset cards, `covers` tags |
 | 7–9 | Training, evaluation, deployment | Out of scope | — | — |
 
 ### 1.3 The knowledge graph
@@ -501,7 +518,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M1** ✅ | Graph integration + coverage | `graph.py` loader and validator, `sftgen graph validate/stats`, item↔page matching from source URLs, and a **coverage section in the report** (items with or without grounding and samples) | `sftgen graph validate` → `OK 242/3257/1704`; the report shows coverage per node and priority |
 | **M2** ✅ | Storage switch | `storage.py`, `.env` keys, push and pull after each command | Run with `false`, then `true` against a test bucket: identical layout |
 | **M3** ✅ | Licence register + repo collector | `sftgen collect-repos`: sparse, pinned, licence-gated, Swan Lake filter, dedup. It covers ballerina-platform, ballerina-guides, wso2 and **permissive external repos**, and keeps the register CSV up to date | Collect `ballerina-guides` (15 repos), then 20 external repos; counts and licences in the report |
-| **M4** | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; ~180 BBE eval items each pass `bal run` against their `.out` |
+| **M4** ✅ | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; every checked BBE eval item passes `bal run` against its `.out` (or `bal build`), or has a known upstream difference. **Met:** 0 overlap in both exports; 148/150 pass, 2 known differences |
 | **M5** | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
 | **M6** | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
 | **M7** | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
@@ -550,6 +567,42 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
   a `GITHUB_TOKEN`.
 - With the current database, 1,227 of 3,231 active items are grounded (core: 412 of 676).
 - Most of the rest are only "not scraped yet", which more scraping (M3) closes.
+
+**Done (2026-11-21):** M4 is built and tested.
+- `sftgen build-eval` pins `ballerina-distribution` at `v2201.14.1` (commit `f5a81497`) under
+  `bbe` in the lockfile, and reads the examples listed in `examples/index.json`.
+- **Split:** a hash of `bbe-split:<name>` < 0.30 means eval, by example and stable as examples
+  are added. Of 584 examples, 188 are eval (32%) and 396 train. Every category has some on both
+  sides.
+- **Tags:** 187 of 188 eval items are tagged with graph items whose own sources are the example
+  (337 `node#item` refs); node-level links are kept in `nodes`.
+- **Checks with `bal` 2201.14.1** (3 minutes, 2 workers):
+  - **Run:** 74 items are a single `bal run` transcript; 72 match their `.out`.
+  - **Build:** 76 more are built only, as upstream CI does; all 76 compile.
+  - **Not checked:** 38 that upstream doesn't verify.
+  - **The 2 that differ are real changes in this update:**
+    - `flush` prints nothing.
+    - `convert-from-json-to-user-defined-type` now converts the value instead of returning the
+      documented error.
+  - **Revised target:** the original ~180 assumed every eval example could be run. Only 223 of
+    the 584 BBE examples are output-checked upstream, so 30% of them is ~70; the target is now
+    "every checked eval item passes or has a known upstream difference".
+- **Fingerprints:** 191 `.bal` files: an exact hash, MinHash, and distinctive 5-token shingles
+  (those found in 10 or more examples count as boilerplate).
+- **Decontamination** flags `chunks`, `questions` (with answers) and `repo_files` in
+  `eval_overlap`, using exact, MinHash ≥ 0.8, or containment ≥ 50% of an item's distinctive
+  shingles.
+  - It runs after `scrape` and `collect-repos`, before `generate-questions`, and in both
+    exports.
+  - **Current database:**
+    - 131 chunks held out: 122 from eval pages, plus 9 copies on train BBE, Central and learn
+      pages.
+    - 3 questions and 11 repo `.bal` files held out.
+    - Both exports dropped the 3 questions, and the re-check of the written files finds
+      0 overlap.
+- **Outputs:** `data/eval/v1/bbe.jsonl`, `decontam.jsonl` and `split.json`.
+- **Prose isn't fingerprinted:** a page that paraphrases an eval example's explanation without
+  its code isn't caught. M8's benchmark translations should add text fingerprints if needed.
 
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.

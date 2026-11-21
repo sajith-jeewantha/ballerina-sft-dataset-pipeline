@@ -11,6 +11,7 @@ erDiagram
     questions ||--o| answers : "answered by"
     runs ||--o{ llm_usage : "records"
     repos ||--o{ repo_files : "snapshot"
+    eval_items ||--o{ fingerprints : "fingerprinted by"
     pages {
         int id
         text source
@@ -87,7 +88,7 @@ Heading-aware pieces of a page's Markdown: the grounding for questions and answe
 | `text`, `text_hash` | Chunk body (code blocks are never split), and its hash. An identical body on another page is skipped. |
 | `token_estimate` | Characters ÷ 4; at most `chunk.max_tokens` |
 | `has_code` | 1 if the chunk contains a code block |
-| `status` | `pending` (needs questions) · `questioned` · `too_small` (under `chunk.min_tokens`, not used) · `failed` (question call failed `max_chunk_attempts` times) · `stale` (no longer on the page) |
+| `status` | `pending` (needs questions) · `questioned` · `too_small` (under `chunk.min_tokens`, not used) · `failed` (question call failed `max_chunk_attempts` times) · `stale` (no longer on the page) · `eval_holdout` (an eval page, or copies eval code: no questions) |
 | `attempts`, `error` | Question-generation attempts and the last error |
 
 ## `questions`
@@ -118,7 +119,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `build-eval` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -199,6 +200,43 @@ One row per file in a collected repo's snapshot.
 | `code_hash`, `minhash` | Fingerprints: sha256 of tokens without comments/whitespace; 128 × uint32 MinHash of 5-token shingles |
 | `dup_of` | The `repo_files.id` this file duplicates |
 | `status` | `kept` · `duplicate` · `near_duplicate` (MinHash ≥ `repos.near_duplicate_threshold`) · `legacy` · `too_large` · `context` (non-`.bal` files kept as project context) |
+| `eval_overlap` | The eval item this file copies (see below); such files stay out of the corpus and pool |
+
+## Decontamination columns
+
+`chunks`, `questions` and `repo_files` also have:
+
+| Column | Meaning |
+|---|---|
+| `eval_overlap` | `eval_items.id` the row copies, or `NULL`. A question is checked with its answer and inherits its chunk's overlap |
+| `decontam_key` | The fingerprint set the row was last checked against (questions add `:<answer id>`), so only new or changed rows are re-checked |
+
+## `eval_items`
+
+One row per held-out eval item (`sftgen build-eval`); the primary key is a text id.
+
+| Column | Meaning |
+|---|---|
+| `id` | `bbe/<example name>` |
+| `suite`, `version` | `bbe`; the eval set version (`eval.version`, e.g. `v1`) |
+| `name`, `title`, `category` | From `examples/index.json` |
+| `url`, `source_url`, `commit_sha` | ballerina.io page; GitHub folder at the pinned tag; pinned commit |
+| `files` | JSON `{file name: text}`: the example's top-level files (`.bal`, `.out`, `.md`, configs) |
+| `covers`, `nodes` | JSON: graph items whose own sources are this example; nodes that list it as a node-level source |
+| `verify_mode` | `run` (one `.bal` + a `$ bal run` transcript) · `build` (upstream builds it) · `none` |
+| `verify_status`, `verify_detail` | `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; first difference or error |
+| `status` | `active` · `retired` (no longer on the eval side; its fingerprints are deleted) |
+
+## `fingerprints`
+
+One row per eval `.bal` file.
+
+| Column | Meaning |
+|---|---|
+| `item_id`, `path` | The eval item and file |
+| `code_hash` | sha256 of the tokens without comments and whitespace |
+| `minhash` | 128 × uint32 MinHash of 5-token shingles |
+| `shingles` | Sorted uint32 hashes of the file's 5-token shingles, minus those in `eval.common_df` or more BBE examples |
 
 ## `docs/licence-register.csv`
 
@@ -213,7 +251,7 @@ that people add are kept.
 ## `data/dataset.jsonl`
 
 Written by `sftgen export`: one JSON object per answered question, leaving out `invalid` answers
-unless `export.include_invalid` is true.
+unless `export.include_invalid` is true, and always leaving out questions that overlap the eval set.
 
 ```json
 {"question": "...", "answer": "...", "source_url": "https://...", "category": "code-writing", "difficulty": "beginner"}
@@ -227,4 +265,12 @@ unless `export.include_invalid` is true.
 | `metadata.jsonl` | row in train or eval | `id`, `split`, `source_url`, `source`, `category`, `difficulty`, `validation` |
 
 The split is decided by a hash of `source_url`, so all questions from one page land on the same
-side.
+side. Questions that overlap the eval set are in neither file.
+
+## `data/eval/<version>/` (from `sftgen build-eval`)
+
+| File | One line per | Fields |
+|---|---|---|
+| `bbe.jsonl` | eval item | `id`, `suite`, `version`, `name`, `title`, `category`, `url`, `source_url`, `commit`, `covers`, `nodes`, `explanation`, `code` `{file: text}`, `outputs` `{file: transcript}`, `other_files`, `verify` `{mode, status, detail}` |
+| `decontam.jsonl` | eval `.bal` file | `item_id`, `path`, `code_hash`, `minhash` (hex, little-endian uint32), `shingles` (hex, little-endian uint32) |
+| `split.json` | — | `version`, `source`, `commit`, `graph_version`, `rule`, `fingerprints` (settings), `eval` and `train` example names, `unlisted_folders` |

@@ -81,7 +81,7 @@ def round_robin(rows: list[sqlite3.Row], order: list[str]) -> deque[sqlite3.Row]
 
 def pending_chunks(s: Settings, db: Database) -> deque[sqlite3.Row]:
     rows = db.query(
-        "SELECT c.* FROM chunks c WHERE c.status = 'pending' AND c.attempts < ? "
+        "SELECT c.* FROM chunks c WHERE c.status = 'pending' AND c.eval_overlap IS NULL AND c.attempts < ? "
         "AND NOT EXISTS (SELECT 1 FROM questions q WHERE q.chunk_id = c.id) ORDER BY c.page_id, c.ordinal",
         (s.generate.max_chunk_attempts,),
     )

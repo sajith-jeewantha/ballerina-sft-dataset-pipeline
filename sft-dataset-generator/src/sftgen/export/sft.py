@@ -14,6 +14,9 @@ chat template (`tokenizer.apply_chat_template`). It loads directly in TRL
 * The trailing `Source: <url>` line is removed by default, so the model does
   not learn to end answers with URLs it would then invent.
 * Answers marked `invalid` by `validate` are left out, as in `export`.
+* Questions that overlap the held-out eval set (`sftgen build-eval`) are left out of
+  both files. This `eval.jsonl` is a validation split for training; the benchmark eval
+  set lives in <data>/eval/<version>/.
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ from pathlib import Path
 
 from balpipe_common.config import Settings
 from balpipe_common.db import Database, RunTracker
+from balpipe_common.decontam import export_guard
 from balpipe_common.ids import sha256_text
 
 SOURCE_LINE_RE = re.compile(r"\n*\s*Source:\s*\S+\s*$")
@@ -59,9 +63,12 @@ def run(s: Settings, db: Database, run_: RunTracker) -> dict[str, int]:
     out.mkdir(parents=True, exist_ok=True)
     status_filter = "" if s.export.include_invalid else "AND a.status != 'invalid'"
     rows = db.query(
-        "SELECT q.id, q.question, a.answer, q.source_url, q.source, q.category, q.difficulty, a.status AS validation "
+        "SELECT q.id, q.question, a.answer, q.source_url, q.source, q.category, q.difficulty, a.status AS validation, "
+        "q.eval_overlap "
         f"FROM questions q JOIN answers a ON a.question_id = q.id WHERE q.status = 'answered' {status_filter} "
         "ORDER BY q.id")
+    overlap = sum(1 for r in rows if r["eval_overlap"])
+    rows = [r for r in rows if not r["eval_overlap"]]
     files: dict[str, list[dict]] = {"train": [], "eval": [], "metadata": []}
     for r in rows:
         answer = strip_source(r["answer"]) if cfg.strip_source_line else r["answer"]
@@ -75,6 +82,9 @@ def run(s: Settings, db: Database, run_: RunTracker) -> dict[str, int]:
                                   "validation": r["validation"]})
     for name, items in files.items():
         _write_atomic(out / f"{name}.jsonl", items)
-    stats = {"sft_train": len(files["train"]), "sft_eval": len(files["eval"])}
+    texts = ["\n".join(m["content"] for m in row["messages"] if m["role"] != "system")
+             for split in ("train", "eval") for row in files[split]]
+    stats = {"sft_train": len(files["train"]), "sft_eval": len(files["eval"]), "eval_overlap_dropped": overlap,
+             **export_guard(db, s.eval_, texts)}
     run_.stats.update(stats)
     return stats

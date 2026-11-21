@@ -132,7 +132,7 @@ def test_export_skips_invalid_and_report_renders(settings: Settings, db: Databas
     with db.run("export", settings.limits()) as run:
         stats = export(settings, db, run)
     lines = (settings.repo_root / "data" / "dataset.jsonl").read_text(encoding="utf-8").splitlines()
-    assert stats == {"rows_exported": 1, "invalid_skipped": 1} and len(lines) == 1
+    assert stats == {"rows_exported": 1, "invalid_skipped": 1, "eval_overlap_dropped": 0} and len(lines) == 1
     assert set(json.loads(lines[0])) == {"question", "answer", "source_url", "category", "difficulty"}
 
     db.insert("pages", {"source": "learn", "url": "https://ballerina.io/learn/broken/", "status": "failed",

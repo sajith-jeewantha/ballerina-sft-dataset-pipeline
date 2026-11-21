@@ -1,7 +1,13 @@
 {
  "lock_version": 1,
  "swan_lake": "2201.14.1",
- "bbe": {},
+ "bbe": {
+  "ballerina-platform/ballerina-distribution": {
+   "ref": "v2201.14.1",
+   "commit": "f5a814972a488904ad14209de002cee6baf3cef5",
+   "locked_at": "2026-11-21T16:19:38Z"
+  }
+ },
  "repos": {
   "3nethz/ballerina-pipelines-connector": {
    "ref": "main",

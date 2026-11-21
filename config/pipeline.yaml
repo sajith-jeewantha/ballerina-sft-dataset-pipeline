@@ -85,6 +85,18 @@ sft:                                 # export-sft: chat-format files for fine-tu
     real Ballerina syntax and APIs; if you are not sure something exists or how it behaves, say so
     instead of guessing.
 
+eval:                                # build-eval: held-out eval set and decontamination
+  version: v1                        # files go to <data>/eval/v1/
+  bbe_eval_fraction: 0.30            # BBE examples held out, decided by a hash of the example name
+  split_salt: bbe-split              # don't change once training data exists: it reshuffles the split
+  verify: true                       # bal run (output vs .out) / bal build each eval item
+  run_timeout_s: 120
+  workers: 2                         # parallel bal processes
+  near_duplicate_threshold: 0.8      # MinHash similarity that counts as a copy
+  containment: 0.5                   # share of an item's distinctive shingles that counts as a copy
+  min_shingles: 15                   # smaller items are matched exactly only
+  common_df: 10                      # shingles in this many BBE examples are boilerplate, not evidence
+
 report:
   path: reports/report.html
   samples: 5

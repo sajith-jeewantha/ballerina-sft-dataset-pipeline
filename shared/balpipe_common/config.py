@@ -230,6 +230,25 @@ class SftCfg(BaseModel):
     )
 
 
+class EvalCfg(BaseModel):
+    """`build-eval`: the held-out evaluation set and the decontamination fingerprints."""
+
+    version: str = "v1"               # files go to <data>/eval/<version>/
+    dir: str = "eval"                 # relative to LOCAL_DATA_DIR
+    bbe_eval_fraction: float = Field(default=0.30, gt=0.0, lt=1.0)  # share of BBE examples held out
+    split_salt: str = "bbe-split"     # changing it reshuffles the split: don't, once training data exists
+    verify: bool = True               # bal run / bal build every eval item against the pinned toolchain
+    run_timeout_s: int = 120
+    workers: int = 2
+    # Decontamination: a text overlaps an eval item when it has the same code (comments and layout
+    # ignored), a MinHash similarity >= near_duplicate_threshold, or contains >= containment of the
+    # item's distinctive 5-token shingles (shingles found in >= common_df BBE examples don't count).
+    near_duplicate_threshold: float = 0.8
+    containment: float = Field(default=0.5, gt=0.0, le=1.0)
+    min_shingles: int = 15            # items with fewer distinctive shingles are matched exactly only
+    common_df: int = 10
+
+
 class GraphCfg(BaseModel):
     path: str = "graph/graph.json"         # export of ballerina-ecosystem (schema 0.2)
     source_file: str = "graph/SOURCE.json"  # upstream repo, commit and sha256 of graph.json
@@ -302,6 +321,7 @@ class Settings(BaseSettings):
     validate_: ValidateCfg = Field(default_factory=ValidateCfg, alias="validate")
     export: ExportCfg = Field(default_factory=ExportCfg)
     sft: SftCfg = Field(default_factory=SftCfg)
+    eval_: EvalCfg = Field(default_factory=EvalCfg, alias="eval")
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -350,6 +370,11 @@ class Settings(BaseSettings):
     @property
     def sft_dir(self) -> Path:
         return self.data_path(self.sft.dir)
+
+    @property
+    def eval_dir(self) -> Path:
+        """<data>/eval/<version>/: the eval items and their fingerprints."""
+        return self.data_path(self.eval_.dir) / self.eval_.version
 
     @property
     def report_path(self) -> Path:

@@ -16,6 +16,10 @@ Commands (run in this order, or all at once with `run-all`):
   collect-repos        snapshot Ballerina repositories (platform modules, ballerina-guides, wso2,
                        permissive external repos): licence-gated, pinned, Swan Lake filter, dedup;
                        up to LIMIT_REPOS clones per run. Updates docs/licence-register.csv
+  build-eval           eval set v1: BBE split 30% eval / 70% train by example, eval items tagged
+                       node#item and checked with `bal run`/`bal build`, fingerprints for
+                       decontamination; writes data/eval/<version>/ and flags overlapping
+                       chunks, questions and repo files (every export leaves them out)
   storage status       compare the local data folder with the bucket
   storage push         upload new or changed outputs and a database snapshot
   storage pull         download what is missing locally (newest database snapshot, outputs);
@@ -47,7 +51,7 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "collect-repos", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
+COMMANDS = ["scrape", "collect-repos", "build-eval", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
@@ -89,14 +93,22 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
 
             fetched = scrape_sources(s, db, run, refresh=a.refresh, only=a.source, update_lock=a.update_lock)
             processed = process_pages(s, db, run)
-            return {"fetch": fetched, "process": processed, "graph": _sync_graph_quietly(s, db)}
+            return {"fetch": fetched, "process": processed, "graph": _sync_graph_quietly(s, db),
+                    **_decontam(s, db, run)}
         if command == "collect-repos":
             from ballerinascraper.repos import collect_repos
             from ballerinascraper.scrape import github_api, open_lock
 
             out = collect_repos(s, db, run, github_api(s), open_lock(s), groups=a.group, extra=a.repo,
                                 update_lock=a.update_lock, refresh=a.refresh)
-            return out
+            return {**out, **_decontam(s, db, run)}
+        if command == "build-eval":
+            from ballerinascraper.scrape import open_lock
+
+            from sftgen.eval.bbe import build_eval
+
+            return build_eval(s, db, run, open_lock(s), update_lock=a.update_lock,
+                              verify=False if a.no_verify else None, reverify=a.recheck)
         if command == "graph-sync":
             from sftgen.graph.coverage import sync
 
@@ -106,6 +118,7 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
         if command == "generate-questions":
             from sftgen.generate.questions import run as gen_questions
 
+            _decontam(s, db, run)  # chunks scraped since the eval set was built
             return gen_questions(s, db, run)
         if command == "generate-answers":
             from sftgen.generate.answers import run as gen_answers
@@ -118,12 +131,26 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
         if command == "export":
             from sftgen.export.stage import run as export
 
+            _decontam(s, db, run)
             return export(s, db, run)
         if command == "export-sft":
             from sftgen.export.sft import run as export_sft
 
+            _decontam(s, db, run)
             return export_sft(s, db, run)
     raise ValueError(command)
+
+
+def _decontam(s: Settings, db: Database, run: object) -> dict:
+    """Flag rows that overlap the eval set (incremental; nothing to do before `build-eval`)."""
+    from balpipe_common.decontam import Decontaminator, apply_decontam
+
+    dc = Decontaminator.from_db(db, s.eval_)
+    if not dc and not db.scalar("SELECT 1 FROM chunks WHERE eval_overlap IS NOT NULL LIMIT 1"):
+        return {}
+    out = apply_decontam(db, s.eval_, dc)
+    log.info("decontamination: %s", out)
+    return {"decontam": out}
 
 
 def _sync_graph_quietly(s: Settings, db: Database) -> dict:
@@ -231,7 +258,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--refresh", action="store_true",
                    help="scrape: re-check pages already downloaded · collect-repos: re-clone collected repos")
     p.add_argument("--update-lock", action="store_true",
-                   help="scrape, collect-repos: re-resolve pinned commits and package versions in "
+                   help="scrape, collect-repos, build-eval: re-resolve pinned commits and package versions in "
                         "config/sources.lock.json")
     p.add_argument("--group", action="append", default=None,
                    help="collect-repos: only this group from repos.groups (platform, guides, wso2, external; "
@@ -241,7 +268,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--source", action="append", choices=["bbe", "spec", "learn", "central", "github"],
                    help="scrape: only this source (repeatable)")
     p.add_argument("--retry-failed", action="store_true", help="generate-answers: retry questions that failed")
-    p.add_argument("--recheck", action="store_true", help="validate: re-check answers already validated")
+    p.add_argument("--recheck", action="store_true",
+                   help="validate: re-check answers already validated · build-eval: re-run every eval check")
+    p.add_argument("--no-verify", action="store_true",
+                   help="build-eval: skip the bal run / bal build checks of the eval items")
     p.add_argument("--config", type=Path, default=None, help="path to pipeline.yaml")
     p.add_argument("--log-format", choices=["json", "text"], default=None)
     a = p.parse_args(argv)

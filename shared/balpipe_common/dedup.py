@@ -4,11 +4,13 @@
                 that differ only in a licence header, comments or formatting.
 * `MinHasher`   128-value MinHash over 5-token shingles. Two files with signature agreement
                 >= 0.8 (estimated Jaccard similarity) are treated as near-duplicates.
+* `shingle_hashes` 32-bit hashes of the 5-token shingles, for containment checks
+                (`decontam.py`: how much of an eval item a text contains).
 * `LSH`         banding index (16 bands x 8 rows) so candidates are found without comparing
                 every pair; candidates are then checked against the threshold.
 
-Also used by the eval decontamination step (M4), so eval items and training code share one
-fingerprint definition.
+Also used by the eval decontamination step (`decontam.py`), so eval items and training code
+share one fingerprint definition.
 """
 
 from __future__ import annotations
@@ -46,6 +48,15 @@ def _h32(s: str) -> int:
     return int.from_bytes(hashlib.blake2b(s.encode("utf-8"), digest_size=4).digest(), "little")
 
 
+def shingles(tokens: list[str], k: int = 5) -> set[str]:
+    return {" ".join(tokens[i:i + k]) for i in range(max(1, len(tokens) - k + 1))} if tokens else set()
+
+
+def shingle_hashes(code: str, k: int = 5) -> set[int]:
+    """32-bit hashes of the 5-token shingles of the code (comments removed); used for containment checks."""
+    return {_h32(g) for g in shingles(code_tokens(code), k)}
+
+
 class MinHasher:
     def __init__(self, num_perm: int = 128, shingle: int = 5, seed: int = 1) -> None:
         rng = np.random.RandomState(seed)
@@ -55,9 +66,7 @@ class MinHasher:
         self.b = rng.randint(0, (1 << 31) - 1, size=num_perm, dtype=np.uint64)
 
     def signature(self, code: str) -> np.ndarray:
-        toks = code_tokens(code)
-        k = self.shingle
-        grams = {" ".join(toks[i:i + k]) for i in range(max(1, len(toks) - k + 1))} if toks else {""}
+        grams = shingles(code_tokens(code), self.shingle) or {""}
         hv = np.fromiter((_h32(g) for g in grams), dtype=np.uint64, count=len(grams))
         perm = ((hv[:, None] * self.a[None, :] + self.b[None, :]) % _MERSENNE) & _MAX32
         return perm.min(axis=0).astype(np.uint32)

@@ -41,6 +41,7 @@ class ReportData:
     coverage: dict[str, Any] | None = None  # knowledge-graph coverage (graph/coverage.py)
     swan_lake: str = ""
     repos: dict[str, Any] | None = None     # collect-repos (ballerinascraper/repos.py)
+    eval_set: dict[str, Any] | None = None  # build-eval (sftgen/eval/bbe.py) and decontamination
 
     @property
     def total_pages(self) -> int:
@@ -87,8 +88,40 @@ def collect(s: Settings, db: Database) -> ReportData:
         questions_by_difficulty=by("difficulty"), question_status=by("status"),
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
-        swan_lake=s.sources.swan_lake, repos=_repos(db),
+        swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db),
     )
+
+
+def _eval(db: Database) -> dict[str, Any] | None:
+    if not db.scalar("SELECT COUNT(*) FROM eval_items WHERE status = 'active'"):
+        return None
+    from balpipe_common.decontam import overlap_counts
+
+    items = db.query("SELECT * FROM eval_items WHERE status = 'active' ORDER BY id")
+    verify = _grouped(db.query("SELECT verify_mode, COALESCE(verify_status, 'not_checked'), COUNT(*) "
+                               "FROM eval_items WHERE status = 'active' GROUP BY 1, 2"))
+    refs = {ref for r in items for ref in json.loads(r["covers"])}
+    problems = [dict(r) for r in db.query(
+        "SELECT id, verify_mode, verify_status, verify_detail FROM eval_items WHERE status = 'active' "
+        "AND verify_status NOT IN ('pass', 'skipped') ORDER BY verify_status, id LIMIT 60")]
+    exports = {}
+    for cmd in ("export", "export-sft"):
+        row = db.one("SELECT stats FROM runs WHERE command = ? AND status = 'succeeded' ORDER BY id DESC LIMIT 1",
+                     (cmd,))
+        if row:
+            st = json.loads(row["stats"] or "{}")
+            exports[cmd] = {k: st[k] for k in ("eval_overlap_dropped", "eval_overlap_in_export") if k in st}
+    overlap_by_source = {r[0]: r[1] for r in db.query(
+        "SELECT p.source, COUNT(*) FROM chunks c JOIN pages p ON p.id = c.page_id "
+        "WHERE c.eval_overlap IS NOT NULL GROUP BY 1 ORDER BY 2 DESC")}
+    return {
+        "version": items[0]["version"], "commit": items[0]["commit_sha"], "items": len(items),
+        "by_category": dict(sorted({c: sum(1 for r in items if r["category"] == c)
+                                    for c in {r["category"] for r in items}}.items(), key=lambda kv: -kv[1])),
+        "verify": verify, "problems": problems, "with_covers": sum(1 for r in items if json.loads(r["covers"])),
+        "refs": len(refs), "fingerprints": int(db.scalar("SELECT COUNT(*) FROM fingerprints") or 0),
+        "overlap": overlap_counts(db), "overlap_by_source": overlap_by_source, "exports": exports,
+    }
 
 
 def _repos(db: Database) -> dict[str, Any] | None:
@@ -149,6 +182,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
            f"{d.coverage['by_priority'].get('core', {}).get('items', 0)}) · graph {d.coverage['graph_version']}"]
           if d.coverage else []),
         *([_repos_line(d.repos)] if d.repos else []),
+        *([_eval_line(d.eval_set)] if d.eval_set else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -164,6 +198,15 @@ def _repos_line(r: dict[str, Any]) -> str:
     check = sum(v.get("licence_check", 0) for v in r["groups"].values())
     return (f"Repos      {collected}/{total} collected, {check} need a licence check  |  "
             f"{kept:,} unique .bal files, ~{tokens / 1e6:.1f}M tokens")
+
+
+def _eval_line(e: dict[str, Any]) -> str:
+    passed = sum(v.get("pass", 0) for v in e["verify"].values())
+    checked = sum(n for v in e["verify"].values() for k, n in v.items() if k not in ("skipped", "not_checked"))
+    o = e["overlap"]
+    return (f"Eval set   {e['version']}: {e['items']} BBE items, {passed}/{checked} pass bal run/build  |  "
+            f"held out: {o['chunks_overlap']} chunks, {o['questions_overlap']} questions, "
+            f"{o['repo_files_overlap']} repo files")
 
 
 # --------------------------------------------------------------------------- #
@@ -324,6 +367,54 @@ def _repos_html(d: ReportData) -> list[str]:
     ]
 
 
+def _eval_html(d: ReportData) -> list[str]:
+    e = d.eval_set
+    if not e:
+        return ["<h2>Eval set</h2>",
+                '<div class="card"><p class="muted">Not built yet: run <code>sftgen build-eval</code>.</p></div>']
+    modes = ["run", "build", "none"]
+    statuses = sorted({k for v in e["verify"].values() for k in v})
+    rows = [[_e(m), *[str(e["verify"].get(m, {}).get(st, 0)) for st in statuses],
+             str(sum(e["verify"].get(m, {}).values()))] for m in modes if m in e["verify"]]
+    o = e["overlap"]
+    exports = [[_e(cmd), str(v.get("eval_overlap_dropped", "—")), str(v.get("eval_overlap_in_export", "—"))]
+               for cmd, v in e["exports"].items()]
+    return [
+        "<h2>Eval set</h2>",
+        f'<p class="muted">From <code>sftgen build-eval</code>: version {_e(e["version"])}, Ballerina by Example at '
+        f"commit <code>{_e((e['commit'] or '')[:12])}</code>, split 30% eval / 70% train by a hash of the example "
+        "name. Eval items are checked with the pinned toolchain: <b>run</b> = <code>bal run</code> output equals the "
+        "<code>.out</code> transcript, <b>build</b> = every .bal file compiles, <b>none</b> = not checked upstream. "
+        "Files in <code>data/eval/</code>.</p>",
+        '<div class="grid">' + "".join(
+            f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}</div></div>' for k, v in (
+                ("Eval items", e["items"]), ("Tagged node#item", f'{e["with_covers"]} ({e["refs"]} refs)'),
+                ("Fingerprints", e["fingerprints"]), ("Chunks held out", o["chunks_overlap"]),
+                ("Questions held out", o["questions_overlap"]), ("Repo files held out", o["repo_files_overlap"]))
+        ) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        '<div class="card scroll"><h3>Checks</h3>' + _table(["Mode", *statuses, "Total"], rows,
+                                                           numeric=set(range(1, len(statuses) + 2))) + "</div>",
+        f'<div class="card"><h3>Items by category</h3>{_bars(e["by_category"])}</div>',
+        "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Held-out chunks by source</h3>{_bars(e["overlap_by_source"], SOURCE_LABELS, alt=True)}'
+        '<p class="muted">Chunks of eval pages, plus chunks elsewhere that copy eval code. No questions are '
+        "generated from them.</p></div>",
+        '<div class="card"><h3>Exports</h3>' + (_table(["Export", "Rows dropped (overlap)", "Overlap in file"],
+                                                        exports, numeric={1, 2}) if exports else
+                                                 '<p class="muted">No export since the eval set was built.</p>')
+        + '<p class="muted">"Overlap in file" re-checks the written rows against the fingerprints; it should be '
+        "0.</p></div>",
+        "</div>",
+        *([f'<h3 style="margin-top:16px">Checks that did not pass ({len(e["problems"])} shown)</h3>',
+           '<div class="card scroll">' + _table(["Item", "Mode", "Status", "Detail"], [
+               [_e(p["id"]), _e(p["verify_mode"]), _e(p["verify_status"] or "not checked"),
+                f'<span class="err">{_e(p["verify_detail"])}</span>'] for p in e["problems"]]) + "</div>"]
+          if e["problems"] else []),
+    ]
+
+
 def render_html(d: ReportData) -> str:
     srcs = [x for x in d.sources if x in d.pages or x in d.chunks] + sorted(
         (set(d.pages) | set(d.chunks)) - set(d.sources))
@@ -361,6 +452,7 @@ def render_html(d: ReportData) -> str:
             if d.failed_pages else '<p class="muted">None.</p>') + "</div>",
         *_coverage_html(d),
         *_repos_html(d),
+        *_eval_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

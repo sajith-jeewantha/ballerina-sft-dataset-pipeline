@@ -10,6 +10,11 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * llm_usage  tokens and cost of every model call, per phase
 * repos      collected code repositories: licence verdict, pinned commit, snapshot
 * repo_files files from those repos: Swan Lake filter, dedup status, fingerprints
+* eval_items held-out evaluation items (BBE 30%): files, expected output, `covers`, verification
+* fingerprints code fingerprints of the eval items, used to keep near-copies out of training
+
+`chunks`, `questions` and `repo_files` carry `eval_overlap` (the eval item they copy, or
+NULL) and `decontam_key` (the fingerprint set they were last checked against).
 
 Writes are committed immediately, so an interrupted command loses at most the
 item it was working on, and the next run picks up from the statuses.
@@ -206,6 +211,40 @@ CREATE TABLE IF NOT EXISTS repo_files (
 CREATE INDEX IF NOT EXISTS ix_repo_files_status ON repo_files(status);
 CREATE INDEX IF NOT EXISTS ix_repo_files_hash ON repo_files(code_hash);
 
+CREATE TABLE IF NOT EXISTS eval_items (
+    id               TEXT PRIMARY KEY,      -- bbe/<example name>
+    suite            TEXT NOT NULL,         -- bbe
+    version          TEXT NOT NULL,         -- eval set version (eval.version), e.g. v1
+    name             TEXT NOT NULL,
+    title            TEXT,
+    category         TEXT,
+    url              TEXT NOT NULL,         -- public page (ballerina.io/learn/by-example/<name>/)
+    source_url       TEXT,                  -- folder at the pinned commit
+    commit_sha       TEXT,
+    files            TEXT NOT NULL,         -- JSON {file name: text}
+    covers           TEXT NOT NULL DEFAULT '[]', -- JSON: node#item refs whose own sources are this example
+    nodes            TEXT NOT NULL DEFAULT '[]', -- JSON: nodes linking it as a node-level source
+    verify_mode      TEXT NOT NULL,         -- run (bal run vs .out) | build | none
+    verify_status    TEXT,                  -- pass | output_differs | build_failed | timeout | skipped
+    verify_detail    TEXT,
+    status           TEXT NOT NULL,         -- active | retired (no longer in the split)
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS fingerprints (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id          TEXT NOT NULL REFERENCES eval_items(id) ON DELETE CASCADE,
+    path             TEXT NOT NULL,
+    code_hash        TEXT NOT NULL,         -- tokens without comments/whitespace
+    minhash          BLOB NOT NULL,         -- 128 x uint32 MinHash signature
+    shingles         BLOB NOT NULL,         -- sorted uint32 hashes of distinctive 5-token shingles
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (item_id, path)
+);
+CREATE INDEX IF NOT EXISTS ix_fingerprints_hash ON fingerprints(code_hash);
+
 CREATE TABLE IF NOT EXISTS llm_usage (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id            INTEGER,
@@ -237,7 +276,9 @@ class Database:
         self.conn.commit()
 
     # Columns added after a table was first created: (table, column, type). Applied once, idempotently.
-    MIGRATIONS = (("llm_usage", "provider", "TEXT"),)
+    MIGRATIONS = (("llm_usage", "provider", "TEXT"),
+                  *((t, c, "TEXT") for t in ("chunks", "questions", "repo_files")
+                    for c in ("eval_overlap", "decontam_key")))
 
     def _migrate(self) -> None:
         for table, column, ctype in self.MIGRATIONS:
@@ -278,7 +319,7 @@ class Database:
         cur = self.execute(f"INSERT INTO {table} ({cols}) VALUES ({marks})", tuple(values.values()))
         return int(cur.lastrowid or 0)
 
-    def update(self, table: str, row_id: int, values: dict[str, Any]) -> None:
+    def update(self, table: str, row_id: int | str, values: dict[str, Any]) -> None:
         values = {**values, "updated_at": utc_now_iso()}
         sets = ", ".join(f"{k} = ?" for k in values)
         self.execute(f"UPDATE {table} SET {sets} WHERE id = ?", (*values.values(), row_id))

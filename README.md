@@ -114,14 +114,15 @@ without stopping the run.
 | `sftgen generate-questions` | For chunks with no questions yet, generate `QUESTIONS_PER_CHUNK` each, until `LIMIT_GENERATING` questions are saved. Each question is saved as soon as it is generated, with its chunk, source URL, category and difficulty. Near-duplicates are skipped. | question: `pending` |
 | `sftgen generate-answers` | Answer every `pending` question using the question **and its saved chunk**. Answers include working Ballerina code when relevant, must not invent APIs, and cite the source URL. | question: `answered` · `failed` (with error) |
 | `sftgen validate` *(optional)* | Compile the ```` ```ballerina ```` blocks in each answer with `bal` if it is installed | answer: `valid` · `invalid` · `not_checked` |
-| `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid` are left out) | — |
-| `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` | — |
+| `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid`, and questions overlapping the eval set, are left out) | — |
+| `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` (eval-set overlaps left out) | — |
 | `sftgen report` | Rebuild `data/reports/report.html` and print the summary | — |
 | `sftgen run-all` | `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` → `export-sft` | — |
 | `sftgen graph validate` | Check `graph/graph.json`: schema 0.2 and the graph rules from [ballerina-ecosystem](https://github.com/sajith-jeewantha/ballerina-ecosystem), plus the hash recorded in `graph/SOURCE.json` | — |
 | `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
 | `sftgen graph sync` | Load the graph into the database and match each item's sources to scraped pages (also runs after every `scrape`) | item: `grounded` · `not_scraped` · `external_only` · `retired` |
 | `sftgen collect-repos` | Snapshot whole Ballerina repositories: the platform's module repos, `ballerina-guides`, wso2 and permissive external repos. Licence-gated, pinned, Swan Lake filter, dedup; up to `LIMIT_REPOS` clones per run. See [Code repositories](#code-repositories) | repo: `collected` · `excluded` · `licence_check` · `failed`; file: `kept` · `duplicate` · `near_duplicate` · `legacy` · `too_large` · `context` |
+| `sftgen build-eval` | Build eval set v1 from Ballerina by Example: 30% of examples held out, tagged `node#item`, checked with `bal run`/`bal build`, and fingerprinted. Overlapping chunks, questions and repo files are flagged and left out of every export. See [Eval set and decontamination](#eval-set-and-decontamination) | eval item: `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; chunk: `eval_holdout` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
 | `sftgen storage pull` | Download what's missing locally: the newest database snapshot and the outputs. `--overwrite` replaces local files; the local database is backed up first | — |
@@ -132,6 +133,8 @@ Flags:
 - `scrape --source bbe`: one source only (repeatable).
 - `collect-repos --group guides`: one group only (repeatable). `--repo owner/name` adds one repo.
   `--refresh` re-clones. `--update-lock` re-pins to the latest default-branch commit.
+- `build-eval --no-verify`: skip the `bal` checks. `--recheck` re-runs every check.
+  `--update-lock` re-resolves the BBE tag.
 - `generate-answers --retry-failed`
 - `validate --recheck`
 - `storage pull --overwrite`
@@ -228,6 +231,10 @@ It shows:
   - estimated tokens
   - licences of collected repos
   - the repos that need a manual licence check
+- **eval set:**
+  - eval items by category, and their `bal run`/`bal build` check results
+  - chunks, questions and repo files held out because they overlap the eval set
+  - rows each export dropped, and the overlap re-check of the written files (should be 0)
 - 5 random Q&A samples, so you can spot-check quality
 
 Terminal summary (illustrative numbers):
@@ -302,6 +309,8 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `llm_usage` | model call: phase, tokens, cost, serving provider | `ok` · `error` |
 | `graph_items` | knowledge-graph item (`node#item`), with priority, difficulty and coverage | `grounded` · `not_scraped` · `external_only` · `retired` |
 | `item_sources` | an item's source URL matched to a scraped page (or spec section) | `matched` · `not_scraped` · `external` |
+| `eval_items` | held-out eval item (BBE example): files, `covers`, check result | `active` · `retired` |
+| `fingerprints` | exact hash, MinHash and shingles of each eval `.bal` file | — |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -346,6 +355,38 @@ results stay in the database only. People can edit it:
 - **Block a repo:** set its row to `exclude`.
 - **Allow a `check` repo after reading its licence:** set the row to `safe` and start `notes`
   with `verified:`.
+
+### Eval set and decontamination
+
+`sftgen build-eval` builds the held-out evaluation set and keeps it out of training:
+
+1. **Pin** `ballerina-distribution` at the tag of the pinned Swan Lake update (`v2201.14.1`),
+   recorded under `bbe` in `config/sources.lock.json`, and fetch `examples/` with a sparse clone.
+2. **Split** the examples listed in `examples/index.json` 30% eval / 70% train **by example**:
+   a hash of the example name decides, so an example never changes side when others are added.
+3. **Tag** each eval item with the graph items (`node#item`) whose own sources are that example.
+4. **Check** each eval item with the pinned toolchain. `run`: one `.bal` file with a
+   `$ bal run` transcript, whose output must match the `.out` file line by line. `build`:
+   every other example that upstream CI builds. `none`: not checked upstream.
+5. **Fingerprint** each eval `.bal` file: an exact hash (comments and layout ignored), MinHash,
+   and its distinctive 5-token shingles (those not found in 10 or more BBE examples).
+6. **Decontaminate.** A chunk, question+answer or repo `.bal` file overlaps an eval item when it
+   has the same code, a MinHash similarity ≥ 0.8, or contains ≥ 50% of the item's distinctive
+   shingles. Overlaps are recorded in `eval_overlap`. Eval pages and overlapping chunks become
+   `eval_holdout`, so no questions are generated from them, and every export leaves overlapping
+   questions out, then re-checks what it wrote (`eval_overlap_in_export`, which should be 0).
+   This runs again after `scrape`, `collect-repos`, and before `generate-questions` and the exports.
+
+Outputs, in `data/eval/v1/`:
+
+| File | Contents |
+|---|---|
+| `bbe.jsonl` | one eval item per line: `id`, `title`, `category`, `url`, `commit`, `covers` (`node#item`), `nodes`, `explanation` (`.md`), `code` (`.bal` files), `outputs` (`.out` transcripts), `other_files`, `verify` |
+| `decontam.jsonl` | the fingerprints: item, file, `code_hash`, MinHash and shingles (hex) |
+| `split.json` | both sides of the split, the rule, the commit and the fingerprint settings |
+
+`export-sft`'s `eval.jsonl` is still a validation split of the Q&A rows (by source page) for
+training; the benchmark eval set is `data/eval/`. Thresholds are in `eval:` in `pipeline.yaml`.
 
 ### Local folder and cloud bucket
 
@@ -400,7 +441,7 @@ ballerina-sft-dataset-pipeline/
 ├── docs/
 │   ├── recommendations.md        # design research (v2; partly superseded, see note inside)
 │   └── schemas.md                # SQLite tables and columns
-├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · licences · dedup · ids · logging
+├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · licences · dedup · decontam · ids · logging
 ├── scraper/ballerinascraper/
 │   └── ballerinascraper/
 │       ├── scrape.py             # fetch loop: limits, caching, change detection, failures
@@ -414,6 +455,7 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── generate/             # questions · answers · LLM client
 │   │   ├── validate/             # bal compiler wrapper
 │   │   ├── export/               # dataset.jsonl · sft (chat messages)
+│   │   ├── eval/                 # build-eval: BBE split, eval items, bal run checks
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
 │   └── tests/
@@ -556,6 +598,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen graph validate` | Check the knowledge graph before using it |
 | `sftgen collect-repos --group guides` | Collect one repo group; `LIMIT_REPOS=0` for all of it |
 | `sftgen collect-repos --repo owner/name` | Collect one repository |
+| `sftgen build-eval` | Rebuild the eval set and re-flag overlaps (after a new Swan Lake pin) |
+| `sftgen build-eval --recheck` | Re-run every `bal run`/`bal build` check, e.g. after installing a new `bal` |
 | `sftgen storage status` | See what's local only, changed, or only in the bucket |
 | `sftgen storage pull` | On a new machine: get the database and outputs from the bucket |
 | `sftgen generate-answers --retry-failed` | Retry questions whose answer call failed |

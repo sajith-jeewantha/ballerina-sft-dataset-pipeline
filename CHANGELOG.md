@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M3 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M4 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -108,9 +108,47 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 - `external`: 123 of 1,000 collected; 873 excluded for having no licence; 4 need a licence check.
 - In total, about 2,800 unique `.bal` files (~3.1M tokens).
 
+### M4: eval set v1 and decontamination
+
+- **`sftgen build-eval`**:
+  - **Pin:** `ballerina-distribution` at the Swan Lake tag (`bbe` in the lockfile), with
+    `examples/` read from a sparse clone.
+  - **Split:** 30% eval / 70% train **by example**, decided by a hash of the example name.
+  - **Tags:** eval items tagged with graph `node#item` refs.
+  - **Checks:** with the pinned toolchain, `bal run` output against the `.out` transcript, or
+    `bal build`. Results are cached, and `--recheck` re-runs them.
+  - **Outputs:** `data/eval/v1/bbe.jsonl`, `decontam.jsonl` and `split.json`.
+- **Decontamination** (`balpipe_common.decontam`):
+  - **What counts as a copy:** exact code (comments and layout ignored), MinHash ≥ 0.8, or
+    ≥ 50% of an eval item's distinctive shingles (boilerplate shingles are ignored).
+  - **What's flagged:** chunks, questions (with their answers) and repo `.bal` files, in
+    `eval_overlap`.
+  - **Held out:** eval pages and overlapping chunks become `eval_holdout`, so no questions are
+    generated from them.
+  - **Exports:** `export` and `export-sft` leave out overlapping questions and re-check what
+    they wrote (`eval_overlap_in_export`).
+  - **When it runs:** incrementally, after `scrape` and `collect-repos`, and before
+    `generate-questions` and the exports.
+- **New tables** `eval_items` and `fingerprints`; new columns `eval_overlap` and
+  `decontam_key` on `chunks`, `questions` and `repo_files` (added automatically).
+- **Config:** a new `eval:` section in `pipeline.yaml`, and new flags `build-eval --no-verify`
+  and `--recheck`.
+- **The report** gets an *Eval set* section, and the terminal summary an Eval set line.
+
+**Live run:**
+- 584 examples: 188 eval, 396 train. 187 eval items are tagged with graph items.
+- 148 of the 150 checkable items pass. The 2 that differ (`flush`,
+  `convert-from-json-to-user-defined-type`) behave differently on 2201.14.1.
+- Held out: 131 chunks, 3 questions and 11 repo files. Both exports have 0 overlap.
+
 ### Tests
 
-89 tests in total (+9 for M3: licence detection and verdicts, the pre-gate, the register,
+97 tests in total (+8 for M4: containment, exact and near matches and boilerplate; incremental
+re-checks, held-out chunks and clearing; the split rule; parsing `index.json`; check modes and
+output comparison; a real `bal run`/`bal build` check, skipped without `bal`; and `build-eval`
+end to end, including a decontaminated export and a retired item).
+
+M3: 89 tests (+9 for M3: licence detection and verdicts, the pre-gate, the register,
 fingerprints and LSH; a collect run against local git repos covering the licence gate, sparse
 snapshot, lockfile, register, tarball, Swan Lake classification, exact and near dedup, re-run
 skips and the clone limit).
