@@ -570,6 +570,7 @@ edubencz,nexdom-integration-control-plane,Apache-2.0,safe,corpus; codebase-pool 
 exercism,ballerina,MIT,safe,corpus; codebase-pool candidate,1165,42937e1df8a834e55020dc86ccc2c725ab97c0b3,2026-11-21,,e52f804e74f0fbd34e8927962319df346166b8194094309a0aee318693df44df,293
 gagd-inetum,choreo-samples,Apache-2.0,safe,corpus; codebase-pool candidate,5011,cf629cc0cbbcd7ca4d24570b776e8cfb8641a63d,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,230
 godwinamila,wso2-samples,Apache-2.0,safe,corpus; codebase-pool candidate,7,3052d5d764e25b3f939f678d18520a7614a52401,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,9
+google-research,google-research,CC-BY-4.0,safe,eval-benchmark,,87e25a5ba04d2c4cf0108f0cec96d648fe2b945a,2026-11-22,dataset released under CC BY 4.0 (dataset card; the repo code is Apache-2.0): attribute Austin et al. 2021 in the dataset card (repo LICENSE reads Apache-2.0),,
 guna3006,ballerina-container,MIT,safe,corpus; codebase-pool candidate,298,ab701db95b8c5438ada55d3f6317e8b1432f70b1,2026-11-21,,b8f60b6c29460a997422f4e0387ccdaaba9aeff8756a208a23edad12ec71e512,22
 hasathcharu,persist-sql-load-tests,Apache-2.0,safe,corpus; codebase-pool candidate,18166,b8c61a1521eb6e89034e3f3d5855ee8198146f48,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,17
 hasathcharu,persist-tools-tests,Apache-2.0,safe,corpus; codebase-pool candidate,33,665dd6f47726087ebeb0eb662282d9838fcd8bca,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,43
@@ -592,6 +593,7 @@ nadheesh,agent-demo,Apache-2.0,safe,corpus; codebase-pool candidate,45,40b8bbcd8
 nadheesh,ballerina-ai-agent-demo,Apache-2.0,safe,corpus; codebase-pool candidate,8,e662bd9b1d0b04aa439d3963d866b0ae980a011a,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,2
 nivindulakshitha,Ballerina-Fundamentals,CC0-1.0,safe,corpus; codebase-pool candidate,33,277cfc16bbbd4df802dd78121982090fb773dfd0,2026-11-21,,a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499,20
 nthnn,rheolaeth,MPL-2.0,exclude,corpus; codebase-pool candidate,37,,2026-11-21,MPL-2.0 is not a permissive licence,,
+openai,human-eval,MIT,safe,eval-benchmark,,b9453e8f1865df0a0057a1383767caa400acfbcf,2026-11-22,MIT (repo LICENSE): keep the copyright notice (repo LICENSE reads MIT),,
 pasinduh2002,MediLink-Smart-Medical-API-Hub,MIT,safe,corpus; codebase-pool candidate,111,6dca33214e7ab9eff21a5380337f80facc59805b,2026-11-21,,7085bd77ced6c114d3f92069eb54f75d66ac5cd82edfd45f69827ffe51d2051a,9
 prakanth97,network,GPL-3.0,exclude,corpus; codebase-pool candidate,28,,2026-11-21,GPL-3.0 is not a permissive licence,,
 pubudu91,choreo-samples,Apache-2.0,safe,corpus; codebase-pool candidate,8,4496001d042d742c92aac03cccc8fd61ff26aa7b,2026-11-21,,c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4,3

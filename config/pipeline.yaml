@@ -144,6 +144,18 @@ eval:                                # build-eval: held-out eval set and deconta
   containment: 0.5                   # share of an item's distinctive shingles that counts as a copy
   min_shingles: 15                   # smaller items are matched exactly only
   common_df: 10                      # shingles in this many BBE examples are boilerplate, not evidence
+  # --- eval set v2 and baselines (sftgen eval, M8) ---
+  # benchmarks: HumanEval (MIT, all 164) and MBPP (CC BY 4.0, test split 11-510); see BenchmarkSource
+  translate_attempts: 3              # teacher translation + repairs with the real bal errors
+  ecosystem_tasks_per_node: 2        # eval tasks the teacher writes per core graph node
+  models:                            # baselines; "teacher" = ANSWER_GEN_MODEL
+    base: qwen/qwen3.8-27b
+  samples: 5                         # answers per item per model (pass@k)
+  ks: [1, 5]
+  sample_temperature: 0.8
+  max_answer_tokens: 3000
+  run_tests: false                   # true = run benchmark tests and BBE programs: EXECUTES model code.
+                                     # Sandbox only. false = compile-only scores (mode "compile")
 
 report:
   path: reports/report.html

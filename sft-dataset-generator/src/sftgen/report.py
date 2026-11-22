@@ -48,6 +48,7 @@ class ReportData:
     prompts: dict[str, Any] | None = None   # plan-prompts / generate-prompts (sftgen/generate/prompts.py)
     answers: dict[str, Any] | None = None   # answer-prompts (sftgen/generate/responses.py)
     codebases: dict[str, Any] | None = None  # codebases build/verify/attach (sftgen/codebases/)
+    baselines: dict[str, Any] | None = None  # eval set v2 and eval runs (sftgen/eval/runner.py)
 
     @property
     def total_pages(self) -> int:
@@ -95,8 +96,25 @@ def collect(s: Settings, db: Database) -> ReportData:
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
         swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
-        answers=_answers(s, db), codebases=_codebases(s, db),
+        answers=_answers(s, db), codebases=_codebases(s, db), baselines=_baselines(s, db),
     )
+
+
+def _baselines(s: Settings, db: Database) -> dict[str, Any] | None:
+    suites = _grouped(db.query("SELECT suite, COALESCE(task_type, 'write_code'), COUNT(*) FROM eval_items "
+                               "WHERE status = 'active' AND prompt IS NOT NULL GROUP BY 1, 2"))
+    bench = _grouped(db.query("SELECT suite, status, COUNT(*) FROM benchmark_problems GROUP BY 1, 2"))
+    if not suites and not bench:
+        return None
+    from sftgen.eval.runner import summary
+
+    runs = []
+    for r in db.query("SELECT * FROM eval_runs ORDER BY id"):
+        sm = summary(db, r["id"], s.eval_.ks)
+        runs.append({**dict(r), "summary": sm,
+                     "scored": db.scalar("SELECT COUNT(*) FROM eval_results WHERE eval_run_id = ?", (r["id"],))})
+    refs = sorted({ref for r in runs for ref in r["summary"]["refs"]})
+    return {"suites": suites, "bench": bench, "runs": runs, "refs": refs, "ks": s.eval_.ks}
 
 
 def _codebases(s: Settings, db: Database) -> dict[str, Any] | None:
@@ -291,6 +309,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_prompts_line(d.prompts)] if d.prompts else []),
         *([_answers_line(d.answers)] if d.answers else []),
         *([_codebases_line(d.codebases)] if d.codebases else []),
+        *([_baselines_line(d.baselines)] if d.baselines else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -310,6 +329,13 @@ def _repos_line(r: dict[str, Any]) -> str:
 
 def _pct(n: int, total: int) -> str:
     return f"{100 * n / total:.0f}%" if total else "—"
+
+
+def _baselines_line(b: dict[str, Any]) -> str:
+    items = sum(sum(v.values()) for v in b["suites"].values())
+    pending = sum(v.get("pending", 0) for v in b["bench"].values())
+    runs = ", ".join(f"{r['label']} ({r['mode']}, {r['status']})" for r in b["runs"]) or "none yet"
+    return f"Eval v2    {items} items with prompts, {pending} benchmark problems to translate  |  runs: {runs}"
 
 
 def _codebases_line(c: dict[str, Any]) -> str:
@@ -556,6 +582,49 @@ def _prompts_html(d: ReportData) -> list[str]:
     ]
 
 
+def _baselines_html(d: ReportData) -> list[str]:
+    b = d.baselines
+    if not b:
+        return []
+    suite_rows = [[_e(su), *[str(v.get(t, 0)) for t in ("write_code", "fix_code", "explain")], str(sum(v.values()))]
+                  for su, v in sorted(b["suites"].items())]
+    bench_rows = [[_e(su), *[str(v.get(x, 0)) for x in ("pending", "translated", "failed")]]
+                  for su, v in sorted(b["bench"].items())]
+    metrics = [f"pass@{k}" for k in b["ks"]]
+    run_rows = []
+    for r in b["runs"]:
+        for su, v in r["summary"]["suites"].items():
+            run_rows.append([f'#{r["id"]} {_e(r["label"])}', _e(r["model"]), _e(r["mode"]), _e(su), str(v["items"]),
+                             *[f"{v[m]:.3f}" if v.get(m) is not None else "—" for m in metrics]])
+    labels = [f'#{r["id"]} {r["label"]} ({r["mode"]})' for r in b["runs"]]
+    map_rows = [[f'<span class="url">{_e(ref)}</span>',
+                 *[(f'{r["summary"]["refs"][ref]:.2f}' if ref in r["summary"]["refs"] else "—") for r in b["runs"]]]
+                for ref in b["refs"][:400]]
+    return [
+        "<h2>Eval set v2 and baselines</h2>",
+        '<p class="muted">From <code>sftgen eval</code>: HumanEval and MBPP translated into Ballerina with '
+        "<code>bal</code> tests (MIT; MBPP CC BY 4.0, attributed), eval-split codebase tasks, BBE eval prompts and "
+        "ecosystem tasks per core node. <code>eval run</code> samples answers per item per model; mode "
+        "<b>compile</b> = code compiled only, <b>test</b> = tests and programs run (<code>eval.run_tests</code>). "
+        "pass@k uses the unbiased estimator. Never compare runs of different modes.</p>",
+        '<div class="two">',
+        '<div class="card scroll"><h3>Eval items with prompts</h3>' + _table(
+            ["Suite", "write_code", "fix_code", "explain", "Total"], suite_rows, numeric={1, 2, 3, 4}) + "</div>",
+        '<div class="card scroll"><h3>Benchmark translation</h3>' + (_table(
+            ["Benchmark", "Pending", "Translated", "Failed"], bench_rows, numeric={1, 2, 3}) if bench_rows else
+            '<p class="muted">Not fetched: run <code>sftgen eval fetch</code>.</p>') + "</div>",
+        "</div>",
+        '<div class="card scroll" style="margin-top:12px"><h3>Runs</h3>' + (_table(
+            ["Run", "Model", "Mode", "Suite", "Items", *metrics], run_rows, numeric=set(range(4, 5 + len(metrics))))
+            if run_rows else '<p class="muted">No baseline yet: <code>sftgen eval run --model base</code> and '
+            "<code>--model teacher</code>.</p>") + "</div>",
+        *([f'<h3 style="margin-top:16px">Per-item score map (pass@1 per graph item, {len(map_rows)} items)</h3>',
+           '<div class="card scroll">' + _table(["Item", *[_e(x) for x in labels]], map_rows,
+                                                numeric=set(range(1, 1 + len(labels)))) + "</div>"]
+          if map_rows else []),
+    ]
+
+
 def _codebases_html(d: ReportData) -> list[str]:
     c = d.codebases
     if not c:
@@ -717,6 +786,7 @@ def render_html(d: ReportData) -> str:
         *_prompts_html(d),
         *_answers_html(d),
         *_codebases_html(d),
+        *_baselines_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

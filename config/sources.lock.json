@@ -2900,5 +2900,19 @@
    "locked_at": "2026-11-21T11:07:17Z"
   }
  },
- "central": {}
+ "central": {},
+ "benchmarks": {
+  "humaneval": {
+   "repo": "openai/human-eval",
+   "file": "data/HumanEval.jsonl.gz",
+   "commit": "b9453e8f1865df0a0057a1383767caa400acfbcf",
+   "locked_at": "2026-11-22T06:09:02Z"
+  },
+  "mbpp": {
+   "repo": "google-research/google-research",
+   "file": "mbpp/mbpp.jsonl",
+   "commit": "87e25a5ba04d2c4cf0108f0cec96d648fe2b945a",
+   "locked_at": "2026-11-22T06:09:06Z"
+  }
+ }
 }

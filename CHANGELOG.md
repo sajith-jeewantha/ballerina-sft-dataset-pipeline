@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M7 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M8 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -276,9 +276,50 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 - `codebases attach`: 39 codebase prompts (6 eval states held back), up to ~9.6k tokens each,
   all with `covers`.
 
+### M8: eval set v2 and baselines
+
+- **Benchmarks (decided 2026-11-22: translate both):**
+  - **`sftgen eval fetch`** pins and sparse-fetches HumanEval (`openai/human-eval`, MIT, 164
+    problems) and MBPP (`google-research/google-research`, test split 11–510, 500 problems). It
+    detects the repo licences, records both in the licence register (intended use
+    `eval-benchmark`, with MBPP's CC BY 4.0 attribution duty), and stores the problems in the new
+    `benchmark_problems` table.
+  - **`sftgen eval translate`:** the teacher writes a Ballerina prompt with the signature, a
+    reference solution and `bal` tests. These must build together (tests run with
+    `eval.run_tests`), with repairs from the real errors. Translations become fingerprinted eval
+    items.
+- **`sftgen eval tasks`** (no model calls): eval-split codebase states become fix, implement and
+  migrate tasks, plus an explain task per codebase. The 188 BBE eval items get prompts built from
+  their explanation and expected output.
+- **`sftgen eval ecosystem`:** the teacher writes tasks per core graph node with a reference; a
+  code reference must compile.
+- **`sftgen eval run --model base|teacher`:**
+  - **Sampling:** `eval.samples` answers per item, using the training system prompt; each sample
+    is a separately cached call with a seed (new `sample` argument to `LLMClient.chat`).
+  - **Scoring** by suite: benchmark tests, BBE output, codebase overlay build, compile, or the
+    judge for explain tasks.
+  - **Summaries:** unbiased pass@k per suite and per graph item. Runs resume per sample.
+  - **Modes:** `compile` vs `test` (code executed only with `eval.run_tests`) is recorded per run,
+    and runs of different modes are never mixed.
+- **New tables** `benchmark_problems`, `eval_runs` and `eval_results`; `eval_items` gains `prompt`,
+  `task_type`, `reference` and `meta`; the lockfile gains a `benchmarks` section.
+- **The report** gets *Eval set v2 and baselines*: items per suite, translation status, runs with
+  pass@k per suite, and the **per-item score map** (pass@1 per graph item per run).
+- **Fix:** the translation template's literal `@test:Config {}` broke Python formatting. A new
+  test formats every template, so stray braces fail in CI.
+
+**Run without a key:** HumanEval (164) and MBPP (500) fetched and registered; 9 codebase eval tasks
+(3 eval codebases); 188 BBE prompts. **Not run yet:** `eval translate`, `eval ecosystem` and the
+baselines need `OPENROUTER_API_KEY`.
+
 ### Tests
 
-111 tests in total (+5 for M7: the function scanner and each state edit; context packing order and
+118 tests in total (+7 for M8: pass@k; problem parsing and the MBPP split; fetch with licences,
+register and lockfile; translation with a repair, saved item and fingerprints; codebase and BBE
+tasks plus a full eval run with pass@k, judge, resume, a second model and the score map; unknown
+model labels; every prompt template formats).
+
+M7: 111 tests in total (+5 for M7: the function scanner and each state edit; context packing order and
 budget; pool candidates, tags and split; build, verify, attach and codebase answers with a fake
 compiler, the report section, and the plan staying standalone; real `bal` state verification and
 type-checking tests without running module init, skipped without `bal`).

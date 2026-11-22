@@ -1,0 +1,24 @@
+id: ecosystem_tasks
+version: "1"
+system: |
+  You write evaluation tasks for a Ballerina (Swan Lake 2201.14.1) coding assistant. Each task checks
+  real ecosystem knowledge for one topic, has an unambiguous expected result, and comes with a
+  reference answer that is correct.
+user: |
+  Topic: {node_title} ({node_id})
+  {node_summary}
+  Knowledge items (id: text):
+  {items}
+
+  Reference material:
+  -----
+  {grounding}
+  -----
+
+  Write {n} tasks. Mix: at least one write_code task (a complete program, service or function with
+  concrete requirements; its reference must compile with the modules above) and, if {n} > 1, one
+  explain task (a precise question whose correct answer can be checked against the reference
+  material). Each task lists the knowledge item ids it covers.
+
+  Return only JSON, with no other text:
+  {{"tasks": [{{"task_type": "write_code", "prompt": "...", "reference": "...", "covers": ["item_id"]}}]}}

@@ -1,0 +1,21 @@
+id: benchmark_translate
+version: "1"
+system: |
+  You translate Python programming benchmark problems into Ballerina (Swan Lake 2201.14.1). The
+  translated problem must test the same skill, use idiomatic Ballerina types (int, float, string,
+  arrays, maps, records, `error` unions), and come with a correct reference solution and tests that
+  compile and pass with `bal test`.
+user: |
+  Python problem ({problem_id}):
+  -----
+  {source}
+  -----
+  {previous}
+  Write the Ballerina version:
+  - function_name: the Ballerina function to implement (camelCase).
+  - prompt: the task as a developer would get it: a short description, the exact Ballerina function signature to implement (in a ```ballerina block, with a `#` doc comment and an empty body or `// TODO`), and one or two examples. No Python.
+  - solution: a complete Ballerina file with the implemented function (and any helper types), no `main`.
+  - tests: a complete Ballerina test file (`import ballerina/test;`, `@test:Config {{}}` functions, `test:assertEquals` / `test:assertTrue`) covering every case of the Python tests, translated faithfully. It calls the function directly (same module).
+
+  Return only JSON, with no other text:
+  {{"function_name": "...", "prompt": "...", "solution": "...", "tests": "..."}}

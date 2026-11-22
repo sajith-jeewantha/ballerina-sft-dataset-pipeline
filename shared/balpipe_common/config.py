@@ -299,8 +299,30 @@ class CodebasesCfg(BaseModel):
     max_candidates: int = 80          # candidates tried per run while filling the pool
 
 
+class BenchmarkSource(BaseModel):
+    """A public coding benchmark translated into Ballerina (`eval fetch` / `eval translate`)."""
+
+    name: str                         # humaneval | mbpp (also the eval suite name)
+    repo: str                         # GitHub owner/name
+    file: str                         # problems file in the repo (.jsonl or .jsonl.gz)
+    spdx: str                         # licence of the problems
+    licence_note: str = ""            # duties (attribution) recorded in the register and the dataset card
+    task_ids: list[int] = Field(default_factory=list)  # [first, last] task ids to use; [] = all
+
+
+def _benchmarks() -> list[BenchmarkSource]:
+    return [
+        BenchmarkSource(name="humaneval", repo="openai/human-eval", file="data/HumanEval.jsonl.gz", spdx="MIT",
+                        licence_note="MIT (repo LICENSE): keep the copyright notice"),
+        BenchmarkSource(name="mbpp", repo="google-research/google-research", file="mbpp/mbpp.jsonl",
+                        spdx="CC-BY-4.0", task_ids=[11, 510],
+                        licence_note="dataset released under CC BY 4.0 (dataset card; the repo code is Apache-2.0): "
+                                     "attribute Austin et al. 2021 in the dataset card"),
+    ]
+
+
 class EvalCfg(BaseModel):
-    """`build-eval`: the held-out evaluation set and the decontamination fingerprints."""
+    """`build-eval` (eval set v1, decontamination) and `eval` (eval set v2, baselines)."""
 
     version: str = "v1"               # files go to <data>/eval/<version>/
     dir: str = "eval"                 # relative to LOCAL_DATA_DIR
@@ -316,6 +338,19 @@ class EvalCfg(BaseModel):
     containment: float = Field(default=0.5, gt=0.0, le=1.0)
     min_shingles: int = 15            # items with fewer distinctive shingles are matched exactly only
     common_df: int = 10
+    # --- eval set v2 (M8) ---
+    benchmarks: list[BenchmarkSource] = Field(default_factory=_benchmarks)
+    translate_attempts: int = 3       # teacher translation + repairs with the real bal errors
+    ecosystem_tasks_per_node: int = 2  # tasks the teacher writes per core graph node
+    # baselines: label -> OpenRouter model id; "teacher" defaults to ANSWER_GEN_MODEL
+    models: dict[str, str] = Field(default_factory=lambda: {"base": "qwen/qwen3.8-27b"})
+    samples: int = 5                  # answers per item per model, for pass@k
+    ks: list[int] = Field(default_factory=lambda: [1, 5])
+    sample_temperature: float = 0.8
+    max_answer_tokens: int = 3000
+    # Scoring with tests (benchmarks) or by running programs (BBE output) EXECUTES model-written code.
+    # Off by default: scores are then compile-only (and the judge), recorded as mode "compile".
+    run_tests: bool = False
 
 
 class GraphCfg(BaseModel):

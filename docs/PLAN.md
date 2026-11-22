@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **approved; M0–M4 and M7 done; M5 and M6 built (2026-11-22), their live runs are next**. See [Progress](#progress).
+status: **approved; M0–M4 and M7 done; M5, M6 and M8 built (2026-11-22); their live runs need the API key**. See [Progress](#progress).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -35,7 +35,8 @@ decontamination.
 | M5 | Item-driven prompts (pilot) | 🟡 built 2026-11-21; live run waits for `OPENROUTER_API_KEY` | `sftgen plan-prompts` · `generate-prompts` |
 | M6 | Verified answers | 🟡 built 2026-11-22; live run after M5's | `sftgen answer-prompts` |
 | M7 | Codebase pool v1 | ✅ done 2026-11-22 (failing_test states need `codebases.run_tests`) | `sftgen codebases build` · `verify` · `attach` |
-| M8–M10 | Eval set v2 → dataset v1 | not started | — |
+| M8 | Eval set v2 + baselines | 🟡 built 2026-11-22; translation and baselines wait for `OPENROUTER_API_KEY` | `sftgen eval fetch` · `translate` · `tasks` · `ecosystem` · `run` |
+| M9–M10 | Raw corpus → dataset v1 | not started | — |
 
 Details per milestone are in the "Done" notes under §6.
 
@@ -524,7 +525,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M5** 🟡 | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
 | **M6** 🟡 | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
 | **M7** ✅ | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
-| **M8** | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
+| **M8** 🟡 | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
 | **M9** | Pool to 50–150 + commit miner + raw corpus | Scale the pool with external repos; mined before/after fixes; **raw pretraining corpus** (~25–40M tokens, generated code down-weighted, eval fingerprints removed) | Counts, licences and token totals in the register and report |
 | **M10** | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
 
@@ -675,6 +676,27 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
   - Diffs for files over ~400 lines (§8 question 1).
   - Version drift only covers HTTP services.
 
+**Built (2026-11-22):** M8's code is built and tested; translation and baselines need the API key.
+- **Benchmarks:** `sftgen eval fetch` pinned, licence-checked and registered HumanEval (164, MIT)
+  and MBPP (500, the test split; CC BY 4.0, attributed). `eval translate` turns them into
+  Ballerina tasks with a reference solution and `bal` tests, repaired with the real errors.
+- **Other suites:**
+  - `eval tasks`: 9 codebase eval tasks from the 3 eval-split codebases (fix, implement, migrate,
+    explain) and 188 BBE prompts.
+  - `eval ecosystem`: teacher-written tasks per core node.
+- **Runner:** `eval run --model base|teacher` takes k samples per item (training system prompt;
+  seeded, separately cached calls) and scores them with `bal` or the judge. It reports unbiased
+  pass@k per suite and per graph item; the report has the per-item score map.
+- **Executing code (decided 2026-11-22: opt-in):** benchmark tests and BBE programs run only with
+  `eval.run_tests`. Without it, runs are labelled `compile` and measure compilation; for real
+  pass@k, run in a sandbox with `eval.run_tests: true`.
+- **Live run:**
+  1. `LIMIT_GENERATING=20 sftgen eval translate`, then `LIMIT_GENERATING=0`. Expected about $1–2
+     for 664 problems (~1.3 attempts).
+  2. `sftgen eval ecosystem`: 43 core nodes × 2 tasks.
+  3. `sftgen eval run --model base` and `--model teacher`: about 860 items × 5 samples. The
+     plan's estimate is ~$15–25 for both, mostly the teacher.
+
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.
 
@@ -718,6 +740,9 @@ DeepSeek writing the prompts.
    for the bucket. It doesn't block anything before M2.
 4. **Benchmark licences.** HumanEval-style problems are usually MIT and MBPP-style CC-BY-4.0;
    verify both in M8 before translating. Or should we write our own problems only?
+   **Decided 2026-11-22: translate both.** Verified at fetch: HumanEval's repo LICENSE is MIT; MBPP
+   lives in google-research (Apache-2.0 code) and its dataset is CC BY 4.0, so attribute Austin
+   et al. 2021 in the dataset card. Both are in the licence register.
 5. **Upstream graph fixes.** Should the 251 core items without their own sources, and the
    `/latest` and `main` links, be fixed upstream in `ballerina-ecosystem` (the graph team), or
    should this project resolve them locally in `sources.lock.json` and leave the graph as is?

@@ -124,9 +124,13 @@ class LLMClient:
         return None
 
     async def chat(self, model: str, prompt: Prompt, *, temperature: float, max_tokens: int,
-                   **fmt: Any) -> tuple[str, Usage]:
+                   sample: int | None = None, **fmt: Any) -> tuple[str, Usage]:
+        """`sample`: the index of one of several answers to the same prompt (pass@k). It is part of the
+        cache key and sent as the `seed`, so each sample is a separate call."""
         messages = prompt.messages(**fmt)
         params: dict[str, Any] = {"temperature": temperature, "max_tokens": max_tokens}
+        if sample is not None:
+            params["seed"] = sample
         extra = dict(self.settings.generate.extra_body)
         routing = self.settings.generate.provider_for(model)
         if routing:  # e.g. DeepSeek models only from DeepSeek's own endpoint (its terms allow distillation)

@@ -88,6 +88,7 @@ flowchart LR
 | Source pins | `shared/balpipe_common/lock.py`, `config/sources.lock.json` | One Swan Lake update: BBE at its release tag, module repos at a locked commit, Central packages at the newest version built for the pin |
 | Knowledge graph | `shared/balpipe_common/graph.py`, `sftgen/graph/coverage.py`, `graph/graph.json` | Load and validate the graph with the pinned `ballerina_graph` package; match item sources to scraped pages and spec sections; coverage in the report |
 | Repo collector | `scraper/.../repos.py`, `shared/balpipe_common/licences.py`, `dedup.py` | `collect-repos`: list groups, licence pre-gate, pin with `git ls-remote`, blobless sparse clone, LICENSE-text gate, licence register, Swan Lake classification, exact + MinHash dedup across repos |
+| Eval set v2 + baselines | `sftgen/eval/benchmarks.py`, `tasks.py`, `runner.py` | `eval fetch` (HumanEval, MBPP: pinned, licence-checked), `eval translate` (teacher → Ballerina task + `bal` tests, repaired), `eval tasks` (eval-split codebase tasks, BBE prompts), `eval ecosystem` (tasks per core node), `eval run` (k samples per item per model, scored with `bal` / judge, unbiased pass@k per suite and per graph item); code executed only with `eval.run_tests` |
 | Eval set | `sftgen/eval/bbe.py`, `sftgen/eval/verify.py` | `build-eval`: pin BBE at the Swan Lake tag, split 30/70 by example name, tag eval items with `node#item`, check them with `bal run` (output vs `.out`) or `bal build`, fingerprint their code, write `data/eval/<version>/` |
 | Prompt planner | `sftgen/plan/planner.py` | Items in scope (`prompts.nodes`), budgets by priority, slots over task mix × the item's difficulties, open slots and gap-fill rounds |
 | Retrieval | `sftgen/retrieval/fts.py`, `symbols.py`, `grounding.py` | FTS5 (BM25) over chunks; Central symbol table parsed from the API reference; per-item grounding: own sources (pages or collected repo files), symbols, node sources, FTS neighbours; eval overlaps excluded |
@@ -187,7 +188,7 @@ sft-dataset-generator/
     retrieval/                  fts (FTS5) · symbols (Central) · grounding
     validate/                   bal_compiler (files, packages, tests) · stage · answer_check
     export/                     stage (dataset.jsonl) · sft (chat messages)
-    eval/                       bbe (build-eval: split, items, fingerprints) · verify (bal run / build)
+    eval/                       bbe (build-eval) · verify (bal run / build) · benchmarks · tasks · runner (pass@k)
     report.py
     prompts/                    questions.yaml · answer.yaml
   tests/

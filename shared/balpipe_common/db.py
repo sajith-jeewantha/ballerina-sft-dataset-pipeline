@@ -20,6 +20,8 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * preference_pairs  a failed attempt and the passing repair of the same prompt (for DPO)
 * codebases  the codebase pool: verified Swan Lake projects, graph tags, train/eval split
 * codebase_states  broken or unfinished versions of a codebase (the starting point of a task)
+* benchmark_problems  HumanEval / MBPP problems fetched for translation into Ballerina
+* eval_runs / eval_results  baseline runs: k sampled answers per eval item per model, and scores
 
 `chunks`, `questions`, `repo_files`, `prompts` and `responses` carry `eval_overlap` (the eval item they copy, or
 NULL) and `decontam_key` (the fingerprint set they were last checked against).
@@ -360,6 +362,46 @@ CREATE TABLE IF NOT EXISTS codebase_states (
     UNIQUE (codebase_id, kind)
 );
 
+CREATE TABLE IF NOT EXISTS benchmark_problems (
+    id               TEXT PRIMARY KEY,      -- <suite>/<task id>
+    suite            TEXT NOT NULL,         -- humaneval | mbpp
+    task_id          TEXT NOT NULL,
+    source           TEXT NOT NULL,         -- JSON: the original problem (prompt, solution, tests)
+    commit_sha       TEXT,
+    spdx             TEXT,
+    status           TEXT NOT NULL,         -- pending | translated | failed
+    attempts         INTEGER NOT NULL DEFAULT 0,
+    error            TEXT,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS eval_runs (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    label            TEXT NOT NULL,         -- base | teacher | any eval.models key
+    model            TEXT NOT NULL,
+    mode             TEXT NOT NULL,         -- compile (no code executed) | test (tests and programs run)
+    samples          INTEGER NOT NULL,
+    suites           TEXT NOT NULL DEFAULT '[]',
+    status           TEXT NOT NULL,         -- running | done
+    run_id           INTEGER,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS eval_results (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    eval_run_id      INTEGER NOT NULL REFERENCES eval_runs(id) ON DELETE CASCADE,
+    item_id          TEXT NOT NULL REFERENCES eval_items(id),
+    sample           INTEGER NOT NULL,
+    answer           TEXT,
+    passed           INTEGER NOT NULL,
+    detail           TEXT,                  -- JSON: why it failed (errors, judge issues)
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (eval_run_id, item_id, sample)
+);
+
 CREATE TABLE IF NOT EXISTS symbols (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     module           TEXT NOT NULL,         -- ballerina/http
@@ -412,6 +454,8 @@ class Database:
 
     # Columns added after a table was first created: (table, column, type). Applied once, idempotently.
     MIGRATIONS = (("llm_usage", "provider", "TEXT"), ("prompts", "codebase_state_id", "INTEGER"),
+                  ("eval_items", "prompt", "TEXT"), ("eval_items", "task_type", "TEXT"),
+                  ("eval_items", "reference", "TEXT"), ("eval_items", "meta", "TEXT"),
                   *((t, c, "TEXT") for t in ("chunks", "questions", "repo_files")
                     for c in ("eval_overlap", "decontam_key")))
 

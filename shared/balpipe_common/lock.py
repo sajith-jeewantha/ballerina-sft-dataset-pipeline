@@ -42,7 +42,7 @@ class SourceLock:
     def __init__(self, path: Path, swan_lake: str) -> None:
         self.path = path
         self.data: dict[str, Any] = {"lock_version": LOCK_VERSION, "swan_lake": swan_lake,
-                                     "bbe": {}, "repos": {}, "central": {}}
+                                     "bbe": {}, "repos": {}, "central": {}, "benchmarks": {}}
         if path.is_file():
             loaded = json.loads(path.read_text(encoding="utf-8"))
             if loaded.get("swan_lake") == swan_lake:

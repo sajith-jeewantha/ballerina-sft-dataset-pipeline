@@ -128,6 +128,11 @@ without stopping the run.
 | `sftgen codebases build` | Fill the codebase pool: 20 Swan Lake projects from the collected repos that build with the pinned `bal`, tagged with graph items, each turned into verified states (compile error, unfinished feature, version drift, failing test). See [Codebase pool](#codebase-pool) | codebase: `active` · `rejected`; state: `pass` · `fail` · `skipped` |
 | `sftgen codebases verify` | Re-check every base and state with `bal`; exits with an error if anything is red | — |
 | `sftgen codebases attach` | Turn verified states of train codebases into codebase-task prompts with the project packed in | prompt: `accepted` (`context_mode = codebase`) |
+| `sftgen eval fetch` | Fetch HumanEval (MIT, 164) and MBPP (CC BY 4.0, test split 11–510): pinned, licence-checked, recorded in the licence register | problem: `pending` |
+| `sftgen eval translate` | The teacher translates each problem into a Ballerina task with a reference solution and `bal` tests; verified and repaired with the real errors. Up to `LIMIT_GENERATING` per run | problem: `translated` · `failed` |
+| `sftgen eval tasks` | Eval tasks from the eval-split codebases (fix, implement, migrate, explain) and prompts for the BBE eval items | — |
+| `sftgen eval ecosystem` | The teacher writes eval tasks per core graph node; a code reference must build | — |
+| `sftgen eval run --model base` | Baseline a model (`base` = Qwen3.8-27B, or `teacher`): `eval.samples` answers per item, scored with `bal` and the judge, pass@k per suite and per graph item. See [Eval set v2 and baselines](#eval-set-v2-and-baselines) | run: `running` · `done` |
 | `sftgen build-eval` | Build eval set v1 from Ballerina by Example: 30% of examples held out, tagged `node#item`, checked with `bal run`/`bal build`, and fingerprinted. Overlapping chunks, questions and repo files are flagged and left out of every export. See [Eval set and decontamination](#eval-set-and-decontamination) | eval item: `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; chunk: `eval_holdout` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
@@ -326,6 +331,9 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `preference_pairs` | the first failed answer and the passing repair of a prompt (for DPO) | — |
 | `codebases` | a project in the pool: files, graph tags, train/eval split | `active` · `rejected` |
 | `codebase_states` | a broken or unfinished version of a codebase: changed files, patch, verification | `pass` · `fail` · `skipped` |
+| `benchmark_problems` | a HumanEval / MBPP problem fetched for translation | `pending` · `translated` · `failed` |
+| `eval_runs` | one baseline run: model, mode (`compile` / `test`), samples | `running` · `done` |
+| `eval_results` | one sampled answer to an eval item and whether it passed | — |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -521,6 +529,36 @@ state, the project must build, and a stubbed function must actually be implement
 Files in `data/codebases/`: `<id>/base.tar.gz`, `<id>/states/<kind>.patch` and `manifest.jsonl`
 (source, licence, split, tags and states per codebase).
 
+### Eval set v2 and baselines
+
+`sftgen eval` grows the eval set and measures models on it, so you can later tell whether the
+dataset helped.
+
+| Suite | Items | Scored by |
+|---|---|---|
+| `humaneval` | 164, translated from HumanEval (MIT) | the answer's function built with the item's `bal` tests (tests run with `eval.run_tests`) |
+| `mbpp` | 500, MBPP's official test split (CC BY 4.0, attributed in the dataset card) | the same |
+| `bbe` | the 188 held-out BBE examples (M4): write the program the explanation describes | output compared with `.out` (`eval.run_tests`), otherwise it must compile |
+| `codebase` | the eval-split codebases (M7): fix, implement, migrate, plus an explain task each | the changed files laid over the state must build; explain by the judge |
+| `ecosystem` | tasks the teacher writes per core graph node | code must compile; explain by the judge |
+
+- **Translation:** `eval translate` gives the teacher the Python problem, solution and tests. It
+  returns a Ballerina prompt (with the function signature), a reference solution and a test file.
+  These must build together (tests run with `eval.run_tests`); failures are repaired with the real
+  errors, up to 3 attempts.
+- **Decontamination:** every eval item's code is fingerprinted, so decontamination keeps
+  near-copies out of training.
+- **Baselines:** `eval run --model base` (Qwen3.8-27B) and `--model teacher` sample `eval.samples`
+  answers per item. They use the training system prompt, so the base model sees what the
+  fine-tuned one will.
+- **pass@k:** the unbiased estimator per item, averaged per suite and per graph item (`covers`).
+  The report shows a **per-item score map**: pass@1 per graph item for each run.
+- **Executing code:** scoring benchmark tests and BBE output **runs model-written code**, so it
+  needs `eval.run_tests: true` (use a container or VM). Without it, runs are labelled mode
+  `compile` and score compilation only. Don't compare runs of different modes.
+- **Resuming:** runs resume where they stopped (results are saved per sample);
+  `LIMIT_GENERATING` caps the samples per invocation.
+
 ### Local folder and cloud bucket
 
 Everything the pipeline writes lives under **`LOCAL_DATA_DIR`** (default `data/`). That folder is
@@ -588,9 +626,9 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── generate/             # questions · answers · prompts (writer/reviewer) · responses (answer, check, repair) · LLM client
 │   │   ├── validate/             # bal compiler wrapper (files, packages, tests) · answer checks
 │   │   ├── export/               # dataset.jsonl · sft (chat messages)
-│   │   ├── eval/                 # build-eval: BBE split, eval items, bal run checks
 │   │   ├── plan/                 # planner: item budgets, slots, gaps
 │   │   ├── codebases/            # pool (select, verify, tag) · states · attach (context packing) · stage
+│   │   ├── eval/                 # bbe (v1) · verify · benchmarks (fetch, translate) · tasks · runner (pass@k)
 │   │   ├── retrieval/            # FTS5 search · Central symbol table · grounding per item
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
@@ -738,6 +776,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `LIMIT_GENERATING=30 sftgen generate-prompts` | A small prompt batch (about 3 items) to check quality and cost |
 | `LIMIT_GENERATING=20 sftgen answer-prompts` | Answer 20 accepted prompts, to check pass and repair rates and cost |
 | `sftgen codebases verify` | Check that every codebase base and state still verifies (e.g. after a `bal` update) |
+| `LIMIT_GENERATING=20 sftgen eval translate` | Translate 20 benchmark problems to check quality and cost |
+| `sftgen eval run --model teacher --suite humaneval` | Baseline one model on one suite |
 | `sftgen answer-prompts --retry-failed` | Give prompts that failed every attempt another round of repairs |
 | `sftgen build-eval` | Rebuild the eval set and re-flag overlaps (after a new Swan Lake pin) |
 | `sftgen build-eval --recheck` | Re-run every `bal run`/`bal build` check, e.g. after installing a new `bal` |

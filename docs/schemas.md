@@ -126,7 +126,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `build-eval` · `eval-fetch` · `eval-translate` · `eval-tasks` · `eval-ecosystem` · `eval-run` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -220,23 +220,53 @@ One row per file in a collected repo's snapshot.
 
 ## `eval_items`
 
-One row per held-out eval item (`sftgen build-eval`); the primary key is a text id.
+One row per held-out eval item; the primary key is a text id. v1 items come from `build-eval`
+(BBE); v2 items from `eval translate` (benchmarks), `eval tasks` (codebases) and `eval ecosystem`.
 
 | Column | Meaning |
 |---|---|
-| `id` | `bbe/<example name>` |
-| `suite`, `version` | `bbe`; the eval set version (`eval.version`, e.g. `v1`) |
+| `id` | `bbe/<name>` · `humaneval/<task>` · `mbpp/<task>` · `codebase/<codebase>/<kind or explain>` · `ecosystem/<node>/<n>` |
+| `suite`, `version` | `bbe` · `humaneval` · `mbpp` · `codebase` · `ecosystem`; `v1` / `v2` |
+| `prompt`, `task_type` | The task as the model gets it; `write_code` · `fix_code` · `explain` |
+| `reference` | Reference answer: the translated solution, the original files of a codebase state, or the teacher's reference |
+| `meta` | JSON: e.g. the function name of a benchmark, the state kind and target of a codebase task |
 | `name`, `title`, `category` | From `examples/index.json` |
 | `url`, `source_url`, `commit_sha` | ballerina.io page; GitHub folder at the pinned tag; pinned commit |
 | `files` | JSON `{file name: text}`: the example's top-level files (`.bal`, `.out`, `.md`, configs) |
 | `covers`, `nodes` | JSON: graph items whose own sources are this example; nodes that list it as a node-level source |
-| `verify_mode` | `run` (one `.bal` + a `$ bal run` transcript) · `build` (upstream builds it) · `none` |
+| `verify_mode` | `run` (one `.bal` + a `$ bal run` transcript) · `build` · `none` · `test` (benchmark tests) · `codebase` · `judge` |
 | `verify_status`, `verify_detail` | `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; first difference or error |
 | `status` | `active` · `retired` (no longer on the eval side; its fingerprints are deleted) |
 
+## `benchmark_problems`
+
+| Column | Meaning |
+|---|---|
+| `id`, `suite`, `task_id` | `humaneval/0`, `mbpp/11`, … |
+| `source` | JSON: the original problem (prompt or text, solution, tests) |
+| `commit_sha`, `spdx` | Pinned commit of the source repo; licence of the problems (MIT · CC-BY-4.0) |
+| `status`, `attempts`, `error` | `pending` · `translated` · `failed`; translation attempts; last errors |
+
+## `eval_runs`
+
+| Column | Meaning |
+|---|---|
+| `label`, `model` | `base` · `teacher` · any `eval.models` key, and the model id |
+| `mode` | `compile` (no model code executed) · `test` (tests and programs run, `eval.run_tests`) |
+| `samples`, `suites` | Answers per item; suites requested (`[]` = all) |
+| `status` | `running` · `done` (every item has all its samples) |
+
+## `eval_results`
+
+| Column | Meaning |
+|---|---|
+| `eval_run_id`, `item_id`, `sample` | Which run, eval item and sample (0-based) |
+| `answer`, `passed` | The model's answer and whether it passed |
+| `detail` | JSON: why: build errors, test failures, judge verdict |
+
 ## `fingerprints`
 
-One row per eval `.bal` file.
+One row per eval code file (BBE `.bal` files, benchmark solutions, codebase task references).
 
 | Column | Meaning |
 |---|---|

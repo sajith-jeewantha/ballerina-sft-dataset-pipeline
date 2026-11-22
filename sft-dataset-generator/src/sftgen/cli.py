@@ -17,6 +17,14 @@ Commands (run in this order, or all at once with `run-all`):
                        (compile error, unfinished feature, version drift, failing test); data/codebases/
   codebases verify     re-check every base and state with bal; fails if anything is red
   codebases attach     codebase-task prompts from verified states of train codebases (project packed in)
+  eval fetch           fetch HumanEval and MBPP (pinned, licence-checked, in the licence register)
+  eval translate       the teacher translates them into Ballerina tasks with bal tests (verified,
+                       repaired with real errors); up to LIMIT_GENERATING problems per run
+  eval tasks           eval tasks from eval-split codebases and prompts for the BBE eval items
+  eval ecosystem       the teacher writes eval tasks per core graph node (reference must build)
+  eval run             baseline a model (--model base | teacher): eval.samples answers per item,
+                       scored with bal (tests/programs run only with eval.run_tests) and the
+                       judge; pass@k per suite and per graph item in the report
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -66,11 +74,11 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts", "codebases",
+COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts", "codebases", "eval",
             "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"],
-           "codebases": ["build", "verify", "attach"]}
+           "codebases": ["build", "verify", "attach"], "eval": ["fetch", "translate", "tasks", "ecosystem", "run"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
 
 
@@ -135,6 +143,31 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
 
             return build_eval(s, db, run, open_lock(s), update_lock=a.update_lock,
                               verify=False if a.no_verify else None, reverify=a.recheck)
+        if command.startswith("eval-"):
+            action = command.split("-", 1)[1]
+            if action == "fetch":
+                from ballerinascraper.scrape import open_lock
+
+                from sftgen.eval.benchmarks import fetch
+
+                return fetch(s, db, run, open_lock(s), update_lock=a.update_lock)
+            if action == "translate":
+                from sftgen.eval.benchmarks import translate
+
+                return translate(s, db, run)
+            if action == "tasks":
+                from sftgen.eval.tasks import build_tasks
+
+                return build_tasks(s, db, run)
+            if action == "ecosystem":
+                from sftgen.eval.tasks import ecosystem
+
+                return ecosystem(s, db, run)
+            from sftgen.eval.runner import run as eval_run
+
+            out = eval_run(s, db, run, label=a.model, suites=a.suite)
+            print(_eval_table(out), flush=True)
+            return {k: v for k, v in out.items() if k != "summary"}
         if command.startswith("codebases-"):
             from sftgen.codebases import attach, stage
 
@@ -196,6 +229,15 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             _decontam(s, db, run)
             return export_sft(s, db, run)
     raise ValueError(command)
+
+
+def _eval_table(out: dict) -> str:
+    lines = [f"Eval run {out['eval_run']}: {out['model']} · mode {out['mode']} · scored {out['scored']} "
+             f"sample(s) this run, {out['errors']} error(s)"]
+    for suite, v in out["summary"]["suites"].items():
+        lines.append("  " + f"{suite:<12} items {v['items']:>4}  " + "  ".join(
+            f"{k} {v[k]:.3f}" for k in v if k.startswith("pass@") and v[k] is not None))
+    return "\n".join(lines) + "\n"
 
 
 def _codebase_table(out: dict) -> str:
@@ -332,7 +374,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("command", choices=COMMANDS)
     p.add_argument("action", nargs="?", choices=sorted({x for v in ACTIONS.values() for x in v}),
                    help="graph: validate (default) | stats | sync · storage: status (default) | push | pull · "
-                        "codebases: build (default) | verify | attach")
+                        "codebases: build (default) | verify | attach · "
+                        "eval: fetch | translate | tasks | ecosystem | run (default)")
     p.add_argument("--overwrite", action="store_true",
                    help="storage pull: replace local files (the local database is backed up first)")
     p.add_argument("--refresh", action="store_true",
@@ -347,6 +390,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="collect-repos: also collect this repository (repeatable)")
     p.add_argument("--source", action="append", choices=["bbe", "spec", "learn", "central", "github"],
                    help="scrape: only this source (repeatable)")
+    p.add_argument("--model", default="base",
+                   help="eval run: which model to baseline: a key of eval.models (default base) or teacher")
+    p.add_argument("--suite", action="append", default=None,
+                   help="eval run: only this suite (humaneval, mbpp, bbe, codebase, ecosystem; repeatable)")
     p.add_argument("--retry-failed", action="store_true", help="generate-answers: retry questions that failed · answer-prompts: continue failed prompts "
                         "with another round of repairs")
     p.add_argument("--recheck", action="store_true",
@@ -374,7 +421,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if a.command == "storage":
         return storage_command(s, store, a.action or "status", a.overwrite)
-    shown = {"graph": "graph sync", "codebases": f"codebases {a.action or 'build'}"}.get(a.command, a.command)
+    shown = {"graph": "graph sync", "codebases": f"codebases {a.action or 'build'}",
+             "eval": f"eval {a.action or 'run'}"}.get(a.command, a.command)
     print_startup(s, shown, store)
 
     if store.enabled and not s.db_path.is_file():
@@ -391,7 +439,8 @@ def main(argv: list[str] | None = None) -> int:
     code = 0
     push_error: str | None = None
     with Database(s.db_path) as db:
-        single = {"graph": "graph-sync", "codebases": f"codebases-{a.action or 'build'}"}.get(a.command, a.command)
+        single = {"graph": "graph-sync", "codebases": f"codebases-{a.action or 'build'}",
+                  "eval": f"eval-{a.action or 'run'}"}.get(a.command, a.command)
         commands = RUN_ALL if a.command == "run-all" else [single]
         for command in commands:
             if command == "report":
