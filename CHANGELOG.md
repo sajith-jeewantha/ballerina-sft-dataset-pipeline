@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M9 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M10 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -354,9 +354,32 @@ baselines need `OPENROUTER_API_KEY`.
 - **Prompts and eval tasks:** 177 codebase-task prompts (6 held out as eval overlaps), and 65
   codebase eval tasks.
 
+### M10: dataset assembly (built; the full run needs the API key)
+
+- **`sftgen assemble`** builds `data/datasets/<version>/` (no model calls).
+  - **Sources:** verified and judged answers to accepted prompts (`assemble.prompt_sets`, default
+    `prompts.set_name`), standalone and codebase; chunk-grounded Q&A (not `invalid`), tagged with
+    the graph items their chunk grounds; mined fixes only with `assemble.include_mined_fixes`.
+  - **Decontamination** runs first, and every sample is re-checked against the eval fingerprints;
+    the card records the overlap left in the files (should be 0).
+  - **Dedup:** exact and MinHash near-duplicate prompts; the better sample is kept.
+  - **Balance:** caps per graph item by priority (core 14, important 9, long tail 5), round-robin
+    over task × difficulty × context mode; Q&A without an item capped per page.
+  - **Split:** 3% validation by group (codebase, page, prompt).
+  - **Files:** `sft/{train,eval}.jsonl` (chat messages), `metadata.jsonl`, `dpo/pairs.jsonl`
+    (train split only), `cpt/` (the raw corpus, hard-linked), `coverage.csv`, `gaps.jsonl`,
+    `ATTRIBUTION.md`, `CARD.md` + `card.json` (composition, coverage per node and item, licences,
+    graph version, models, decontamination) and `manifest.json` (sha256 per file).
+- **Config:** new `assemble` section.
+- **The report** gets a *Dataset* section and a terminal Dataset line.
+- **Not run:** the dataset is built after the full prompt and answer runs (README, *Full run*).
+
 ### Tests
 
-121 tests in total (+3 for M9: corpus export with filters, weights, the eval-codebase exclusion,
+123 tests in total (+2 for M10: assembly end to end with dedup, eval overlap, caps and
+round-robin, Q&A tagging, DPO, CPT, gaps, card, manifest and the report; the group split).
+
+Before M10: 121 tests in total (+3 for M9: corpus export with filters, weights, the eval-codebase exclusion,
 manifest, attribution and register; the miner against a local git history with a real fix, a
 bump, a pure addition and a bot commit, plus the report section and skipping repos already
 mined; state variant fallback and never stubbing `init`).

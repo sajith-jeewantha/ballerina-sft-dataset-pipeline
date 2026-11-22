@@ -126,7 +126,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `corpus` · `mine-fixes` · `build-eval` · `eval-fetch` · `eval-translate` · `eval-tasks` · `eval-ecosystem` · `eval-run` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `corpus` · `mine-fixes` · `build-eval` · `eval-fetch` · `eval-translate` · `eval-tasks` · `eval-ecosystem` · `eval-run` · `assemble` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -436,6 +436,20 @@ side. Questions that overlap the eval set are in neither file.
 | `manifest.json` | — | `files`, `tokens`, `weighted_tokens`, `generated_files`, `generated_tokens`, `repos`, `parts`, `by_group`, `by_licence`, `by_syntax`, `left_out`, `decontamination` |
 | `ATTRIBUTION.md` | repo | licence, commit, files, tokens |
 | `fixes.jsonl` | mined fix | `id`, `repo`, `commit`, `parent`, `message`, `licence`, `files` (path, before, after), `diff`, `lines_changed`, `touches_tests`, `status` |
+
+## `data/datasets/<version>/` (from `sftgen assemble`)
+
+| File | One line per | Fields |
+|---|---|---|
+| `sft/train.jsonl`, `sft/eval.jsonl` | sample | `id` (`p<prompt id>`, `q<question id>`, `m<fix id>`), `messages` (optional `system`, `user`, `assistant`) |
+| `metadata.jsonl` | sample | `id`, `split`, `source` (`prompt` · `question` · `mined_fix`), `covers`, `ref`, `priority`, `task_type` (`qa` for Q&A), `difficulty`, `context_mode`, `verification`, `licence`, `repo`, `commit`; prompts add `set`, `teacher`, `writer`, `reviewer`, `attempts`, `repaired` (and `codebase`, `state`); Q&A adds `docs_source`, `source_url`, `category`, `teacher`; fixes add `lines_changed`, `touches_tests` |
+| `dpo/pairs.jsonl` | preference pair (train split) | as `data/answers/<set>/pairs.jsonl` |
+| `cpt/` | — | the raw corpus files (`part-*.jsonl.gz`, `manifest.json`, `ATTRIBUTION.md`) |
+| `coverage.csv` | graph item | `ref`, `node`, `priority`, `grounding`, `in_scope`, `samples`, `train`, `eval`, `codebase`, `tasks` |
+| `gaps.jsonl` | in-scope item under budget | `ref`, `node`, `priority`, `grounding`, `samples`, `budget`, `missing` |
+| `card.json` | — | `version`, `created_at`, `swan_lake`, `student`, `system_prompt`, `prompt_sets`, `graph`, `models`, `stats`, `composition`, `priority`, `nodes`, `licences`, `attribution`, `eval`, `decontamination`, `gaps`, `corpus`, `config` |
+| `CARD.md`, `ATTRIBUTION.md` | — | the card and third-party code attribution, for people |
+| `manifest.json` | — | `version`, `created_at`, `files` (`bytes`, `sha256` per file) |
 
 ## `data/codebases/` (from `sftgen codebases build`)
 

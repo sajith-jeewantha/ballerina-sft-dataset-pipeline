@@ -342,6 +342,24 @@ class MinerCfg(BaseModel):
     clone_timeout_s: int = 900
 
 
+class AssembleCfg(BaseModel):
+    """`assemble`: dataset v1 from verified answers, Q&A, (optionally) mined fixes and the raw corpus (M10)."""
+
+    version: str = "v1"               # <data>/datasets/<version>/
+    prompt_sets: list[str] = Field(default_factory=list)  # [] = prompts.set_name
+    include_questions: bool = True    # chunk-grounded Q&A (generate-questions/answers), `invalid` left out
+    include_mined_fixes: bool = False  # mined fixes are not built at their commit: opt in after checking them
+    mined_fix_max_lines: int = 40     # only small fixes become fix_code samples
+    # most samples kept per graph item, by priority (spread over task, difficulty and context mode)
+    caps: dict[str, int] = Field(default_factory=lambda: {"core": 14, "important": 9, "long_tail": 5})
+    max_per_page: int = 6             # Q&A samples kept per source page when no graph item is known
+    near_duplicate_threshold: float = 0.85  # MinHash similarity between prompts
+    eval_fraction: float = Field(default=0.03, ge=0.0, lt=1.0)  # validation split, by group (codebase, page, prompt)
+    split_salt: str = "dataset-split"
+    dpo: bool = True                  # dpo/pairs.jsonl from repaired answers (train split only)
+    cpt: bool = True                  # copy the raw corpus (corpus.version) into cpt/
+
+
 class EvalCfg(BaseModel):
     """`build-eval` (eval set v1, decontamination) and `eval` (eval set v2, baselines)."""
 
@@ -455,6 +473,7 @@ class Settings(BaseSettings):
     codebases: CodebasesCfg = Field(default_factory=CodebasesCfg)
     corpus: CorpusCfg = Field(default_factory=CorpusCfg)
     miner: MinerCfg = Field(default_factory=MinerCfg)
+    assemble: AssembleCfg = Field(default_factory=AssembleCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -521,6 +540,10 @@ class Settings(BaseSettings):
     @property
     def corpus_dir(self) -> Path:
         return self.data_path("corpus") / self.corpus.version
+
+    @property
+    def dataset_dir(self) -> Path:
+        return self.data_path("datasets") / self.assemble.version
 
     @property
     def codebases_dir(self) -> Path:

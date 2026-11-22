@@ -50,6 +50,7 @@ class ReportData:
     codebases: dict[str, Any] | None = None  # codebases build/verify/attach (sftgen/codebases/)
     baselines: dict[str, Any] | None = None  # eval set v2 and eval runs (sftgen/eval/runner.py)
     corpus: dict[str, Any] | None = None     # corpus + mine-fixes (sftgen/corpus/)
+    dataset: dict[str, Any] | None = None    # assemble (sftgen/assemble/): card.json of the current version
 
     @property
     def total_pages(self) -> int:
@@ -98,8 +99,14 @@ def collect(s: Settings, db: Database) -> ReportData:
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
         swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
         answers=_answers(s, db), codebases=_codebases(s, db), baselines=_baselines(s, db),
-        corpus=_corpus(s, db),
+        corpus=_corpus(s, db), dataset=_dataset(s),
     )
+
+
+def _dataset(s: Settings) -> dict[str, Any] | None:
+    from sftgen.assemble.build import card_data
+
+    return card_data(s)
 
 
 def _corpus(s: Settings, db: Database) -> dict[str, Any] | None:
@@ -330,6 +337,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_codebases_line(d.codebases)] if d.codebases else []),
         *([_baselines_line(d.baselines)] if d.baselines else []),
         *([_corpus_line(d.corpus)] if d.corpus else []),
+        *([_dataset_line(d.dataset)] if d.dataset else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -357,6 +365,13 @@ def _corpus_line(c: dict[str, Any]) -> str:
             f"(weighted {m.get('weighted_tokens', 0) / 1e6:.1f}M) from {m.get('repos', 0)} repos" if m
             else "Corpus     not exported yet")
     return f"{head}  |  mined fixes {c['fixes']} from {c['mined_repos']} repos"
+
+
+def _dataset_line(c: dict[str, Any]) -> str:
+    st = c["stats"]
+    return (f"Dataset    {c['version']}: train {st['train']:,}, eval {st['eval']:,}, DPO pairs {st['dpo_pairs']:,}, "
+            f"CPT ~{st['cpt_tokens'] / 1e6:.1f}M tokens  |  {c['gaps']['items']:,} items under budget · "
+            f"eval overlap {st['eval_overlap_in_export']}")
 
 
 def _baselines_line(b: dict[str, Any]) -> str:
@@ -649,6 +664,44 @@ def _corpus_html(d: ReportData) -> list[str]:
     return parts
 
 
+def _dataset_html(d: ReportData) -> list[str]:
+    c = d.dataset
+    if not c:
+        return []
+    st = c["stats"]
+    kpis = (("Train", f"{st['train']:,}"), ("Eval", f"{st['eval']:,}"), ("DPO pairs", f"{st['dpo_pairs']:,}"),
+            ("CPT tokens", f"{st['cpt_tokens'] / 1e6:.1f}M"), ("Items under budget", f"{c['gaps']['items']:,}"),
+            ("Eval overlap", st["eval_overlap_in_export"]))
+    comp = c["composition"]
+    prio_rows = [[_e(p), f"{b['items']:,}", f"{b['covered']:,}", f"{b['in_scope_covered']:,}/{b['in_scope']:,}",
+                  f"{b['samples']:,}"] for p, b in sorted(c["priority"].items())]
+    node_rows = [[f"<code>{_e(n['node'])}</code>", _e(n["priority"]), str(n["items"]), str(n["covered"]),
+                  str(n["samples"])] for n in c["nodes"][:40]]
+    return [
+        f"<h2>Dataset {_e(c['version'])}</h2>",
+        f'<p class="muted">From <code>sftgen assemble</code> ({_e(c["created_at"])}): prompt sets '
+        f"{_e(', '.join(c['prompt_sets']))}, decontaminated, deduplicated ({st['duplicates']['exact']} exact, "
+        f"{st['duplicates']['near']} near), balanced by graph item ({st['over_cap']:,} over the caps). Files and the "
+        f"card are in <code>data/datasets/{_e(c['version'])}/</code>.</p>",
+        '<div class="grid">' + "".join(f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}'
+                                       "</div></div>" for k, v in kpis) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Source</h3>{_bars(comp["source"])}</div>',
+        f'<div class="card"><h3>Task type</h3>{_bars(comp["task_type"], alt=True)}</div>',
+        "</div>",
+        '<div class="two" style="margin-top:12px">',
+        f'<div class="card"><h3>Difficulty</h3>{_bars(comp["difficulty"])}</div>',
+        f'<div class="card"><h3>Verification</h3>{_bars(comp["verification"], alt=True)}</div>',
+        "</div>",
+        '<div class="two" style="margin-top:12px">',
+        '<div class="card"><h3>Coverage by priority</h3>' + _table(
+            ["Priority", "Items", "With samples", "In scope covered", "Samples"], prio_rows, numeric={1, 2, 4})
+        + "</div>",
+        '<div class="card scroll"><h3>Samples per node (top 40)</h3>' + _table(
+            ["Node", "Priority", "Items", "With samples", "Samples"], node_rows, numeric={2, 3, 4}) + "</div>",
+        "</div>"]
+
+
 def _baselines_html(d: ReportData) -> list[str]:
     b = d.baselines
     if not b:
@@ -855,6 +908,7 @@ def render_html(d: ReportData) -> str:
         *_codebases_html(d),
         *_baselines_html(d),
         *_corpus_html(d),
+        *_dataset_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

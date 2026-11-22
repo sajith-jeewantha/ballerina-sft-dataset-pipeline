@@ -30,6 +30,10 @@ Commands (run in this order, or all at once with `run-all`):
                        (parts, manifest, ATTRIBUTION.md); totals per repo in the licence register
   mine-fixes           before/after bug fixes from the history of collected repos (blobless clones);
                        up to LIMIT_REPOS repos per run; data/corpus/<version>/fixes.jsonl
+  assemble             dataset v1: verified/judged prompt answers + Q&A (+ mined fixes, opt in),
+                       decontaminated, deduplicated, balanced by graph item, split by group;
+                       data/datasets/<version>/ (sft/{train,eval}.jsonl in chat messages, metadata,
+                       dpo/pairs.jsonl, cpt/ raw corpus, coverage.csv, gaps.jsonl, CARD.md)
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -80,7 +84,7 @@ from balpipe_common.storage import Storage, StorageError
 log = logging.getLogger("sftgen")
 
 COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts", "codebases", "eval",
-            "corpus", "mine-fixes",
+            "corpus", "mine-fixes", "assemble",
             "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"],
@@ -154,6 +158,10 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             from sftgen.corpus.raw import export
 
             return export(s, db, run)
+        if command == "assemble":
+            from sftgen.assemble.build import assemble
+
+            return assemble(s, db, run)
         if command == "mine-fixes":
             from sftgen.corpus.miner import mine
 

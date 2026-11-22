@@ -5,13 +5,25 @@
 ![Ballerina 2201.14](https://img.shields.io/badge/ballerina-2201.14.x-20b6b0.svg)
 [![Architecture](https://img.shields.io/badge/docs-architecture-2f6f5e.svg)](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html)
 
-Builds a **grounded question-and-answer dataset** for fine-tuning a small language model on the
-[Ballerina](https://ballerina.io) programming language.
+Builds **verified supervised fine-tuning datasets** for fine-tuning
+[Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B) on the [Ballerina](https://ballerina.io)
+programming language (Swan Lake 2201.14.1).
 
-It scrapes official Ballerina sources, splits them into heading-aware chunks, generates questions
-from each chunk, and answers every question from **the same chunk**, citing its source URL. The
-`bal` compiler can then check the code in the answers. Every step is tracked in one SQLite
-database, and an HTML report shows progress after every command.
+- **Coverage from a knowledge graph:** prompts are planned per graph item, written by one model
+  and reviewed by another from a different family.
+- **Answers checked by the toolchain:** the teacher's code is built with `bal` and repaired with
+  the real compiler errors; prose is checked by a judge.
+- **Real projects:** a pool of 100 licence-checked Swan Lake projects with verified broken states
+  gives codebase tasks.
+- **Clean evaluation:** a held-out eval set (BBE, translated HumanEval/MBPP, eval codebases) with
+  fingerprints keeps copies of eval items out of training, and a runner measures pass@k.
+- **Dataset v1:** `sftgen assemble` writes SFT train/eval, DPO pairs, a ~35M-token CPT corpus and a
+  dataset card.
+
+The original chunk-grounded Q&A pipeline (questions and answers from the same chunk, citing its
+URL) is still here and feeds the dataset too. Every step is tracked in one SQLite database, and an
+HTML report shows progress after every command. The plan and milestone status are in
+[docs/PLAN.md](docs/PLAN.md).
 
 **🔗 Interactive architecture page:** https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html
 **📦 Repository:** https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline
@@ -27,6 +39,7 @@ database, and an HTML report shows progress after every command.
 - [The report](#the-report)
 - [Output format](#output-format)
 - [Storage](#storage)
+  - [Dataset assembly](#dataset-assembly)
 - [Repository structure](#repository-structure)
 - [Quick start: step by step](#quick-start-step-by-step)
 - [Configuration](#configuration)
@@ -40,33 +53,58 @@ database, and an HTML report shows progress after every command.
 ## How it works
 
 ```mermaid
-flowchart LR
-    subgraph SRC["Official sources"]
-        IO[("ballerina.io<br/>sitemap: learn · spec 2024R1")]
-        GH[("GitHub API<br/>BBE sources · module repos")]
-        CEN[("Ballerina Central API<br/>README · API docs")]
+flowchart TB
+    subgraph SRC["Sources: Swan Lake 2201.14.1"]
+        DOCS[("docs, spec, BBE, Central")]
+        REPOS[("GitHub repos")]
+        KG[/"knowledge graph"/]
+        BENCH[("HumanEval, MBPP")]
     end
-
-    subgraph SCRAPE["sftgen scrape"]
-        F[fetch<br/>robots.txt · delay · cache] --> C[clean → Markdown] --> K[chunk by headings]
+    subgraph COLLECT["Collect"]
+        SC["scrape"]
+        CR["collect-repos"]
+        GS["graph sync"]
     end
-
-    subgraph GEN["generation"]
-        Q[generate-questions] --> A[generate-answers] --> V[validate<br/>bal build]
+    subgraph EVAL["Eval set"]
+        BE["build-eval"]
+        EV["eval fetch / translate / tasks"]
+        FP[/"fingerprints"/]
+        RUN["eval run: pass@k"]
     end
-
-    IO & GH & CEN --> F
-    K --> Q
-    V --> E[export]
-    V --> ES[export-sft]
-    E --> OUT[/"data/dataset.jsonl"/]
-    ES --> SFT[/"data/sft/train.jsonl · eval.jsonl"/]
-
-    DB[("data/pipeline.db<br/>pages · chunks · questions<br/>answers · runs · llm_usage")]
-    SCRAPE <--> DB
-    GEN <--> DB
-    DB --> R[/"data/reports/report.html"/]
+    subgraph CODE["Codebases and corpus"]
+        CB["codebases build / attach"]
+        CO["corpus"]
+        MF["mine-fixes"]
+    end
+    subgraph GEN["Prompts and answers"]
+        PP["plan-prompts"] --> GP["generate-prompts"] --> AP["answer-prompts"]
+        QA["Q&A: generate-questions / answers / validate"]
+    end
+    DOCS --> SC
+    REPOS --> CR
+    KG --> GS
+    SC --> GS
+    SC --> BE
+    SC --> QA
+    BENCH --> EV
+    BE --> FP
+    EV --> FP
+    EV --> RUN
+    CR --> CB
+    CR --> CO
+    CR --> MF
+    GS --> PP
+    CB --> AP
+    AP --> AS["assemble"]
+    QA --> AS
+    MF -.-> AS
+    CO --> AS
+    FP --> AS
+    AS --> OUT[/"data/datasets/v1/: SFT, DPO, CPT, CARD.md"/]
 ```
+
+Every phase reads and writes `data/pipeline.db`, and `data/reports/report.html` is rebuilt after
+every command. The Q&A path on its own:
 
 ```mermaid
 flowchart LR
@@ -76,9 +114,10 @@ flowchart LR
     AN --> S{{"question: answered / failed<br/>answer: valid / invalid / not_checked"}}
 ```
 
-**Principles:** official sources only · answers are grounded in the chunk the question came from
-and cite its URL · every record has a status and timestamps · small runs are cheap and
-re-runs never repeat finished work.
+**Principles:** pinned, licence-gated sources · coverage driven by the knowledge graph · code
+verified by the `bal` toolchain, never executed by default · the eval set held out of every export
+· every record has a status and timestamps · small runs are cheap and re-runs never repeat
+finished work.
 
 Full design: [ARCHITECTURE.md](ARCHITECTURE.md) · [interactive page](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html)
 
@@ -130,6 +169,7 @@ without stopping the run.
 | `sftgen codebases attach` | Turn verified states of train codebases into codebase-task prompts with the project packed in | prompt: `accepted` (`context_mode = codebase`) |
 | `sftgen corpus` | Export the raw pretraining corpus: the kept copy of every Swan Lake `.bal` file from licence-safe repos, eval overlaps removed, generated code down-weighted; manifest, attribution, and per-repo totals in the licence register. See [Raw corpus and mined fixes](#raw-corpus-and-mined-fixes) | — |
 | `sftgen mine-fixes` | Before/after bug fixes from the commit history of collected repos (blobless clones); up to `LIMIT_REPOS` repos per run | fix: `mined` |
+| `sftgen assemble` | Dataset v1: verified and judged prompt answers plus Q&A (mined fixes opt in), decontaminated, deduplicated, balanced by graph item and split by group; SFT, DPO, CPT corpus, coverage, gaps and a dataset card in `data/datasets/<version>/`. See [Dataset assembly](#dataset-assembly) | — |
 | `sftgen eval fetch` | Fetch HumanEval (MIT, 164) and MBPP (CC BY 4.0, test split 11–510): pinned, licence-checked, recorded in the licence register | problem: `pending` |
 | `sftgen eval translate` | The teacher translates each problem into a Ballerina task with a reference solution and `bal` tests; verified and repaired with the real errors. Up to `LIMIT_GENERATING` per run | problem: `translated` · `failed` |
 | `sftgen eval tasks` | Eval tasks from the eval-split codebases (fix, implement, migrate, explain) and prompts for the BBE eval items | — |
@@ -569,6 +609,56 @@ The fixes go to `mined_fixes` and `data/corpus/raw-v1/fixes.jsonl` (files before
 whether tests changed). They are **not built** at their commit; M10 checks them before using them
 as fix tasks. The register gets `mined_fixes` per repo.
 
+### Dataset assembly
+
+**`sftgen assemble`** builds the dataset from everything the pipeline has checked. It makes no model
+calls, so it can be re-run after every gap-fill round.
+
+1. **Sources:**
+   - answers to accepted prompts of `assemble.prompt_sets` (default: `prompts.set_name`) that are
+     `verified` (code built with `bal`) or `judged` (prose checked by the judge), standalone and
+     codebase tasks;
+   - the chunk-grounded Q&A (`invalid` answers left out), tagged with the graph items their chunk
+     grounds;
+   - mined fixes, only with `assemble.include_mined_fixes` (they aren't built at their commit).
+2. **Decontaminate:** `apply_decontam`, then every sample is checked against the eval fingerprints
+   again.
+3. **Dedup:** exact and near-duplicate prompts (MinHash ≥ 0.85); the better sample wins (verified >
+   judged > Q&A, first try > repaired).
+4. **Balance:** at most `assemble.caps` samples per graph item (core 14, important 9, long tail 5),
+   picked round-robin over task type × difficulty × context mode; Q&A without an item is capped
+   per page.
+5. **Split:** 3% validation by group (codebase, source page or prompt), so a codebase or page never
+   feeds both sides.
+
+| File in `data/datasets/v1/` | What |
+|---|---|
+| `sft/train.jsonl`, `sft/eval.jsonl` | `{"id", "messages"}`: system, user, assistant (Qwen3.8 chat template, non-thinking) |
+| `metadata.jsonl` | per sample: source, `covers`, task, difficulty, context mode, verification, licence, repo, models |
+| `dpo/pairs.jsonl` | preference pairs from repaired answers, train split only (TRL format) |
+| `cpt/` | the raw corpus (`corpus.version`), hard-linked |
+| `coverage.csv` | samples per graph item (train, eval, codebase, task types) |
+| `gaps.jsonl` | in-scope items under their prompt budget: the gap-fill list |
+| `CARD.md`, `card.json` | the dataset card: composition, coverage per node and item, licences, graph version, models, decontamination |
+| `ATTRIBUTION.md` | third-party code inside samples (codebase tasks, mined fixes) |
+| `manifest.json` | sha256 and size of every file |
+
+**Full run** (needs `OPENROUTER_API_KEY`). The pilot covers the HTTP cluster. For dataset v1 over the
+whole graph, set in `config/pipeline.yaml`:
+
+```yaml
+prompts:
+  set_name: v1
+  nodes: []                                     # every active node
+  budgets: {core: 4, important: 2, long_tail: 1}  # ~6,800 prompts over 3,231 items
+assemble:
+  prompt_sets: [pilot, v1]                      # the pilot (and its codebase prompts) stays in
+```
+
+Then `generate-prompts` → `codebases attach` → `answer-prompts` (each with `LIMIT_GENERATING=0`),
+then `assemble`. To close gaps, run `generate-prompts` and `answer-prompts` again (the planner
+refills open slots) and re-run `assemble`.
+
 ### Eval set v2 and baselines
 
 `sftgen eval` grows the eval set and measures models on it, so you can later tell whether the
@@ -649,13 +739,17 @@ ballerina-sft-dataset-pipeline/
 ├── README.md · ARCHITECTURE.md · architecture.html · CHANGELOG.md · LICENSE
 ├── .env.example                  # secrets, models and run limits template
 ├── config/pipeline.yaml          # all non-secret settings
+├── graph/                        # graph.json (knowledge graph) · SOURCE.json (upstream commit, hash)
 ├── docs/
+│   ├── PLAN.md                   # plan v2: research, milestones M0–M10, status
+│   ├── licence-register.csv      # every repo seen: licence, verdict, use, corpus totals
 │   ├── recommendations.md        # design research (v2; partly superseded, see note inside)
 │   └── schemas.md                # SQLite tables and columns
 ├── shared/balpipe_common/        # config · db (SQLite) · graph · lock · storage · licences · dedup · decontam · ids · logging
 ├── scraper/ballerinascraper/
 │   └── ballerinascraper/
 │       ├── scrape.py             # fetch loop: limits, caching, change detection, failures
+│       ├── bbe_source.py         # BBE examples from a sparse git snapshot at the release tag
 │       ├── repos.py              # collect-repos: licence gate, sparse snapshots, Swan Lake filter, dedup
 │       └── collectors/           # ballerina_io (sitemap) · github · central · http · robots
 ├── sft-dataset-generator/
@@ -670,12 +764,15 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── codebases/            # pool (select, verify, tag) · states · attach (context packing) · stage
 │   │   ├── eval/                 # bbe (v1) · verify · benchmarks (fetch, translate) · tasks · runner (pass@k)
 │   │   ├── corpus/               # raw (corpus export, attribution) · miner (before/after fixes)
+│   │   ├── assemble/             # build (sources, dedup, balance, split, files) · card (CARD.md, card.json)
+│   │   ├── graph/                # coverage: items matched to sources
 │   │   ├── retrieval/            # FTS5 search · Central symbol table · grounding per item
 │   │   ├── report.py
-│   │   └── prompts/              # questions.yaml · answer.yaml
+│   │   └── prompts/              # versioned prompt templates (questions, answers, writer, reviewer, judge, eval)
 │   └── tests/
-└── data/                         # gitignored (LOCAL_DATA_DIR): pipeline.db · dataset.jsonl · sft/ ·
-                                  #   reports/report.html · cache/ · .storage/ (push bookkeeping)
+└── data/                         # gitignored (LOCAL_DATA_DIR): pipeline.db · datasets/ · corpus/ ·
+                                  #   codebases/ · eval/ · prompts/ · answers/ · repos/ · dataset.jsonl ·
+                                  #   sft/ · reports/report.html · cache/ · .storage/ (push bookkeeping)
 ```
 
 ---
@@ -798,10 +895,43 @@ sftgen run-all
 Every run continues where the last one stopped. Pages already downloaded aren't fetched again,
 chunks that already have questions are skipped, and only `pending` questions are answered.
 
-### 9. Fine-tune
+### 9. Build dataset v1 (the v2 pipeline)
 
-Point your trainer at `data/sft/train.jsonl` and `data/sft/eval.jsonl`: TRL `SFTTrainer`,
-Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
+The steps above are the Q&A path. The full dataset adds graph-driven prompts, verified answers,
+codebase tasks and the eval set. Steps without a model need no API key:
+
+```bash
+# collect, hold out the eval set, build the pool and corpus (no model calls)
+sftgen scrape && sftgen graph sync
+LIMIT_REPOS=0 sftgen collect-repos
+sftgen build-eval
+sftgen codebases build && sftgen codebases verify
+sftgen corpus && sftgen mine-fixes
+
+# prompts and verified answers (model calls; start with small limits)
+sftgen plan-prompts
+LIMIT_GENERATING=30 sftgen generate-prompts      # check quality, then LIMIT_GENERATING=0
+sftgen codebases attach
+LIMIT_GENERATING=20 sftgen answer-prompts        # check pass and repair rates, then 0
+
+# eval set v2 and baselines
+sftgen eval fetch && sftgen eval translate && sftgen eval tasks && sftgen eval ecosystem
+sftgen eval run --model base && sftgen eval run --model teacher
+
+# the dataset
+sftgen assemble
+```
+
+For the whole graph rather than the HTTP pilot, see [Dataset assembly](#dataset-assembly)
+(*Full run*). Close gaps by re-running `generate-prompts` and `answer-prompts`, then `assemble`.
+
+### 10. Fine-tune
+
+Point your trainer at `data/datasets/v1/sft/train.jsonl` and `sft/eval.jsonl` (Qwen3.8 chat
+template, non-thinking mode, the system prompt from the card). `dpo/pairs.jsonl` is ready for a
+DPO pass and `cpt/` for continued pretraining. The older Q&A-only export is in
+`data/sft/` (TRL `SFTTrainer`, Axolotl `type: chat_template` or Unsloth). See
+[Output format](#output-format).
 
 ### Useful extra commands
 
@@ -818,6 +948,7 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `LIMIT_GENERATING=20 sftgen answer-prompts` | Answer 20 accepted prompts, to check pass and repair rates and cost |
 | `sftgen codebases verify` | Check that every codebase base and state still verifies (e.g. after a `bal` update) |
 | `LIMIT_REPOS=60 sftgen mine-fixes` | Mine fixes from the next 60 repos (repos already mined are skipped) |
+| `sftgen assemble` | Rebuild `data/datasets/<version>/` and its card (no model calls) |
 | `LIMIT_GENERATING=20 sftgen eval translate` | Translate 20 benchmark problems to check quality and cost |
 | `sftgen eval run --model teacher --suite humaneval` | Baseline one model on one suite |
 | `sftgen answer-prompts --retry-failed` | Give prompts that failed every attempt another round of repairs |
@@ -829,6 +960,9 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen validate --recheck` | Re-compile all answers, e.g. after installing a new `bal` |
 | `sftgen report` | Rebuild the report and summary at any time |
 | `sftgen <command> --log-format json` | Machine-readable logs |
+| `sftgen <command> --config path/to/pipeline.yaml` | Use another settings file, e.g. a full-run profile beside the pilot one |
+| `sftgen build-eval --no-verify` | Rebuild the eval set without the `bal run`/`bal build` checks |
+| `sftgen eval run --model base --suite bbe --suite codebase` | Baseline only some suites (`humaneval`, `mbpp`, `bbe`, `codebase`, `ecosystem`) |
 | `LIMIT_GENERATING=5 sftgen generate-questions` | Override a limit for one command |
 | `rm -rf data` | Start over from scratch. This deletes the database, so any generated questions and answers are lost. The model response cache in `data/cache/llm` is deleted too. |
 
@@ -839,7 +973,7 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | Where | What | Committed? |
 |---|---|---|
 | `.env` (copy `.env.example`) | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `PROMPT_WRITER_MODEL`, `JUDGE_MODEL`, `GITHUB_TOKEN`, the run limits above, and the storage switch (`STORAGE_BUCKET`, `STORAGE_PROVIDER`, `BUCKET_NAME`, `BUCKET_PREFIX`, `LOCAL_DATA_DIR`, `AWS_*`, `S3_ENDPOINT_URL`) | ❌ never |
-| `config/pipeline.yaml` | source filters, crawl politeness, chunk size, concurrency, temperatures, compiler settings, export, SFT export (eval share, system prompt, citation stripping), report, and bucket snapshot settings. Output paths are relative to `LOCAL_DATA_DIR` | ✅ |
+| `config/pipeline.yaml` | source pins and filters, crawl politeness, repo groups, chunk size, concurrency, temperatures, compiler settings, prompts (set, nodes, budgets), answers (repairs, `run_tests`), codebases, corpus, miner, assemble (dataset version, caps, split), eval (split, decontamination, benchmarks, baselines), export, SFT system prompt, report, and bucket snapshot settings. Output paths are relative to `LOCAL_DATA_DIR` | ✅ |
 
 - Precedence: **environment > `.env` > `pipeline.yaml` > defaults**. Empty values in `.env` are
   ignored. Override any YAML key with `BALPIPE__SECTION__KEY`, e.g. `BALPIPE__GENERATE__CONCURRENCY=2`.
@@ -880,6 +1014,13 @@ The tests cover:
 - answers with citations and failure recording
 - export filtering, the SFT `messages` export (split by page, citation removed) and the HTML report
 - a real `bal` compile round trip when Ballerina is installed
+- the knowledge graph, source pins, the storage switch, the licence gate and the repo collector
+- the eval set, decontamination, benchmark translation and the pass@k runner
+- the prompt planner, writer and reviewer; verified answers with repairs and preference pairs
+- the codebase pool and its states, the raw corpus and the commit miner
+- dataset assembly: dedup, eval overlap, caps per item, the group split, DPO, CPT, gaps and the card
+
+123 tests in all.
 
 ---
 
@@ -889,6 +1030,7 @@ The tests cover:
 |---|---|
 | [Architecture page](https://sajith-jeewantha.github.io/ballerina-sft-dataset-pipeline/architecture.html) | Interactive diagrams and phase explorer |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Components, data flow, storage, reliability |
+| [docs/PLAN.md](docs/PLAN.md) | Plan v2: research, milestones M0–M10 and their status |
 | [docs/schemas.md](docs/schemas.md) | SQLite tables, columns and statuses |
 | [docs/recommendations.md](docs/recommendations.md) | Research behind the v2 design choices |
 | [CHANGELOG.md](CHANGELOG.md) | What changed and why |

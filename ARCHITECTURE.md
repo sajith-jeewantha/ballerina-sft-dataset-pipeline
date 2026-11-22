@@ -1,12 +1,15 @@
 # Ballerina SFT Data Pipeline: Architecture
 
-This pipeline builds a grounded question-and-answer dataset for fine-tuning a small language model
-on Ballerina. It scrapes official sources, generates questions from heading-aware chunks, answers
-each question from the same chunk, optionally compiles the code, and tracks every step in one
-SQLite database with an HTML report.
+This pipeline builds supervised fine-tuning datasets for **Qwen3.8-27B** on Ballerina Swan Lake
+2201.14.1 (plan v2, [docs/PLAN.md](docs/PLAN.md)). A knowledge graph decides what to cover. Prompts
+are written per graph item and reviewed. The teacher's answers are checked with the real `bal`
+toolchain and repaired with its errors. Real projects give codebase tasks, and a held-out eval
+set keeps training data clean. `sftgen assemble` turns everything into SFT, DPO and CPT data with
+a dataset card. The original chunk-grounded Q&A pipeline is still there and feeds the dataset too.
+Every step is tracked in one SQLite database with an HTML report.
 
 References: [docs/schemas.md](docs/schemas.md) (tables, columns, statuses) ·
-[CHANGELOG.md](CHANGELOG.md) (what changed in 2.1.0 and why) ·
+[CHANGELOG.md](CHANGELOG.md) (what changed and why) ·
 [docs/recommendations.md](docs/recommendations.md) (research behind the v2 design).
 
 ---
@@ -30,39 +33,59 @@ References: [docs/schemas.md](docs/schemas.md) (tables, columns, statuses) ·
 ## 2. End-to-end data flow
 
 ```mermaid
-flowchart LR
-    subgraph SRC["Official sources"]
-        SM[("ballerina.io sitemap")]
-        IO[("ballerina.io pages<br/>learn · spec 2024R1")]
-        GH[("GitHub API<br/>ballerina-distribution/examples<br/>module-ballerina(x)-*")]
-        CEN[("Central API<br/>registry · docs")]
+flowchart TB
+    subgraph SRC["Sources: Swan Lake 2201.14.1"]
+        DOCS[("docs, spec, BBE, Central")]
+        REPOS[("GitHub repos")]
+        KG[/"knowledge graph"/]
+        BENCH[("HumanEval, MBPP")]
     end
-
-    subgraph SCRAPE["sftgen scrape"]
-        direction TB
-        F["fetch (scraper/)<br/>robots.txt · delay · cache<br/>change detection"]
-        CL["clean<br/>page → Markdown"]
-        CH["chunk<br/>by headings"]
-        F --> CL --> CH
+    subgraph COLLECT["Collect"]
+        SC["scrape"]
+        CR["collect-repos"]
+        GS["graph sync"]
     end
-
-    subgraph GEN["LLM phases"]
-        GQ[generate-questions]
-        GA[generate-answers]
-        GQ --> GA
+    subgraph EVAL["Eval set"]
+        BE["build-eval"]
+        EV["eval fetch / translate / tasks"]
+        FP[/"fingerprints"/]
+        RUN["eval run: pass@k"]
     end
-
-    SM -. page list .-> F
-    IO & GH & CEN --> F
-    CH --> GQ
-    GA --> VA["validate<br/>bal build"] --> EX[export] & ES[export-sft]
-    EX --> OUT[/"data/dataset.jsonl"/]
-    ES --> SFT[/"data/sft/<br/>train · eval · metadata"/]
-
-    DB[("data/pipeline.db")]
-    F & CL & CH & GQ & GA & VA <--> DB
-    DB --> RP[/"data/reports/report.html"/]
+    subgraph CODE["Codebases and corpus"]
+        CB["codebases build / attach"]
+        CO["corpus"]
+        MF["mine-fixes"]
+    end
+    subgraph GEN["Prompts and answers"]
+        PP["plan-prompts"] --> GP["generate-prompts"] --> AP["answer-prompts"]
+        QA["Q&A: generate-questions / answers / validate"]
+    end
+    DOCS --> SC
+    REPOS --> CR
+    KG --> GS
+    SC --> GS
+    SC --> BE
+    SC --> QA
+    BENCH --> EV
+    BE --> FP
+    EV --> FP
+    EV --> RUN
+    CR --> CB
+    CR --> CO
+    CR --> MF
+    GS --> PP
+    CB --> AP
+    AP --> AS["assemble"]
+    QA --> AS
+    MF -.-> AS
+    CO --> AS
+    FP --> AS
+    AS --> OUT[/"data/datasets/v1/: SFT, DPO, CPT, CARD.md"/]
 ```
+
+The original Q&A path inside "Q&A" is: `scrape` (fetch → clean → chunk) → `generate-questions` →
+`generate-answers` → `validate` → `export` / `export-sft`. Every phase reads and writes
+`data/pipeline.db`; the report (`data/reports/report.html`) is rebuilt after every command.
 
 ---
 
@@ -94,6 +117,7 @@ flowchart LR
 | Retrieval | `sftgen/retrieval/fts.py`, `symbols.py`, `grounding.py` | FTS5 (BM25) over chunks; Central symbol table parsed from the API reference; per-item grounding: own sources (pages or collected repo files), symbols, node sources, FTS neighbours; eval overlaps excluded |
 | Prompt writer/reviewer | `sftgen/generate/prompts.py`, `prompts/prompt_writer.yaml`, `prompt_reviewer.yaml` | `generate-prompts`: DeepSeek writes prompts per item; filters (source references, near-duplicates, eval overlap); a judge of another family scores them; `data/prompts/<set>/` |
 | Raw corpus + miner | `sftgen/corpus/raw.py`, `miner.py` | `corpus`: kept Swan Lake `.bal` files from licence-safe repos, decontaminated, generated code weighted 0.3, gzipped parts + manifest + ATTRIBUTION.md, register totals; `mine-fixes`: blobless full-history clones, fix-like commits (message, size, no bots), before/after pairs, decontaminated, `fixes.jsonl` |
+| Dataset assembly | `sftgen/assemble/build.py`, `card.py` | `assemble`: verified/judged prompt answers + Q&A (+ mined fixes, opt in) → decontaminate → dedup (exact, MinHash) → balance by graph item (caps by priority, round-robin over task × difficulty × context mode) → split by group → `data/datasets/<version>/` (SFT, DPO, CPT, coverage, gaps, card, manifest) |
 | Codebase pool | `sftgen/codebases/pool.py`, `states.py`, `attach.py`, `stage.py` | `codebases build`: candidates from collected repos, rank, base must build, tag with graph nodes and items, train/eval split; deterministic states (compile error, unfinished feature, version drift, failing test) verified with `bal`; `codebases verify`; `codebases attach`: codebase-task prompts with the project packed in (~14k tokens) |
 | Decontamination | `shared/balpipe_common/decontam.py` | Flag chunks, questions and repo files that copy eval code (exact, MinHash, shingle containment) in `eval_overlap`; held-out chunks get no questions; exports leave overlaps out and re-check their files |
 | Storage switch | `shared/balpipe_common/storage.py` | `LOCAL_DATA_DIR` is the working copy; with `STORAGE_BUCKET=true` it is mirrored to GCS or S3 (fsspec) with the same layout: restore a missing database, upload changed outputs after each phase, gzipped database snapshots |
@@ -133,7 +157,21 @@ flowchart LR
     A --> M["sft/train or eval line<br/>id · messages"]
 ```
 
-Every dataset line can be traced back: `source_url` → `pages.url`, and the database keeps the
+A sample in `data/datasets/<version>/` traces back the same way: `metadata.jsonl` gives its
+`source`, `covers` (graph items), task and verification, and the database keeps the rest.
+
+```mermaid
+flowchart LR
+    I[graph_items row<br/>node#item · priority] --> PR[prompts row<br/>task · difficulty · grounding]
+    CS[codebase_states row<br/>verified broken state] -.-> PR
+    PR --> AT[attempts rows<br/>answer · bal checks · judge]
+    AT --> RS[responses row<br/>verified · judged · failed]
+    AT --> PP[preference_pairs row]
+    RS --> DS["datasets/v1 sft line<br/>id · messages + metadata"]
+    PP --> DP["datasets/v1 dpo line"]
+```
+
+Every Q&A dataset line can be traced back: `source_url` → `pages.url`, and the database keeps the
 chunk text each answer was grounded in.
 
 ---
@@ -153,6 +191,7 @@ chunk text each answer was grounded in.
 | `data/prompts/<set>/` | `accepted.jsonl`, `rejected.jsonl`, `coverage.json` | yes, from the database |
 | `data/answers/<set>/` | `sft.jsonl` (chat messages), `pairs.jsonl` (DPO), `failed.jsonl` | yes, from the database |
 | `data/corpus/<version>/` | `part-*.jsonl.gz`, `manifest.json`, `ATTRIBUTION.md`, `fixes.jsonl` | yes, `corpus` / `mine-fixes` |
+| `data/datasets/<version>/` | `sft/{train,eval}.jsonl`, `metadata.jsonl`, `dpo/pairs.jsonl`, `cpt/`, `coverage.csv`, `gaps.jsonl`, `CARD.md`, `card.json`, `ATTRIBUTION.md`, `manifest.json` | yes, `assemble` |
 | `data/cache/mine/` | Blobless bare clones used by `mine-fixes` | yes |
 | `data/codebases/` | `manifest.jsonl`, `<id>/base.tar.gz`, `<id>/states/<kind>.patch` | yes, `codebases build` |
 | `data/eval/<version>/` | `bbe.jsonl` (eval items), `decontam.jsonl` (fingerprints), `split.json` | yes, `build-eval` |
@@ -189,6 +228,7 @@ sft-dataset-generator/
     plan/                       planner (item budgets, slots, gaps)
     codebases/                  pool · states · attach · stage (build, verify)
     corpus/                     raw (corpus export) · miner (before/after fixes)
+    assemble/                   build (dataset v1) · card
     retrieval/                  fts (FTS5) · symbols (Central) · grounding
     validate/                   bal_compiler (files, packages, tests) · stage · answer_check
     export/                     stage (dataset.jsonl) · sft (chat messages)
@@ -207,8 +247,8 @@ config/pipeline.yaml · .env.example
 
 | Where | Keys |
 |---|---|
-| `.env` | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `QUESTION_GEN_MODEL`, `ANSWER_GEN_MODEL`, `GITHUB_TOKEN`, `LIMIT_GENERATING`, `LIMIT_SCRAPE_PAGES`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` |
-| `config/pipeline.yaml` | `sources` (order, sitemap filters, GitHub org + repo patterns + file globs, Central orgs), `crawl` (User-Agent, robots, exempt API hosts, listing cache), `chunk`, `generate` (concurrency, rate, temperatures, dedup threshold, pricing), `validate`, `export`, `sft` (output dir, eval share, citation stripping, system prompt), `report`, `logging` |
+| `.env` | `OPENROUTER_API_KEY`, `LLM_BASE_URL`, `ANSWER_GEN_MODEL` (teacher), `PROMPT_WRITER_MODEL`, `JUDGE_MODEL`, `QUESTION_GEN_MODEL`, `GITHUB_TOKEN`, `LIMIT_GENERATING`, `LIMIT_SCRAPE_PAGES`, `LIMIT_REPOS`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS`, `STORAGE_BUCKET`, `STORAGE_PROVIDER`, `BUCKET_NAME`, `BUCKET_PREFIX` |
+| `config/pipeline.yaml` | `sources` (Swan Lake pin, order, sitemap filters, GitHub and Central), `crawl`, `chunk`, `repos` (groups, licence gate), `generate`, `validate`, `export`, `sft` (system prompt), `prompts` (set, nodes, budgets, task mix), `answers` (repairs, judge, `run_tests`), `codebases` (pool, states, context budget), `corpus`, `miner`, `assemble` (dataset version, prompt sets, caps, split, DPO, CPT), `eval` (BBE split, decontamination, benchmarks, baseline models), `graph`, `report`, `storage`, `logging` |
 
 Precedence: environment > `.env` > `pipeline.yaml` > defaults. Empty `.env` values are ignored.
 
@@ -223,16 +263,26 @@ pip install -e shared -r scraper/requirements.txt -e scraper \
             -r sft-dataset-generator/requirements.txt -e sft-dataset-generator -r requirements-dev.txt
 cp .env.example .env    # keys, models, limits
 
-# step by step
-sftgen scrape
-sftgen generate-questions
-sftgen generate-answers
-sftgen validate          # optional; needs `bal`
-sftgen export
-sftgen export-sft        # chat `messages` files for fine-tuning
+# collect, hold out the eval set, build the pool and corpus (no model calls)
+sftgen scrape && sftgen graph sync
+LIMIT_REPOS=0 sftgen collect-repos
+sftgen build-eval
+sftgen codebases build && sftgen codebases verify
+sftgen corpus && sftgen mine-fixes
 
-# or all at once
-sftgen run-all
+# prompts, verified answers, eval set v2 and baselines (model calls)
+sftgen plan-prompts
+LIMIT_GENERATING=0 sftgen generate-prompts
+sftgen codebases attach
+LIMIT_GENERATING=0 sftgen answer-prompts
+sftgen eval fetch && sftgen eval translate && sftgen eval tasks && sftgen eval ecosystem
+sftgen eval run --model base && sftgen eval run --model teacher
+
+# the original Q&A path (optional; it feeds assemble too)
+sftgen run-all          # scrape → generate-questions → generate-answers → validate → export → export-sft
+
+# the dataset
+sftgen assemble         # data/datasets/v1/ (SFT, DPO, CPT, CARD.md)
 
 # any time
 sftgen report && open data/reports/report.html
@@ -249,6 +299,12 @@ sftgen report && open data/reports/report.html
 | generate-questions | `pending` chunks with no questions | failed calls retried up to `generate.max_chunk_attempts` |
 | generate-answers | `pending` questions | `--retry-failed` resets failed ones |
 | validate | `not_checked` answers that have code | `--recheck` re-validates all |
+| collect-repos | repos not yet collected | `--refresh` re-clones; `--update-lock` re-pins |
+| generate-prompts | open slots in the plan | rejected slots refilled, up to `prompts.max_rounds` writer calls per item |
+| answer-prompts | accepted prompts without a response | `--retry-failed` adds another round of repairs |
+| codebases build | the pool below `pool_size`, missing state kinds | up to 3 variants per kind |
+| mine-fixes · eval translate | repos not yet mined · problems not yet translated | |
+| assemble | the whole dataset version, rebuilt from the database | re-run after each gap-fill round |
 
 Writes are committed per item, so an interrupted command loses at most the item in flight. A run
 that raises is stored with status `failed` and its error, and shows up in the report.
@@ -268,7 +324,10 @@ that raises is stored with status `failed` and its error, and shows up in the re
 - **Cost control:** `LIMIT_GENERATING` bounds each run. Every call's tokens and cost are stored
   (`llm_usage`), and cached responses cost nothing.
 - **Code safety:** generated code is only compiled (`bal build --offline` first, temp dir, timeout,
-  JVM heap cap, secrets stripped from the environment), never run.
+  JVM heap cap, secrets stripped from the environment). Tests are type-checked as ordinary sources;
+  they run only with `answers.run_tests`, `codebases.run_tests` or `eval.run_tests`, in a sandbox.
+- **Licences and eval leakage:** repos pass a licence pre-gate and a LICENSE-text gate and are
+  recorded in the licence register; eval fingerprints keep copies of eval items out of every export.
 - **Secrets:** `SecretStr` in config, never logged, never stored in the database.
 
 ---

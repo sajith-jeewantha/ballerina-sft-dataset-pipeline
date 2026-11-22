@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **approved; M0–M4, M7 and M9 done; M5, M6 and M8 built (2026-11-22); their live runs need the API key**. See [Progress](#progress).
+status: **approved; M0–M4, M7 and M9 done; M5, M6, M8 and M10 built (2026-11-22); their live runs need the API key**. Next: the live runs, then M11–M14 (proposed). See [Progress](#progress) and [What's next after M10](#whats-next-after-m10).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -37,7 +37,12 @@ decontamination.
 | M7 | Codebase pool v1 | ✅ done 2026-11-22 (failing_test states need `codebases.run_tests`) | `sftgen codebases build` · `verify` · `attach` |
 | M8 | Eval set v2 + baselines | 🟡 built 2026-11-22; translation and baselines wait for `OPENROUTER_API_KEY` | `sftgen eval fetch` · `translate` · `tasks` · `ecosystem` · `run` |
 | M9 | Pool to 100 + commit miner + raw corpus | ✅ done 2026-11-22 | `sftgen corpus` · `mine-fixes` · `codebases build` |
-| M10 | Assembly → dataset v1 | not started | — |
+| M10 | Assembly → dataset v1 | 🟡 built 2026-11-22; the full run follows M5, M6 and M8's live runs | `sftgen assemble` |
+| — | Live runs: pilot → full run → dataset v1 | next; needs `OPENROUTER_API_KEY` | see [What's next](#whats-next-after-m10) |
+| M11 | Dataset v1 quality pass | proposed | — |
+| M12 | Sandboxed execution | proposed | — |
+| M13 | Training handoff + student eval | proposed | — |
+| M14 | Dataset v2 from the eval loop | proposed | — |
 
 Details per milestone are in the "Done" notes under §6.
 
@@ -528,7 +533,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M7** ✅ | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
 | **M8** 🟡 | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
 | **M9** ✅ | Pool to 50–150 + commit miner + raw corpus | Scale the pool with external repos; mined before/after fixes; **raw pretraining corpus** (~25–40M tokens, generated code down-weighted, eval fingerprints removed) | Counts, licences and token totals in the register and report |
-| **M10** | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
+| **M10** 🟡 | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
 
 **Done (2026-11-19):** M0 and M1 are built and tested; see CHANGELOG "Unreleased".
 
@@ -723,6 +728,66 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
   - Corpus parts are gzip, not zstd (stdlib only).
   - `wso2/open-healthcare-prebuilt-services` waits for a licence check (no root LICENSE).
 
+**Built (2026-11-22):** M10's code is built and tested; the full run needs the API key.
+- `sftgen assemble` writes `data/datasets/<version>/` with no model calls, so it can be re-run after
+  every gap-fill round.
+- **Sources:** verified and judged prompt answers (`assemble.prompt_sets`), standalone and
+  codebase; chunk-grounded Q&A tagged with the items their chunk grounds; mined fixes only with
+  `assemble.include_mined_fixes` (they aren't built at their commit).
+- **Steps:** decontaminate (and re-check every sample) → dedup (exact and MinHash; the better sample
+  wins) → balance by item (core 14, important 9, long tail 5; round-robin over task × difficulty
+  × context mode) → 3% validation split by group (codebase, page, prompt).
+- **Outputs:** SFT train/eval in Qwen3.8 chat `messages`, `metadata.jsonl`, DPO pairs (train only),
+  the CPT corpus (`cpt/`), `coverage.csv`, `gaps.jsonl` (the gap-fill list), `ATTRIBUTION.md`, a
+  dataset card (`CARD.md`, `card.json`: coverage per node and item, licences, graph version,
+  models, decontamination) and `manifest.json` (sha256 per file). Pushed to the bucket by the
+  storage switch like every output.
+- **Full run:** `prompts.set_name: v1`, `prompts.nodes: []`, budgets core 4 / important 2 /
+  long tail 1 (~6,800 prompts over 3,231 items), `assemble.prompt_sets: [pilot, v1]`; then
+  `generate-prompts` → `codebases attach` → `answer-prompts` → `assemble`, and gap-fill from
+  `gaps.jsonl`. Expected cost as in §7 (~$30–50 with gap-fill).
+- **Open:** the documentation licences in the card come from the register; `ballerina-spec` is
+  still `check` there, so confirm it before sharing the dataset.
+
+### What's next after M10
+
+Every milestone's code is built. What's left is to run it with model calls, check the result, and
+then close the loop with training (proposed M11–M14).
+
+**Step 1: live runs** (needs `OPENROUTER_API_KEY`; about $60–100 in all, §7). In this order, each
+small first so quality and cost can be checked in the report:
+
+1. **M5 pilot prompts:** `LIMIT_GENERATING=30 sftgen generate-prompts`, read the samples in the
+   report, then `LIMIT_GENERATING=0` (884 prompts, ~$0.3–0.6).
+2. **M6 pilot answers:** `LIMIT_GENERATING=20 sftgen answer-prompts`, check the pass, repair and
+   failure rates, then `LIMIT_GENERATING=0` (~$1–3).
+3. **M8 eval set and baselines:** `eval translate` (small first), `eval ecosystem`, then
+   `eval run --model base` and `--model teacher` (~$15–25). The baselines must exist **before**
+   any training, so later scores can be compared with them.
+4. **Pilot dataset:** `sftgen assemble`; read `CARD.md` and spot-check ~50 samples per task type.
+5. **Full run:** switch to the full-run settings (M10 note: set `v1`, all nodes, ~6,800 prompts),
+   then `generate-prompts` → `codebases attach` → `answer-prompts` → `assemble`. Gap-fill from
+   `gaps.jsonl` until it's small, then publish `datasets/v1/` with `STORAGE_BUCKET=true`.
+
+**Before sharing dataset v1:**
+- Confirm the `ballerina-spec` licence (register verdict `check`) and
+  `wso2/open-healthcare-prebuilt-services` (no root LICENSE).
+- The card must show 0 eval overlap in the files written.
+- Re-check the teacher's and repos' licence terms (licence drift, §8).
+
+**Proposed milestones:**
+
+| M | Milestone | Delivers | Check |
+|---|---|---|---|
+| **M11** | Dataset v1 quality pass | A human review of ~200 samples, stratified by source, task and context mode. A judge audit of a sample of `verified` code answers, since compiling isn't the same as correct. Fixes for the failure patterns found (prompt templates, filters, caps). Mined fixes built at their commit: those whose before fails and after passes get `include_mined_fixes`. NOTICE files collected into the attribution. | Review results in the card; no blocking issue open |
+| **M12** | Sandboxed execution | A container (no network, CPU, memory and time limits) that runs `bal test` / `bal run`. With it, turn on `answers.run_tests`, `codebases.run_tests` (verifies the 53 skipped failing-test states) and `eval.run_tests` (real pass@k instead of compile-only); add `bal run` output checks | Failing-test states verified; baselines re-run in `test` mode |
+| **M13** | Training handoff + student eval | `datasets/v1/` handed to the training project (QLoRA on Qwen3.8-27B, out of scope here; §7 has costs). The fine-tuned student goes in `eval.models` and runs through `eval run`. | Per-item score map in the report: student vs base vs teacher |
+| **M14** | Dataset v2 from the eval loop | Items where the student is still weak get higher budgets and gap-fill. More codebase work: version drift beyond HTTP services, and diffs for files over ~400 lines (§8 question 1). Mine the remaining 405 platform repos. Text fingerprints for prose decontamination. zstd corpus parts. | v2 card shows coverage and score changes against v1 |
+
+**Still open (§8):** question 3 (training cloud, which decides GCS, S3 or R2) and question 5
+(upstream graph fixes). Storage has only been tested with a local folder as the bucket; test a
+real bucket before the full run is published.
+
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.
 
@@ -761,7 +826,9 @@ DeepSeek writing the prompts.
 2. **Thinking mode.** Train Qwen3.8-27B's **non-thinking** mode only (answers without
    reasoning traces), or include short reasoning? Recommendation: non-thinking for v1, which
    is cheaper and matches an editor assistant. Check how Qwen3.8's chat template handles the
-   switch before M10.
+   switch before M10. **Adopted in M10 (2026-11-22):** answers carry no reasoning trace, and the
+   dataset card says to train with `enable_thinking=False`. Confirm against the template in the
+   training project (M13).
 3. **Training cloud.** GCP, AWS or third-party GPUs? This decides GCS (the default), S3 or R2
    for the bucket. It doesn't block anything before M2.
 4. **Benchmark licences.** HumanEval-style problems are usually MIT and MBPP-style CC-BY-4.0;
