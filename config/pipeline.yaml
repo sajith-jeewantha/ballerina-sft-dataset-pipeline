@@ -118,6 +118,21 @@ answers:                             # answer-prompts (verified answers, M6)
                                      # code. Turn on only in a sandbox (container/VM); off = tests are compiled
   max_feedback_errors: 8
 
+codebases:                           # codebases build / verify / attach (codebase pool, M7)
+  pool_size: 20                      # verified Swan Lake projects kept
+  eval_fraction: 0.2                 # held out (by id hash) for M8's eval tasks; never in training prompts
+  groups: [guides, wso2, external, platform]   # preferred sources, in order
+  min_files: 2
+  max_files: 40
+  min_tokens: 800
+  max_tokens: 10000                  # the whole project must fit a prompt
+  max_per_repo: 3
+  kinds: [compile_error, unfinished_feature, version_drift, failing_test]
+  run_tests: false                   # failing_test states RUN the project's tests: sandbox only
+  build_timeout_s: 300
+  context_max_tokens: 14000          # code packed into a codebase prompt
+  max_candidates: 80                 # candidates tried per run while filling the pool
+
 eval:                                # build-eval: held-out eval set and decontamination
   version: v1                        # files go to <data>/eval/v1/
   bbe_eval_fraction: 0.30            # BBE examples held out, decided by a hash of the example name

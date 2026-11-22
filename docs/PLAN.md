@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **approved; M0–M4 done; M5 and M6 built (2026-11-22), their live runs are next**. See [Progress](#progress).
+status: **approved; M0–M4 and M7 done; M5 and M6 built (2026-11-22), their live runs are next**. See [Progress](#progress).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -34,7 +34,8 @@ decontamination.
 | M4 | Eval set v1 + decontamination | ✅ done 2026-11-21 | `sftgen build-eval` |
 | M5 | Item-driven prompts (pilot) | 🟡 built 2026-11-21; live run waits for `OPENROUTER_API_KEY` | `sftgen plan-prompts` · `generate-prompts` |
 | M6 | Verified answers | 🟡 built 2026-11-22; live run after M5's | `sftgen answer-prompts` |
-| M7–M10 | Codebase pool → dataset v1 | not started | — |
+| M7 | Codebase pool v1 | ✅ done 2026-11-22 (failing_test states need `codebases.run_tests`) | `sftgen codebases build` · `verify` · `attach` |
+| M8–M10 | Eval set v2 → dataset v1 | not started | — |
 
 Details per milestone are in the "Done" notes under §6.
 
@@ -522,7 +523,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M4** ✅ | Eval set v1 + decontamination | **BBE 30/70 split** by example; eval items tagged `node#item`; fingerprints (exact + MinHash); near-copy removal in every export | Export shows 0 rows overlapping eval; every checked BBE eval item passes `bal run` against its `.out` (or `bal build`), or has a known upstream difference. **Met:** 0 overlap in both exports; 148/150 pass, 2 known differences |
 | **M5** 🟡 | Item-driven prompts (**pilot**) | Planner with budgets by priority × difficulty. **DeepSeek writes, the judge model reviews.** Grounding comes from item sources, FTS5 and the Central symbol table | **~900 prompts on the HTTP cluster**; read 100 samples in the report |
 | **M6** 🟡 | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
-| **M7** | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
+| **M7** ✅ | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
 | **M8** | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
 | **M9** | Pool to 50–150 + commit miner + raw corpus | Scale the pool with external repos; mined before/after fixes; **raw pretraining corpus** (~25–40M tokens, generated code down-weighted, eval fingerprints removed) | Counts, licences and token totals in the register and report |
 | **M10** | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
@@ -635,7 +636,8 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 - **Checks:**
   - **Format:** no reference-material leaks.
   - **Code:** `bal` builds every block, and `// file:` blocks as one package.
-  - **Tests:** type-checked with `bal test --list-groups`; run only with `answers.run_tests`,
+  - **Tests:** type-checked by building them as ordinary sources with `bal build` (nothing runs);
+    run only with `answers.run_tests`,
     because that executes model code. It is off by default; run it in a sandbox.
   - **Code tasks** must contain code.
   - **Judge:** the judge (another family) scores `explain`/`design` and code-less answers.
@@ -651,6 +653,27 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
   prompts: about $1–3 (teacher ~4k in / 1k out per attempt, ~1.4 attempts; judge on ~30%).
 - **Not covered yet:** `bal run` output checks (generated programs have no expected output). Tests
   run only in a sandbox.
+
+**Done (2026-11-22):** M7 is built, tested and run.
+- `sftgen codebases build` filled the pool with 20 projects: 251 candidates, 29 tried, 9 genuine
+  build failures.
+  - Sources: ballerina-guides first, then external repos.
+  - Split: 17 train, 3 eval (held out for M8). 19 of 20 have tests; ~82k tokens in total.
+- **States** are deterministic edits verified with `bal`: 45 verified, 0 failed (20 compile
+  error, 19 unfinished feature, 6 version drift).
+  - The 15 failing-test states are `skipped`: verifying them runs the projects' tests, so they
+    wait for `codebases.run_tests` in a sandbox.
+- **`sftgen codebases verify`: all green** (acceptance met).
+- **`sftgen codebases attach`:** 39 codebase-task prompts with the project packed in (up to
+  ~9.6k tokens), tagged with graph items. `answer-prompts` checks the answers by building the
+  state with the changed files laid over it.
+- **Safety fix found here:** `bal test --list-groups`, used since M6 to type-check tests, runs
+  module initialisation. Tests are now type-checked as ordinary sources with `bal build`, which
+  executes nothing.
+- **Not covered yet:**
+  - Mined before/after fixes from commit history (M9).
+  - Diffs for files over ~400 lines (§8 question 1).
+  - Version drift only covers HTTP services.
 
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.

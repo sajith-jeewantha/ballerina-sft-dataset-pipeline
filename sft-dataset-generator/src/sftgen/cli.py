@@ -12,6 +12,11 @@ Commands (run in this order, or all at once with `run-all`):
                        answers.run_tests), prose is checked by the judge; failures are repaired
                        with the real errors (up to answers.max_attempts). Up to LIMIT_GENERATING
                        prompts per run; data/answers/<set>/ (sft, pairs, failed)
+  codebases build      fill the codebase pool (codebases.pool_size verified Swan Lake projects from the
+                       collected repos), tag it with graph items, make and verify its states
+                       (compile error, unfinished feature, version drift, failing test); data/codebases/
+  codebases verify     re-check every base and state with bal; fails if anything is red
+  codebases attach     codebase-task prompts from verified states of train codebases (project packed in)
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -61,10 +66,11 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts",
+COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts", "codebases",
             "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
-ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"]}
+ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"],
+           "codebases": ["build", "verify", "attach"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
 
 
@@ -129,6 +135,19 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
 
             return build_eval(s, db, run, open_lock(s), update_lock=a.update_lock,
                               verify=False if a.no_verify else None, reverify=a.recheck)
+        if command.startswith("codebases-"):
+            from sftgen.codebases import attach, stage
+
+            action = command.split("-", 1)[1]
+            if action == "verify":
+                out = stage.verify(s, db, run)
+                print(_codebase_table(out), flush=True)
+                if out["red"]:
+                    raise RuntimeError(f"{len(out['red'])} codebase check(s) failed: " + "; ".join(out["red"][:5]))
+                return {k: v for k, v in out.items() if k != "table"}
+            if action == "attach":
+                return attach.attach(s, db, run)
+            return stage.build(s, db, run)
         if command == "graph-sync":
             from sftgen.graph.coverage import sync
 
@@ -177,6 +196,16 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
             _decontam(s, db, run)
             return export_sft(s, db, run)
     raise ValueError(command)
+
+
+def _codebase_table(out: dict) -> str:
+    kinds = ["compile_error", "unfinished_feature", "version_drift", "failing_test"]
+    rows = [("codebase", "base", *kinds)]
+    rows += [(t["codebase"], t["base"], *(t.get(k, "—") for k in kinds)) for t in out["table"]]
+    w = [max(len(r[i]) for r in rows) for i in range(len(rows[0]))]
+    lines = [f"Codebase pool: {out['codebases']} active · {'all green' if not out['red'] else str(len(out['red'])) + ' red'}"]
+    lines += ["  " + "  ".join(c.ljust(w[i]) for i, c in enumerate(r)) for r in rows]
+    return "\n".join(lines) + "\n"
 
 
 def _plan_table(out: dict, s: Settings) -> str:
@@ -302,7 +331,8 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sftgen", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("command", choices=COMMANDS)
     p.add_argument("action", nargs="?", choices=sorted({x for v in ACTIONS.values() for x in v}),
-                   help="graph: validate (default) | stats | sync · storage: status (default) | push | pull")
+                   help="graph: validate (default) | stats | sync · storage: status (default) | push | pull · "
+                        "codebases: build (default) | verify | attach")
     p.add_argument("--overwrite", action="store_true",
                    help="storage pull: replace local files (the local database is backed up first)")
     p.add_argument("--refresh", action="store_true",
@@ -344,7 +374,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if a.command == "storage":
         return storage_command(s, store, a.action or "status", a.overwrite)
-    print_startup(s, "graph sync" if a.command == "graph" else a.command, store)
+    shown = {"graph": "graph sync", "codebases": f"codebases {a.action or 'build'}"}.get(a.command, a.command)
+    print_startup(s, shown, store)
 
     if store.enabled and not s.db_path.is_file():
         try:
@@ -360,7 +391,8 @@ def main(argv: list[str] | None = None) -> int:
     code = 0
     push_error: str | None = None
     with Database(s.db_path) as db:
-        commands = RUN_ALL if a.command == "run-all" else ["graph-sync" if a.command == "graph" else a.command]
+        single = {"graph": "graph-sync", "codebases": f"codebases-{a.action or 'build'}"}.get(a.command, a.command)
+        commands = RUN_ALL if a.command == "run-all" else [single]
         for command in commands:
             if command == "report":
                 break

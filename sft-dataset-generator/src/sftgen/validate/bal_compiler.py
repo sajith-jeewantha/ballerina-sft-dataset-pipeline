@@ -35,6 +35,26 @@ LANGLIB_PREFIXES = {"int", "float", "decimal", "string", "boolean", "array", "ma
                     "stream", "object", "function", "future", "typedesc", "byte"}
 
 
+def tests_as_sources(files: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
+    """Move `tests/x.bal` (and `modules/m/tests/x.bal`) next to the module's sources as `__test_x.bal`,
+    so `bal build` type-checks them like any source file without running anything. Returns the new
+    file map and {new path: original path}."""
+    out: dict[str, str] = {}
+    renamed: dict[str, str] = {}
+    for path, text in files.items():
+        parts = path.split("/")
+        if "tests" in parts[:-1] and path.endswith(".bal"):
+            i = parts.index("tests")
+            new = "/".join(parts[:i] + ["__test_" + "_".join(parts[i + 1:])])
+            out[new] = text
+            renamed[new] = path
+        elif "tests" in parts[:-1]:
+            continue  # test resources are only needed when tests run
+        else:
+            out[path] = text
+    return out, renamed
+
+
 TEST_FAIL_RE = re.compile(r"\[fail\] (\S+?):\s*\n(.*?)(?=\n\s*callableName|\n\s*\[fail\]|\n\s*\d+ passing|\Z)",
                           re.S)
 
@@ -173,8 +193,13 @@ class BalCompiler:
         """`bal build` (or `bal test`) a package made of these files (relative paths, e.g. main.bal,
         tests/main_test.bal). A Ballerina.toml pinned to this toolchain is added if missing.
         `test=True` runs the package's tests: that executes the code. Otherwise test files are only
-        type-checked (`bal test --list-groups` compiles them without running anything)."""
+        type-checked WITHOUT executing anything: they are moved next to their module's sources and
+        built with `bal build`, which never runs code. (`bal test --list-groups` is not used: it runs
+        module initialisation.) Error locations are mapped back to the original test paths."""
         kind = "test" if test else "build"
+        renamed: dict[str, str] = {}  # built path -> original tests/... path
+        if not test:
+            files, renamed = tests_as_sources(files)
         key_src = json.dumps(sorted(files.items()))
         cache = self._cache_path(f"package-{kind}", key_src)
         if cache.is_file():
@@ -210,9 +235,9 @@ class BalCompiler:
                 return rc, out
 
             rc, out = run([kind])
-            if rc == 0 and not test and any(f.startswith("tests/") for f in files):
-                rc, out = run(["test", "--list-groups"])  # compile the tests, run nothing
         errors = [] if rc == 0 else parse_errors(out, with_file=True)
+        for e in errors:
+            e["file"] = renamed.get(e.get("file") or "", e.get("file"))
         if test and rc not in (0, None) and not ERROR_RE.search(out):
             errors = test_failures(out) or errors
         outcome = CompileOutcome(status="timeout" if rc is None else ("ok" if rc == 0 else "error"), errors=errors,

@@ -44,12 +44,15 @@ class CodeCheck:
     blocks: int = 0
     package_files: list[str] = field(default_factory=list)
     errors: list[dict[str, Any]] = field(default_factory=list)
+    message: str = ""                   # feedback for failures that aren't compiler errors
 
     def as_dict(self) -> dict[str, Any]:
         return {"status": self.status, "reason": self.reason, "verification": self.verification,
                 "blocks": self.blocks, "package_files": self.package_files, "errors": self.errors}
 
     def feedback(self, max_errors: int) -> str:
+        if self.message:
+            return self.message
         if self.reason == "missing_code":
             return ("The request needs working Ballerina code, but the answer has no ```ballerina code block. "
                     "Give the complete code.")
@@ -116,3 +119,30 @@ class AnswerChecker:
         if timed_out:
             return CodeCheck("fail", "timeout", verification, len(blocks), package_files)
         return CodeCheck("pass", "", verification, len(blocks), package_files)
+
+    def check_codebase(self, answer: str, files: dict[str, str], kind: str, target: str,
+                       run_tests: bool) -> CodeCheck:
+        """A codebase task: the answer's `// file:` blocks replace those files in the state, and the
+        project must build (tests compiled; run for `failing_test`, which needs `run_tests`)."""
+        blocks = code_blocks(answer)
+        changed = {b.file: b.code for b in blocks if b.file}
+        if not changed:
+            return CodeCheck("fail", "missing_code", blocks=len(blocks), message=(
+                "Give every file you change in full, each in its own ```ballerina block whose first line is "
+                "`// file: <path>` (the path as shown in the project)."))
+        merged = {**files, **changed}
+        target_file = target.split("::")[0]
+        if kind == "unfinished_feature" and 'panic error("not implemented")' in merged.get(target_file, ""):
+            return CodeCheck("fail", "stub", blocks=len(blocks), package_files=sorted(changed), message=(
+                f"`{target.split('::')[-1]}` in `{target_file}` still panics with \"not implemented\". Implement it, "
+                f"and give `{target_file}` in full."))
+        test = run_tests and (kind == "failing_test" or any(p.startswith("tests/") for p in merged))
+        res = self.compiler.build_package(merged, test=test)
+        verification = "test" if test else "compile"
+        if res.status == "timeout":
+            return CodeCheck("fail", "timeout", verification, len(blocks), sorted(changed))
+        if res.status == "error":
+            only_tests = all(e.get("file") == "tests" and e.get("line") is None for e in res.errors)
+            return CodeCheck("fail", "test" if only_tests else "compile", verification, len(blocks), sorted(changed),
+                             res.errors)
+        return CodeCheck("pass", "", verification, len(blocks), sorted(changed))

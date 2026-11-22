@@ -125,6 +125,9 @@ without stopping the run.
 | `sftgen plan-prompts` | Show the prompt plan for the graph nodes in scope (`prompts.nodes`): items, budget, accepted and open slots per node. Also builds the FTS5 index and the Central symbol table. No model calls | — |
 | `sftgen generate-prompts` | Fill open slots: the writer model (DeepSeek) writes prompts per graph item from its grounding; the judge model (another family) reviews them. Up to `LIMIT_GENERATING` prompts written per run. See [Item-driven prompts](#item-driven-prompts) | prompt: `accepted` · `rejected` · `duplicate` · `eval_overlap` |
 | `sftgen answer-prompts` | Verified answers to accepted prompts: the teacher answers with the item's grounding; code is built with `bal`, prose is checked by the judge, and failures are repaired with the real errors (up to 3 attempts). Up to `LIMIT_GENERATING` prompts per run. See [Verified answers](#verified-answers) | response: `verified` · `judged` · `failed`; attempt: `pass` · `fail` |
+| `sftgen codebases build` | Fill the codebase pool: 20 Swan Lake projects from the collected repos that build with the pinned `bal`, tagged with graph items, each turned into verified states (compile error, unfinished feature, version drift, failing test). See [Codebase pool](#codebase-pool) | codebase: `active` · `rejected`; state: `pass` · `fail` · `skipped` |
+| `sftgen codebases verify` | Re-check every base and state with `bal`; exits with an error if anything is red | — |
+| `sftgen codebases attach` | Turn verified states of train codebases into codebase-task prompts with the project packed in | prompt: `accepted` (`context_mode = codebase`) |
 | `sftgen build-eval` | Build eval set v1 from Ballerina by Example: 30% of examples held out, tagged `node#item`, checked with `bal run`/`bal build`, and fingerprinted. Overlapping chunks, questions and repo files are flagged and left out of every export. See [Eval set and decontamination](#eval-set-and-decontamination) | eval item: `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; chunk: `eval_holdout` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
@@ -321,6 +324,8 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `attempts` | every teacher answer to a prompt (first try and repairs) with its checks and feedback | `pass` · `fail` |
 | `responses` | outcome per prompt: final attempt, attempts used, repaired, verification | `verified` · `judged` · `failed` |
 | `preference_pairs` | the first failed answer and the passing repair of a prompt (for DPO) | — |
+| `codebases` | a project in the pool: files, graph tags, train/eval split | `active` · `rejected` |
+| `codebase_states` | a broken or unfinished version of a codebase: changed files, patch, verification | `pass` · `fail` · `skipped` |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -452,7 +457,8 @@ keeps only answers that pass their checks.
 1. **Format:** answers that mention excerpts or reference material, or end with a `Source:`
    line, fail.
 2. **Code:** blocks are built with `bal` (`// file:` blocks as one package). Test files are
-   type-checked with `bal test --list-groups`, and **run only if `answers.run_tests: true`**,
+   type-checked without running anything (they are built as ordinary sources with `bal build`), and
+   **run only if `answers.run_tests: true`**,
    because running them executes model-written code; use a sandbox for that. `write_code` and
    `fix_code` answers must contain code.
 3. **Judge:** `explain` and `design` answers, and any answer without code, are checked by the
@@ -480,6 +486,40 @@ Outputs, in `data/answers/<set>/`:
 The report's *Answers* section shows the pass rate, first-try rate, repair rate, attempts used,
 why attempts failed, the most common compiler errors, and results by task type. Cost per phase
 (`answer-prompts`, `repair-answers`, `judge-answers`) is in the usage table.
+
+### Codebase pool
+
+`sftgen codebases build` builds the pool of real projects that codebase tasks start from.
+
+1. **Candidates:** every `Ballerina.toml` project (`[package]` layout) in a collected,
+   licence-safe repo. It must have no 1.x syntax, no generated code and nothing copied from the
+   eval set, 2–40 `.bal` files, and roughly 0.8k–10k tokens, so it fits a prompt.
+2. **Rank:** ballerina-guides first, then wso2, external and platform repos; projects with tests
+   preferred; at most 3 per repo.
+3. **Verify the base:** the project must build with `bal` 2201.14.1. Its tests are type-checked
+   without running anything. Candidates are tried in rank order until 20 build.
+4. **Tag** it with graph nodes (from its imports) and items (qualified names such as
+   `http:NotFound` that appear in the code).
+5. **Split:** 20% of the pool (by a hash of its id) is held out for M8's eval tasks and never
+   feeds training prompts.
+6. **States:** each is a deterministic edit, verified with `bal`:
+
+| State | Edit | Verified when | Prompt |
+|---|---|---|---|
+| `compile_error` | one call to a project function is misspelled (or a used import removed) | the build fails, in that file | fix_code: the real `bal build` errors are quoted |
+| `unfinished_feature` | one function's body becomes a stub that panics "not implemented" | it still builds | write_code: implement it |
+| `version_drift` | an HTTP service is rewritten in Ballerina 1.x style (`@http:ServiceConfig {basePath}`, `@http:ResourceConfig`) | the build fails | fix_code: migrate to Swan Lake |
+| `failing_test` | one operator in tested code is flipped | its tests fail; this **runs** the project's tests, so only with `codebases.run_tests` (otherwise `skipped`) | fix_code: the failing test is quoted |
+
+`sftgen codebases verify` re-checks every base and state and fails if anything is red.
+`sftgen codebases attach` turns each verified state of a train codebase into a prompt
+(`context_mode = codebase`). The project is packed in under `// file:` headers, up to ~14k
+tokens: Ballerina.toml, the file the task is about, then the other files, smallest first, then
+the tests. `answer-prompts` answers these too. The answer's changed files are laid over the
+state, the project must build, and a stubbed function must actually be implemented.
+
+Files in `data/codebases/`: `<id>/base.tar.gz`, `<id>/states/<kind>.patch` and `manifest.jsonl`
+(source, licence, split, tags and states per codebase).
 
 ### Local folder and cloud bucket
 
@@ -550,6 +590,7 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── export/               # dataset.jsonl · sft (chat messages)
 │   │   ├── eval/                 # build-eval: BBE split, eval items, bal run checks
 │   │   ├── plan/                 # planner: item budgets, slots, gaps
+│   │   ├── codebases/            # pool (select, verify, tag) · states · attach (context packing) · stage
 │   │   ├── retrieval/            # FTS5 search · Central symbol table · grounding per item
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
@@ -696,6 +737,7 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen plan-prompts` | See budgets, accepted and open prompt slots per node before spending anything |
 | `LIMIT_GENERATING=30 sftgen generate-prompts` | A small prompt batch (about 3 items) to check quality and cost |
 | `LIMIT_GENERATING=20 sftgen answer-prompts` | Answer 20 accepted prompts, to check pass and repair rates and cost |
+| `sftgen codebases verify` | Check that every codebase base and state still verifies (e.g. after a `bal` update) |
 | `sftgen answer-prompts --retry-failed` | Give prompts that failed every attempt another round of repairs |
 | `sftgen build-eval` | Rebuild the eval set and re-flag overlaps (after a new Swan Lake pin) |
 | `sftgen build-eval --recheck` | Re-run every `bal run`/`bal build` check, e.g. after installing a new `bal` |

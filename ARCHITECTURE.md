@@ -92,6 +92,7 @@ flowchart LR
 | Prompt planner | `sftgen/plan/planner.py` | Items in scope (`prompts.nodes`), budgets by priority, slots over task mix × the item's difficulties, open slots and gap-fill rounds |
 | Retrieval | `sftgen/retrieval/fts.py`, `symbols.py`, `grounding.py` | FTS5 (BM25) over chunks; Central symbol table parsed from the API reference; per-item grounding: own sources (pages or collected repo files), symbols, node sources, FTS neighbours; eval overlaps excluded |
 | Prompt writer/reviewer | `sftgen/generate/prompts.py`, `prompts/prompt_writer.yaml`, `prompt_reviewer.yaml` | `generate-prompts`: DeepSeek writes prompts per item; filters (source references, near-duplicates, eval overlap); a judge of another family scores them; `data/prompts/<set>/` |
+| Codebase pool | `sftgen/codebases/pool.py`, `states.py`, `attach.py`, `stage.py` | `codebases build`: candidates from collected repos, rank, base must build, tag with graph nodes and items, train/eval split; deterministic states (compile error, unfinished feature, version drift, failing test) verified with `bal`; `codebases verify`; `codebases attach`: codebase-task prompts with the project packed in (~14k tokens) |
 | Decontamination | `shared/balpipe_common/decontam.py` | Flag chunks, questions and repo files that copy eval code (exact, MinHash, shingle containment) in `eval_overlap`; held-out chunks get no questions; exports leave overlaps out and re-check their files |
 | Storage switch | `shared/balpipe_common/storage.py` | `LOCAL_DATA_DIR` is the working copy; with `STORAGE_BUCKET=true` it is mirrored to GCS or S3 (fsspec) with the same layout: restore a missing database, upload changed outputs after each phase, gzipped database snapshots |
 
@@ -149,6 +150,7 @@ chunk text each answer was grounded in.
 | `data/repos/` | `<owner>__<repo>@<sha12>.tar.gz` sparse snapshots of collected repos | yes, `collect-repos --refresh` |
 | `data/prompts/<set>/` | `accepted.jsonl`, `rejected.jsonl`, `coverage.json` | yes, from the database |
 | `data/answers/<set>/` | `sft.jsonl` (chat messages), `pairs.jsonl` (DPO), `failed.jsonl` | yes, from the database |
+| `data/codebases/` | `manifest.jsonl`, `<id>/base.tar.gz`, `<id>/states/<kind>.patch` | yes, `codebases build` |
 | `data/eval/<version>/` | `bbe.jsonl` (eval items), `decontam.jsonl` (fingerprints), `split.json` | yes, `build-eval` |
 | `data/cache/bbe/`, `data/cache/bal-eval/` | BBE examples snapshot per commit; eval check results | yes |
 | `data/cache/repos/` | Temporary clone folders (removed after each snapshot) | yes |
@@ -181,6 +183,7 @@ sft-dataset-generator/
     chunk/                      markdown_chunker · stage
     generate/                   llm · questions · answers · prompts (writer/reviewer) · responses (answer/check/repair)
     plan/                       planner (item budgets, slots, gaps)
+    codebases/                  pool · states · attach · stage (build, verify)
     retrieval/                  fts (FTS5) · symbols (Central) · grounding
     validate/                   bal_compiler (files, packages, tests) · stage · answer_check
     export/                     stage (dataset.jsonl) · sft (chat messages)

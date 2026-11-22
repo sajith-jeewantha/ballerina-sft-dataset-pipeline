@@ -18,6 +18,8 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * attempts   every teacher answer to a prompt (first try and repairs) with its check results
 * responses  the outcome per prompt: the final attempt, verified / judged / failed
 * preference_pairs  a failed attempt and the passing repair of the same prompt (for DPO)
+* codebases  the codebase pool: verified Swan Lake projects, graph tags, train/eval split
+* codebase_states  broken or unfinished versions of a codebase (the starting point of a task)
 
 `chunks`, `questions`, `repo_files`, `prompts` and `responses` carry `eval_overlap` (the eval item they copy, or
 NULL) and `decontam_key` (the fingerprint set they were last checked against).
@@ -319,6 +321,45 @@ CREATE TABLE IF NOT EXISTS preference_pairs (
     updated_at       TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS codebases (
+    id               TEXT PRIMARY KEY,      -- <repo>-<project>-<hash6>
+    repo_id          INTEGER REFERENCES repos(id),
+    full_name        TEXT NOT NULL,         -- owner/repo
+    root             TEXT NOT NULL,         -- project folder in the repo ('' = repo root)
+    commit_sha       TEXT,
+    spdx             TEXT,
+    files            TEXT NOT NULL,         -- JSON {relative path: text}: Ballerina.toml and .bal files
+    file_count       INTEGER NOT NULL,
+    tokens           INTEGER NOT NULL,      -- approximate (chars / 4)
+    has_tests        INTEGER NOT NULL,
+    modules          TEXT NOT NULL DEFAULT '[]', -- JSON: imported modules
+    nodes            TEXT NOT NULL DEFAULT '[]', -- JSON: graph nodes (from the modules)
+    items            TEXT NOT NULL DEFAULT '[]', -- JSON: node#item refs whose names appear in the code
+    split            TEXT NOT NULL,         -- train | eval (eval codebases never feed training prompts)
+    score            REAL,                  -- selection rank
+    status           TEXT NOT NULL,         -- active | rejected (base build failed) | dropped
+    verify_detail    TEXT,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS codebase_states (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    codebase_id      TEXT NOT NULL REFERENCES codebases(id) ON DELETE CASCADE,
+    kind             TEXT NOT NULL,         -- compile_error | unfinished_feature | version_drift | failing_test
+    target           TEXT NOT NULL,         -- file, or file::function
+    description      TEXT NOT NULL,         -- what was changed, for people
+    changed          TEXT NOT NULL,         -- JSON {path: new text}: the files that differ from the base
+    patch            TEXT NOT NULL,         -- unified diff from the base
+    expect           TEXT NOT NULL,         -- fails_build | builds | fails_tests
+    verify_status    TEXT,                  -- pass | fail | skipped
+    verify_detail    TEXT,                  -- JSON: build errors / test failures of the state
+    status           TEXT NOT NULL,         -- active | retired
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (codebase_id, kind)
+);
+
 CREATE TABLE IF NOT EXISTS symbols (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     module           TEXT NOT NULL,         -- ballerina/http
@@ -370,7 +411,7 @@ class Database:
         self.conn.commit()
 
     # Columns added after a table was first created: (table, column, type). Applied once, idempotently.
-    MIGRATIONS = (("llm_usage", "provider", "TEXT"),
+    MIGRATIONS = (("llm_usage", "provider", "TEXT"), ("prompts", "codebase_state_id", "INTEGER"),
                   *((t, c, "TEXT") for t in ("chunks", "questions", "repo_files")
                     for c in ("eval_overlap", "decontam_key")))
 

@@ -97,6 +97,18 @@ class Responder:
         self.bal_slots = asyncio.Semaphore(max(1, s.validate_.workers))
         self.decontam = Decontaminator.from_db(db, s.eval_)
 
+    def state(self, p: Any) -> dict[str, Any] | None:
+        """For a codebase prompt: the state's files (base + changes), kind and target."""
+        sid = p["codebase_state_id"] if "codebase_state_id" in p.keys() else None
+        if not sid:
+            return None
+        r = self.db.one("SELECT st.kind, st.target, st.changed, cb.files FROM codebase_states st "
+                        "JOIN codebases cb ON cb.id = st.codebase_id WHERE st.id = ?", (sid,))
+        if r is None:
+            return None
+        return {"files": {**json.loads(r["files"]), **json.loads(r["changed"])}, "kind": r["kind"],
+                "target": r["target"]}
+
     def grounding(self, p: Any) -> str:
         item = self.db.one("SELECT * FROM graph_items WHERE ref = ?", (p["ref"],))
         if item is None:
@@ -108,8 +120,13 @@ class Responder:
             chk = CodeCheck("fail", "leak")
             return Result("fail", chk, None, "The answer mentions reference material, excerpts or a Source line. "
                                              "Answer the developer directly, without them.", "leak")
+        state = self.state(p)
         async with self.bal_slots:
-            chk = await asyncio.to_thread(self.checker.check, text, p["task_type"])
+            if state is not None:
+                chk = await asyncio.to_thread(self.checker.check_codebase, text, state["files"], state["kind"],
+                                              state["target"], self.s.codebases.run_tests)
+            else:
+                chk = await asyncio.to_thread(self.checker.check, text, p["task_type"])
         if chk.status == "fail":
             return Result("fail", chk, None, chk.feedback(self.cfg.max_feedback_errors), chk.reason)
         if p["task_type"] not in self.cfg.judge_tasks and chk.status == "pass":

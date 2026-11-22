@@ -96,9 +96,10 @@ def plan(s: Settings, db: Database) -> list[ItemPlan]:
     items.sort(key=lambda r: (PRIORITY_ORDER.get(r["priority"], 9), order[r["node_id"]], r["ref"]))
     accepted: dict[str, Counter[tuple[str, str]]] = {}
     for r in db.query("SELECT ref, task_type, difficulty, COUNT(*) AS n FROM prompts WHERE set_name = ? "
-                      "AND status = 'accepted' AND eval_overlap IS NULL GROUP BY 1, 2, 3", (cfg.set_name,)):
+                      "AND status = 'accepted' AND eval_overlap IS NULL AND context_mode = 'standalone' GROUP BY 1, 2, 3", (cfg.set_name,)):
         accepted.setdefault(r["ref"], Counter())[(r["task_type"], r["difficulty"])] += r["n"]
-    rounds = {r[0]: r[1] for r in db.query("SELECT ref, MAX(round) FROM prompts WHERE set_name = ? GROUP BY 1",
+    rounds = {r[0]: r[1] for r in db.query("SELECT ref, MAX(round) FROM prompts WHERE set_name = ? "
+                                           "AND context_mode = 'standalone' GROUP BY 1",
                                            (cfg.set_name,))}
     plans = []
     for it in items:

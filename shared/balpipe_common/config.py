@@ -277,6 +277,28 @@ class AnswersCfg(BaseModel):
     max_feedback_errors: int = 8       # compiler errors passed back to the teacher per repair
 
 
+class CodebasesCfg(BaseModel):
+    """`codebases`: the codebase pool, its states, and codebase-task prompts (M7)."""
+
+    pool_size: int = 20               # verified projects to keep
+    eval_fraction: float = Field(default=0.2, ge=0.0, lt=1.0)  # held out for eval tasks (M8), by id hash
+    split_salt: str = "codebase-split"
+    groups: list[str] = Field(default_factory=lambda: ["guides", "wso2", "external", "platform"])  # preference
+    min_files: int = 2
+    max_files: int = 40
+    min_tokens: int = 800
+    max_tokens: int = 10000           # so the whole project fits the prompt with room for the answer
+    max_per_repo: int = 3
+    kinds: list[str] = Field(default_factory=lambda: ["compile_error", "unfinished_feature", "version_drift",
+                                                      "failing_test"])
+    # failing_test states need the project's tests RUN (third-party code). Off by default, like
+    # answers.run_tests; without it those states are recorded as skipped and not used.
+    run_tests: bool = False
+    build_timeout_s: int = 300        # first builds pull dependencies from Central
+    context_max_tokens: int = 14000   # code packed into a codebase prompt (Qwen3.8 server budget ~16k)
+    max_candidates: int = 80          # candidates tried per run while filling the pool
+
+
 class EvalCfg(BaseModel):
     """`build-eval`: the held-out evaluation set and the decontamination fingerprints."""
 
@@ -374,6 +396,7 @@ class Settings(BaseSettings):
     eval_: EvalCfg = Field(default_factory=EvalCfg, alias="eval")
     prompts: PromptsCfg = Field(default_factory=PromptsCfg)
     answers: AnswersCfg = Field(default_factory=AnswersCfg)
+    codebases: CodebasesCfg = Field(default_factory=CodebasesCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -436,6 +459,10 @@ class Settings(BaseSettings):
     @property
     def prompts_dir(self) -> Path:
         return self.data_path("prompts") / self.prompts.set_name
+
+    @property
+    def codebases_dir(self) -> Path:
+        return self.data_path("codebases")
 
     @property
     def answers_dir(self) -> Path:

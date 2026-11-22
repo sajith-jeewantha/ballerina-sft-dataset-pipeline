@@ -16,6 +16,8 @@ erDiagram
     prompts ||--o{ attempts : "answered by"
     prompts ||--o| responses : "outcome"
     prompts ||--o| preference_pairs : "chosen vs rejected"
+    codebases ||--o{ codebase_states : "broken or unfinished as"
+    codebase_states ||--o| prompts : "task of"
     pages ||--o{ symbols : "API reference of"
     pages {
         int id
@@ -124,7 +126,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -252,7 +254,8 @@ One row per prompt written by `generate-prompts` (whatever its outcome).
 | `set_name` | The prompt set (`prompts.set_name`, e.g. `pilot`) |
 | `ref`, `node_id` | The graph item (`node#item`) the prompt was planned for, and its node |
 | `task_type`, `difficulty` | The slot it fills: `write_code` · `use_api` · `explain` · `fix_code` · `design`; `beginner` · `intermediate` · `advanced` |
-| `context_mode` | `standalone` (codebase-attached prompts come in M7) |
+| `context_mode` | `standalone` · `codebase` (a task on a codebase state, from `codebases attach`) |
+| `codebase_state_id` | For codebase prompts: the `codebase_states` row the task starts from |
 | `prompt`, `prompt_hash` | The prompt text and its hash (unique) |
 | `covers` | JSON list of `node#item` refs the prompt exercises |
 | `grounding` | JSON: `urls`, `chunk_ids`, `repo_file_ids`, `symbols`, `tokens`, `kinds` of the excerpts the writer and reviewer saw |
@@ -294,6 +297,30 @@ One per prompt whose answer passed after a repair.
 | `prompt_id` | The prompt |
 | `chosen_id`, `rejected_id` | The passing attempt, and the first failed one |
 | `reason` | Why the rejected answer failed: `compile` · `test` · `missing_code` · `leak` · `judge` · `timeout` |
+
+## `codebases`
+
+The codebase pool (`codebases build`); the primary key is a text id `<repo>-<project>-<hash6>`.
+
+| Column | Meaning |
+|---|---|
+| `repo_id`, `full_name`, `root`, `commit_sha`, `spdx` | Where it comes from: repo, project folder, pinned commit, licence |
+| `files` | JSON `{relative path: text}`: Ballerina.toml and the `.bal` files (tests under `tests/`) |
+| `file_count`, `tokens`, `has_tests` | Size and whether it has tests |
+| `modules`, `nodes`, `items` | JSON: imported modules; graph nodes listing them; items whose qualified names appear in the code |
+| `split` | `train` · `eval` (by a hash of the id; eval codebases are kept for M8 and never feed training prompts) |
+| `score` | Selection rank |
+| `status`, `verify_detail` | `active` (base builds) · `rejected` (with the build errors) |
+
+## `codebase_states`
+
+| Column | Meaning |
+|---|---|
+| `codebase_id`, `kind` | The codebase and `compile_error` · `unfinished_feature` · `version_drift` · `failing_test` (one per kind) |
+| `target`, `description` | The file (or `file::function`) changed, and what was done |
+| `changed`, `patch` | JSON `{path: new text}` of the changed files; unified diff from the base |
+| `expect` | `fails_build` · `builds` · `fails_tests` |
+| `verify_status`, `verify_detail` | `pass` · `fail` · `skipped` (failing_test without `codebases.run_tests`); the build errors or test failures |
 
 ## `symbols`
 
@@ -355,6 +382,14 @@ side. Questions that overlap the eval set are in neither file.
 | `sft.jsonl` | verified or judged answer (no eval overlap) | `id` (`p<prompt id>`), `messages` (optional `system`, `user`, `assistant`), `covers`, `task_type`, `difficulty`, `verification`, `attempts`, `repaired` |
 | `pairs.jsonl` | preference pair | `id`, `covers`, `reason`, `prompt` (system + user messages), `chosen`, `rejected` (assistant messages): TRL's conversational DPO format |
 | `failed.jsonl` | prompt that failed every attempt | `id`, `covers`, `task_type`, `difficulty`, `prompt`, `answer` (the last one), `checks` |
+
+## `data/codebases/` (from `sftgen codebases build`)
+
+| File | Contents |
+|---|---|
+| `manifest.jsonl` | one line per active codebase: `id`, `repo`, `root`, `commit`, `licence`, `split`, `files`, `tokens`, `has_tests`, `modules`, `nodes`, `items`, `states` (kind, target, description, expect, verify) |
+| `<id>/base.tar.gz` | the project's files |
+| `<id>/states/<kind>.patch` | each state as a unified diff from the base |
 
 ## `data/eval/<version>/` (from `sftgen build-eval`)
 

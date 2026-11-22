@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M6 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M7 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -199,8 +199,9 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 - **Checks:**
   - **Format:** reference-material leaks fail.
   - **Code:** every block is built with `bal`; `// file:` blocks are built as one package.
-  - **Tests:** test files are type-checked with `bal test --list-groups`. They are run only when
-    `answers.run_tests` is on, which executes model-written code and is off by default.
+  - **Tests:** test files are type-checked by building them as ordinary sources with `bal build`
+    (see the M7 fix: `--list-groups` turned out to run module initialisation). They are run only
+    when `answers.run_tests` is on, which executes model-written code and is off by default.
   - **Code tasks** must contain code.
   - **Judge:** a judge of another family (enforced) scores `explain`/`design` answers, and any
     answer without code, on correctness, completeness and clarity.
@@ -223,9 +224,66 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 
 **Not run yet:** it needs `OPENROUTER_API_KEY` and accepted prompts from M5's live run.
 
+### M7: codebase pool v1
+
+- **`sftgen codebases build`:**
+  - **Candidates:** `[package]` projects from collected, licence-safe repos, with no 1.x syntax,
+    generated code or eval overlap; 2–40 files, ~0.8k–10k tokens.
+  - **Rank:** guides › wso2 › external › platform, tests preferred, at most 3 per repo.
+  - **Base must build** with `bal` 2201.14.1. Candidates are tried until `pool_size` (20) are
+    active.
+  - **Tagging:** graph nodes from imports, and items from qualified names in the code.
+  - **Split:** 20% eval by an id hash, kept for M8.
+- **States**, each a deterministic edit verified with `bal`:
+  - `compile_error`: a misspelled call; must fail to build.
+  - `unfinished_feature`: a stubbed function body; must still build, with imports the stub left
+    unused dropped.
+  - `version_drift`: an HTTP service rewritten in 1.x style; must fail.
+  - `failing_test`: a flipped operator. It runs the project's tests, so it's verified only with
+    `codebases.run_tests`; otherwise `skipped`.
+- **`sftgen codebases verify`** re-checks every base and state and fails if anything is red.
+- **`sftgen codebases attach`:**
+  - Each verified state of a train codebase becomes a prompt (`context_mode = codebase`,
+    `codebase_state_id`), with the real build errors quoted where relevant.
+  - **Packing:** the project goes in under `// file:` headers, up to ~14k tokens (Ballerina.toml,
+    the target file, other files smallest first, tests last).
+  - **Answering:** `answer-prompts` lays the answer's changed files over the state and builds the
+    project. A stub that is still there fails.
+  - **Planning:** codebase prompts don't count toward the standalone plan.
+- **New tables** `codebases` and `codebase_states`, and a `prompts.codebase_state_id` column.
+  Files go to `data/codebases/`: `manifest.jsonl`, `<id>/base.tar.gz` and
+  `<id>/states/<kind>.patch`.
+- **The report** gets a *Codebase pool* section and a terminal Codebases line. The Prompts line
+  lists codebase tasks separately.
+- **Fix (affects M6):** tests were type-checked with `bal test --list-groups`, which turned out to
+  **run module initialisation** (`init()`, module-level initialisers, required configurables). That
+  showed up as projects rejected for missing configurable values. Test files are now built as
+  ordinary sources with `bal build`, which runs nothing, and error paths are mapped back to
+  `tests/…`. A regression test checks that an `init()` side effect doesn't happen.
+  - **What ran:** before the fix, the first pool run started on 14 candidate projects. All are
+    official or licence-safe repos, run with secrets stripped from the environment. Their module
+    initialisation ran under `--list-groups`; no test bodies ran.
+- **Resource functions with path parameters** (`get [string id]`) are recognised by the function
+  scanner.
+
+**Live run:**
+- 251 candidates; 29 tried; 20 build. The 9 rejections are genuine: local multi-package
+  dependencies, a module that won't load on 2201.14.1, and an upstream API change.
+- Pool: 17 train and 3 eval projects; 19 of 20 have tests; about 82k tokens in total.
+- States: 45 verified, 0 failed (20 compile_error, 19 unfinished_feature, 6 version_drift).
+  15 failing_test states were skipped because tests aren't run.
+- **`codebases verify`: all green.**
+- `codebases attach`: 39 codebase prompts (6 eval states held back), up to ~9.6k tokens each,
+  all with `covers`.
+
 ### Tests
 
-106 tests in total (+4 for M6: code blocks and `// file:` packages, missing code and compiler
+111 tests in total (+5 for M7: the function scanner and each state edit; context packing order and
+budget; pool candidates, tags and split; build, verify, attach and codebase answers with a fake
+compiler, the report section, and the plan staying standalone; real `bal` state verification and
+type-checking tests without running module init, skipped without `bal`).
+
+M6: 106 tests in total (+4 for M6: code blocks and `// file:` packages, missing code and compiler
 feedback; real `bal` checks of a multi-file package with tests, compiled and then run, skipped
 without `bal`; the answer loop with compile, leak, missing-code and judge repairs, preference
 pairs, outputs, the report section and `--retry-failed`; the different-family rule).

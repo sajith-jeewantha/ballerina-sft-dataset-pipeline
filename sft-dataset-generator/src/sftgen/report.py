@@ -47,6 +47,7 @@ class ReportData:
     eval_set: dict[str, Any] | None = None  # build-eval (sftgen/eval/bbe.py) and decontamination
     prompts: dict[str, Any] | None = None   # plan-prompts / generate-prompts (sftgen/generate/prompts.py)
     answers: dict[str, Any] | None = None   # answer-prompts (sftgen/generate/responses.py)
+    codebases: dict[str, Any] | None = None  # codebases build/verify/attach (sftgen/codebases/)
 
     @property
     def total_pages(self) -> int:
@@ -94,8 +95,29 @@ def collect(s: Settings, db: Database) -> ReportData:
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
         swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
-        answers=_answers(s, db),
+        answers=_answers(s, db), codebases=_codebases(s, db),
     )
+
+
+def _codebases(s: Settings, db: Database) -> dict[str, Any] | None:
+    if not db.scalar("SELECT COUNT(*) FROM codebases"):
+        return None
+    status = {r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM codebases GROUP BY 1")}
+    rows = [dict(r) for r in db.query(
+        "SELECT id, full_name, root, split, file_count, tokens, has_tests, nodes, items FROM codebases "
+        "WHERE status = 'active' ORDER BY split DESC, id")]
+    states = {}
+    for r in db.query("SELECT codebase_id, kind, verify_status FROM codebase_states WHERE status = 'active'"):
+        states.setdefault(r["codebase_id"], {})[r["kind"]] = r["verify_status"]
+    by_kind = _grouped(db.query("SELECT kind, verify_status, COUNT(*) FROM codebase_states WHERE status = 'active' "
+                                "GROUP BY 1, 2"))
+    prompts = {r[0]: r[1] for r in db.query(
+        "SELECT st.kind, COUNT(*) FROM prompts p JOIN codebase_states st ON st.id = p.codebase_state_id "
+        "WHERE p.set_name = ? GROUP BY 1", (s.prompts.set_name,))}
+    rejected = [dict(r) for r in db.query("SELECT id, verify_detail FROM codebases WHERE status = 'rejected' "
+                                          "ORDER BY updated_at DESC LIMIT 15")]
+    return {"status": status, "rows": rows, "states": states, "by_kind": by_kind, "prompts": prompts,
+            "rejected": rejected}
 
 
 def _answers(s: Settings, db: Database) -> dict[str, Any] | None:
@@ -146,10 +168,12 @@ def _prompts(s: Settings, db: Database) -> dict[str, Any] | None:
         plan_summary = summary(plan(s, db), s.prompts)
     except Exception as exc:  # the report never fails on the plan
         log.warning("prompt plan not shown: %s", exc)
-    status = {r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM prompts WHERE set_name = ? GROUP BY 1",
-                                            (set_name,))}
+    status = {r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM prompts WHERE set_name = ? "
+                                            "AND context_mode = 'standalone' GROUP BY 1", (set_name,))}
+    codebase = db.scalar("SELECT COUNT(*) FROM prompts WHERE set_name = ? AND context_mode = 'codebase'",
+                         (set_name,)) or 0
     matrix = _grouped(db.query("SELECT task_type, difficulty, COUNT(*) FROM prompts WHERE set_name = ? "
-                               "AND status = 'accepted' GROUP BY 1, 2", (set_name,)))
+                               "AND status = 'accepted' AND context_mode = 'standalone' GROUP BY 1, 2", (set_name,)))
     scores: dict[str, list[int]] = {}
     reasons: dict[str, int] = {}
     for r in db.query("SELECT review, status FROM prompts WHERE set_name = ? AND review IS NOT NULL", (set_name,)):
@@ -162,11 +186,12 @@ def _prompts(s: Settings, db: Database) -> dict[str, Any] | None:
             reasons[why] = reasons.get(why, 0) + 1
     samples = [dict(r) for r in db.query(
         "SELECT id, ref, task_type, difficulty, prompt, review, grounding FROM prompts WHERE set_name = ? "
-        "AND status = 'accepted' AND eval_overlap IS NULL ORDER BY substr(prompt_hash, 1, 8) LIMIT 100",
+        "AND status = 'accepted' AND eval_overlap IS NULL AND context_mode = 'standalone' "
+        "ORDER BY substr(prompt_hash, 1, 8) LIMIT 100",
         (set_name,))]
     models = db.one("SELECT GROUP_CONCAT(DISTINCT writer_model) AS w, GROUP_CONCAT(DISTINCT reviewer_model) AS r "
                     "FROM prompts WHERE set_name = ?", (set_name,))
-    return {"set": set_name, "plan": plan_summary, "status": status, "matrix": matrix,
+    return {"set": set_name, "plan": plan_summary, "status": status, "matrix": matrix, "codebase": codebase,
             "scores": {k: round(sum(v) / len(v), 2) for k, v in scores.items() if v},
             "reasons": dict(sorted(reasons.items(), key=lambda kv: -kv[1])[:12]), "samples": samples,
             "writer": models["w"] if models else None, "reviewer": models["r"] if models else None}
@@ -265,6 +290,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_eval_line(d.eval_set)] if d.eval_set else []),
         *([_prompts_line(d.prompts)] if d.prompts else []),
         *([_answers_line(d.answers)] if d.answers else []),
+        *([_codebases_line(d.codebases)] if d.codebases else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -286,6 +312,15 @@ def _pct(n: int, total: int) -> str:
     return f"{100 * n / total:.0f}%" if total else "—"
 
 
+def _codebases_line(c: dict[str, Any]) -> str:
+    ok = sum(v.get("pass", 0) for v in c["by_kind"].values())
+    total = sum(sum(v.values()) for v in c["by_kind"].values())
+    n_eval = sum(1 for r in c["rows"] if r["split"] == "eval")
+    return (f"Codebases  {c['status'].get('active', 0)} active ({n_eval} eval) of "
+            f"{sum(c['status'].values())} tried  |  states verified {ok}/{total}, "
+            f"codebase prompts {sum(c['prompts'].values())}")
+
+
 def _answers_line(a: dict[str, Any]) -> str:
     st, t = a["status"], a["total"]
     ok = st.get("verified", 0) + st.get("judged", 0)
@@ -299,7 +334,8 @@ def _prompts_line(p: dict[str, Any]) -> str:
     plan = p["plan"] or {}
     return (f"Prompts    {p['set']}: {st.get('accepted', 0)} accepted / {plan.get('budget', '?')} planned "
             f"({plan.get('missing', '?')} open)  |  rejected {st.get('rejected', 0)}, duplicate "
-            f"{st.get('duplicate', 0)}, eval overlap {st.get('eval_overlap', 0)}")
+            f"{st.get('duplicate', 0)}, eval overlap {st.get('eval_overlap', 0)}"
+            + (f"; codebase tasks {p['codebase']}" if p.get("codebase") else ""))
 
 
 def _eval_line(e: dict[str, Any]) -> str:
@@ -502,7 +538,8 @@ def _prompts_html(d: ReportData) -> list[str]:
             f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}</div></div>' for k, v in (
                 ("Planned", plan.get("budget", "—")), ("Accepted", st.get("accepted", 0)),
                 ("Open slots", plan.get("missing", "—")), ("Rejected", st.get("rejected", 0)),
-                ("Duplicates", st.get("duplicate", 0)), ("Eval overlap", st.get("eval_overlap", 0)))) + "</div>",
+                ("Duplicates", st.get("duplicate", 0)), ("Eval overlap", st.get("eval_overlap", 0)),
+                ("Codebase tasks", p.get("codebase", 0)))) + "</div>",
         '<div class="two" style="margin-top:12px">',
         '<div class="card scroll"><h3>By node</h3>' + _table(
             ["Node", "Items", "Planned", "Accepted", "Open", "Given up"], node_rows, numeric={1, 2, 3, 4, 5}) + "</div>",
@@ -516,6 +553,37 @@ def _prompts_html(d: ReportData) -> list[str]:
         "</div>",
         f'<details style="margin-top:12px"><summary><b>{len(samples)} accepted prompts</b> (a stable sample, '
         "for reading)</summary>" + "".join(samples) + "</details>",
+    ]
+
+
+def _codebases_html(d: ReportData) -> list[str]:
+    c = d.codebases
+    if not c:
+        return []
+    kinds = ["compile_error", "unfinished_feature", "version_drift", "failing_test"]
+    mark = {"pass": "✓", "fail": "✗", "skipped": "skipped", None: "—"}
+    rows = [[_e(r["id"]), _e(r["split"]), f'<span class="url">{_e(r["full_name"])}/{_e(r["root"])}</span>',
+             str(r["file_count"]), f'{r["tokens"]:,}', "yes" if r["has_tests"] else "no",
+             str(len(json.loads(r["items"]))), *[mark.get(c["states"].get(r["id"], {}).get(k)) for k in kinds]]
+            for r in c["rows"]]
+    kind_rows = [[_e(k), *[str(c["by_kind"].get(k, {}).get(x, 0)) for x in ("pass", "fail", "skipped")],
+                  str(c["prompts"].get(k, 0))] for k in kinds]
+    return [
+        "<h2>Codebase pool</h2>",
+        '<p class="muted">From <code>sftgen codebases build</code>: Swan Lake projects from the collected repos that '
+        "build with the pinned <code>bal</code>, tagged with graph items, each turned into states that are verified "
+        "with the toolchain (a compile error must fail the build, a stubbed function must still build, a 1.x-style "
+        "service must fail, a flipped operator must fail its tests: only with <code>codebases.run_tests</code>). "
+        "<code>codebases attach</code> turns verified states of <b>train</b> codebases into prompts; <b>eval</b> "
+        "codebases are kept for M8. Files in <code>data/codebases/</code>.</p>",
+        '<div class="card scroll">' + _table(["Codebase", "Split", "Source", "Files", "Tokens", "Tests", "Items",
+                                              *kinds], rows, numeric={3, 4, 6}) + "</div>",
+        '<div class="card scroll" style="margin-top:12px"><h3>States</h3>' + _table(
+            ["Kind", "Verified", "Failed", "Skipped", "Prompts"], kind_rows, numeric={1, 2, 3, 4}) + "</div>",
+        *([f'<h3 style="margin-top:16px">Projects that did not build ({len(c["rejected"])} shown)</h3>',
+           '<div class="card scroll">' + _table(["Project", "Build result"], [
+               [_e(r["id"]), f'<span class="err">{_e((r["verify_detail"] or "")[:300])}</span>']
+               for r in c["rejected"]]) + "</div>"] if c["rejected"] else []),
     ]
 
 
@@ -648,6 +716,7 @@ def render_html(d: ReportData) -> str:
         *_eval_html(d),
         *_prompts_html(d),
         *_answers_html(d),
+        *_codebases_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",
