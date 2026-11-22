@@ -7,6 +7,11 @@ Commands (run in this order, or all at once with `run-all`):
   generate-prompts     fill open slots: the writer model (DeepSeek) writes prompts per graph item,
                        grounded in item sources, FTS5 and Central symbols; the judge model reviews
                        them. Up to LIMIT_GENERATING prompts written per run; data/prompts/<set>/
+  answer-prompts       verified answers to accepted prompts: the teacher answers with the item's
+                       grounding; code is built with bal (tests compiled, run only if
+                       answers.run_tests), prose is checked by the judge; failures are repaired
+                       with the real errors (up to answers.max_attempts). Up to LIMIT_GENERATING
+                       prompts per run; data/answers/<set>/ (sft, pairs, failed)
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -56,7 +61,8 @@ from balpipe_common.storage import Storage, StorageError
 
 log = logging.getLogger("sftgen")
 
-COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
+COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts",
+            "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"]}
 RUN_ALL = ["scrape", "generate-questions", "generate-answers", "validate", "export", "export-sft"]
@@ -86,6 +92,11 @@ def print_startup(s: Settings, command: str, store: Storage | None = None) -> No
            f"  prompt reviewer        {s.reviewer_model or '(not set)'}",
            f"  prompt set             {s.prompts.set_name} ({len(s.prompts.nodes) or 'all'} nodes)"]
           if command in ("plan-prompts", "generate-prompts") else []),
+        *([f"  teacher                {s.answer_gen_model or '(not set)'}",
+           f"  judge                  {s.reviewer_model or '(not set)'}",
+           f"  attempts per prompt    {s.answers.max_attempts} (first answer + repairs)",
+           f"  generated tests        {'RUN (answers.run_tests: executes model-written code)' if s.answers.run_tests else 'compiled, not run'}"]
+          if command == "answer-prompts" else []),
         f"  Swan Lake pin          {s.sources.swan_lake} (lock: {s.sources.lock_file})",
         f"  storage                {store.describe() if store else 'local only'}",
         "",
@@ -137,6 +148,11 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
 
             _decontam(s, db, run)
             return gen_prompts(s, db, run)
+        if command == "answer-prompts":
+            from sftgen.generate.responses import run as answer_prompts
+
+            _decontam(s, db, run)
+            return answer_prompts(s, db, run, retry_failed=a.retry_failed)
         if command == "generate-questions":
             from sftgen.generate.questions import run as gen_questions
 
@@ -301,7 +317,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="collect-repos: also collect this repository (repeatable)")
     p.add_argument("--source", action="append", choices=["bbe", "spec", "learn", "central", "github"],
                    help="scrape: only this source (repeatable)")
-    p.add_argument("--retry-failed", action="store_true", help="generate-answers: retry questions that failed")
+    p.add_argument("--retry-failed", action="store_true", help="generate-answers: retry questions that failed · answer-prompts: continue failed prompts "
+                        "with another round of repairs")
     p.add_argument("--recheck", action="store_true",
                    help="validate: re-check answers already validated · build-eval: re-run every eval check")
     p.add_argument("--no-verify", action="store_true",

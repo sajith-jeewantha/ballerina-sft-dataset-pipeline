@@ -13,6 +13,9 @@ erDiagram
     repos ||--o{ repo_files : "snapshot"
     eval_items ||--o{ fingerprints : "fingerprinted by"
     graph_items ||--o{ prompts : "planned for"
+    prompts ||--o{ attempts : "answered by"
+    prompts ||--o| responses : "outcome"
+    prompts ||--o| preference_pairs : "chosen vs rejected"
     pages ||--o{ symbols : "API reference of"
     pages {
         int id
@@ -121,7 +124,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `build-eval` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -206,7 +209,7 @@ One row per file in a collected repo's snapshot.
 
 ## Decontamination columns
 
-`chunks`, `questions`, `repo_files` and `prompts` also have:
+`chunks`, `questions`, `repo_files`, `prompts` and `responses` also have:
 
 | Column | Meaning |
 |---|---|
@@ -257,6 +260,40 @@ One row per prompt written by `generate-prompts` (whatever its outcome).
 | `writer_model`, `reviewer_model` | The models that wrote and reviewed it |
 | `review` | JSON: `on_item`, `answerable`, `clear`, `realistic`, `task_fit` (1–5), `verdict`, `reason`; or `filter` when it never reached review |
 | `status` | `accepted` · `rejected` (filter or review) · `duplicate` (near-duplicate of a prompt in the set) · `eval_overlap` |
+
+## `attempts`
+
+One row per teacher answer to a prompt (`answer-prompts`): the first try and each repair.
+
+| Column | Meaning |
+|---|---|
+| `prompt_id`, `n` | The prompt and the attempt number (1 = first answer; 4+ after `--retry-failed`) |
+| `model`, `answer` | The teacher and its full answer |
+| `checks` | JSON: `status` (`pass` · `fail` · `no_code`), `reason` (`leak` · `compile` · `test` · `missing_code` · `timeout` · `judge`), `verification`, `blocks`, `package_files`, `errors` (file, line, col, message), `judge` (scores, verdict, issues) |
+| `feedback` | What failed in this answer, as sent to the teacher with the repair request |
+| `status` | `pass` · `fail` |
+
+## `responses`
+
+The outcome per prompt.
+
+| Column | Meaning |
+|---|---|
+| `prompt_id`, `set_name` | The prompt and its set |
+| `attempt_id`, `attempts` | The final attempt and how many were used |
+| `repaired` | 1 when it passed after at least one failed attempt |
+| `verification` | `compile` · `test` · `judge` · `compile+judge` · `test+judge` |
+| `status` | `verified` (code checked by the toolchain) · `judged` (prose checked by the judge) · `failed` (every attempt failed) |
+
+## `preference_pairs`
+
+One per prompt whose answer passed after a repair.
+
+| Column | Meaning |
+|---|---|
+| `prompt_id` | The prompt |
+| `chosen_id`, `rejected_id` | The passing attempt, and the first failed one |
+| `reason` | Why the rejected answer failed: `compile` · `test` · `missing_code` · `leak` · `judge` · `timeout` |
 
 ## `symbols`
 
@@ -310,6 +347,14 @@ side. Questions that overlap the eval set are in neither file.
 | `accepted.jsonl` | accepted prompt | `id`, `ref`, `node`, `covers`, `task_type`, `difficulty`, `context_mode`, `prompt`, `grounding_urls`, `symbols`, `review`, `status`, `round`, `writer_model`, `reviewer_model` |
 | `rejected.jsonl` | prompt not accepted | the same fields |
 | `coverage.json` | — | totals and per node (`items`, `budget`, `accepted`, `missing`, `given_up`), plus per item `budget`, `missing`, `rounds` |
+
+## `data/answers/<set>/` (from `sftgen answer-prompts`)
+
+| File | One line per | Fields |
+|---|---|---|
+| `sft.jsonl` | verified or judged answer (no eval overlap) | `id` (`p<prompt id>`), `messages` (optional `system`, `user`, `assistant`), `covers`, `task_type`, `difficulty`, `verification`, `attempts`, `repaired` |
+| `pairs.jsonl` | preference pair | `id`, `covers`, `reason`, `prompt` (system + user messages), `chosen`, `rejected` (assistant messages): TRL's conversational DPO format |
+| `failed.jsonl` | prompt that failed every attempt | `id`, `covers`, `task_type`, `difficulty`, `prompt`, `answer` (the last one), `checks` |
 
 ## `data/eval/<version>/` (from `sftgen build-eval`)
 

@@ -46,6 +46,7 @@ class ReportData:
     repos: dict[str, Any] | None = None     # collect-repos (ballerinascraper/repos.py)
     eval_set: dict[str, Any] | None = None  # build-eval (sftgen/eval/bbe.py) and decontamination
     prompts: dict[str, Any] | None = None   # plan-prompts / generate-prompts (sftgen/generate/prompts.py)
+    answers: dict[str, Any] | None = None   # answer-prompts (sftgen/generate/responses.py)
 
     @property
     def total_pages(self) -> int:
@@ -93,7 +94,45 @@ def collect(s: Settings, db: Database) -> ReportData:
         answer_status={r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM answers GROUP BY 1")},
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
         swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
+        answers=_answers(s, db),
     )
+
+
+def _answers(s: Settings, db: Database) -> dict[str, Any] | None:
+    set_name = s.prompts.set_name
+    total = db.scalar("SELECT COUNT(*) FROM responses WHERE set_name = ?", (set_name,))
+    if not total:
+        return None
+    status = {r[0]: r[1] for r in db.query("SELECT status, COUNT(*) FROM responses WHERE set_name = ? GROUP BY 1",
+                                            (set_name,))}
+    first_try = db.scalar("SELECT COUNT(*) FROM responses WHERE set_name = ? AND status != 'failed' AND repaired = 0",
+                          (set_name,))
+    repaired = db.scalar("SELECT COUNT(*) FROM responses WHERE set_name = ? AND repaired = 1", (set_name,))
+    by_task = _grouped(db.query("SELECT p.task_type, r.status, COUNT(*) FROM responses r JOIN prompts p "
+                                "ON p.id = r.prompt_id WHERE r.set_name = ? GROUP BY 1, 2", (set_name,)))
+    attempts = {str(r[0]): r[1] for r in db.query("SELECT attempts, COUNT(*) FROM responses WHERE set_name = ? "
+                                                  "GROUP BY 1 ORDER BY 1", (set_name,))}
+    reasons: dict[str, int] = {}
+    errors: dict[str, int] = {}
+    for r in db.query("SELECT a.checks FROM attempts a JOIN prompts p ON p.id = a.prompt_id WHERE p.set_name = ? "
+                      "AND a.status = 'fail'", (set_name,)):
+        c = json.loads(r["checks"])
+        reasons[c.get("reason") or "?"] = reasons.get(c.get("reason") or "?", 0) + 1
+        for e in c.get("errors", [])[:3]:
+            msg = re.sub(r"'[^']*'", "'…'", e.get("message", ""))[:90]
+            errors[msg] = errors.get(msg, 0) + 1
+    pairs = db.scalar("SELECT COUNT(*) FROM preference_pairs pp JOIN prompts p ON p.id = pp.prompt_id "
+                      "WHERE p.set_name = ?", (set_name,))
+    failed = [dict(r) for r in db.query(
+        "SELECT p.id, p.ref, p.task_type, a.feedback FROM responses r JOIN prompts p ON p.id = r.prompt_id "
+        "JOIN attempts a ON a.id = r.attempt_id WHERE r.set_name = ? AND r.status = 'failed' ORDER BY p.id LIMIT 25",
+        (set_name,))]
+    return {"set": set_name, "total": total, "status": status, "first_try": first_try or 0,
+            "repaired": repaired or 0, "by_task": by_task, "attempts": attempts,
+            "reasons": dict(sorted(reasons.items(), key=lambda kv: -kv[1])),
+            "errors": dict(sorted(errors.items(), key=lambda kv: -kv[1])[:10]), "pairs": pairs or 0,
+            "failed": failed, "overlap": db.scalar("SELECT COUNT(*) FROM responses WHERE set_name = ? AND "
+                                                   "eval_overlap IS NOT NULL", (set_name,)) or 0}
 
 
 def _prompts(s: Settings, db: Database) -> dict[str, Any] | None:
@@ -225,6 +264,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_repos_line(d.repos)] if d.repos else []),
         *([_eval_line(d.eval_set)] if d.eval_set else []),
         *([_prompts_line(d.prompts)] if d.prompts else []),
+        *([_answers_line(d.answers)] if d.answers else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -240,6 +280,18 @@ def _repos_line(r: dict[str, Any]) -> str:
     check = sum(v.get("licence_check", 0) for v in r["groups"].values())
     return (f"Repos      {collected}/{total} collected, {check} need a licence check  |  "
             f"{kept:,} unique .bal files, ~{tokens / 1e6:.1f}M tokens")
+
+
+def _pct(n: int, total: int) -> str:
+    return f"{100 * n / total:.0f}%" if total else "—"
+
+
+def _answers_line(a: dict[str, Any]) -> str:
+    st, t = a["status"], a["total"]
+    ok = st.get("verified", 0) + st.get("judged", 0)
+    return (f"Answers    {a['set']}: {ok}/{t} pass ({_pct(ok, t)}; first try {_pct(a['first_try'], t)}, "
+            f"after repair {a['repaired']})  |  verified {st.get('verified', 0)}, judged {st.get('judged', 0)}, "
+            f"failed {st.get('failed', 0)}, pairs {a['pairs']}")
 
 
 def _prompts_line(p: dict[str, Any]) -> str:
@@ -467,6 +519,47 @@ def _prompts_html(d: ReportData) -> list[str]:
     ]
 
 
+def _answers_html(d: ReportData) -> list[str]:
+    a = d.answers
+    if not a:
+        return []
+    st, t = a["status"], a["total"]
+    ok = st.get("verified", 0) + st.get("judged", 0)
+    statuses = ["verified", "judged", "failed"]
+    task_rows = [[_e(task), *[str(v.get(x, 0)) for x in statuses], _pct(v.get("verified", 0) + v.get("judged", 0),
+                                                                      sum(v.values()))]
+                 for task, v in sorted(a["by_task"].items())]
+    return [
+        "<h2>Answers</h2>",
+        f'<p class="muted">From <code>sftgen answer-prompts</code> (set <b>{_e(a["set"])}</b>): the teacher answers '
+        "each accepted prompt; code is built with <code>bal</code> (tests compiled, run only with "
+        "<code>answers.run_tests</code>); prose is checked by the judge; failures are repaired with the real errors. "
+        "<b>verified</b> = code checked by the toolchain, <b>judged</b> = prose checked by the judge. Cost per phase "
+        "(answer-prompts, repair-answers, judge-answers) is in the usage table below. Files in "
+        "<code>data/answers/</code>.</p>",
+        '<div class="grid">' + "".join(
+            f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}</div></div>' for k, v in (
+                ("Answered", t), ("Pass rate", _pct(ok, t)), ("First-try pass", _pct(a["first_try"], t)),
+                ("Repaired", f'{a["repaired"]} ({_pct(a["repaired"], t)})'), ("Failed", st.get("failed", 0)),
+                ("Preference pairs", a["pairs"]), ("Eval overlap", a["overlap"]))) + "</div>",
+        '<div class="two" style="margin-top:12px">',
+        '<div class="card scroll"><h3>By task type</h3>' + _table(["Task", *statuses, "Pass rate"], task_rows,
+                                                                  numeric={1, 2, 3, 4}) + "</div>",
+        f'<div class="card"><h3>Attempts used</h3>{_bars(a["attempts"])}</div>',
+        "</div>",
+        '<div class="two" style="margin-top:12px">',
+        '<div class="card"><h3>Why attempts failed</h3>' + (_bars(a["reasons"], alt=True) if a["reasons"] else
+                                                            '<p class="muted">None.</p>') + "</div>",
+        '<div class="card"><h3>Most common compiler errors</h3>' + (_bars(a["errors"], alt=True) if a["errors"] else
+                                                                   '<p class="muted">None.</p>') + "</div>",
+        "</div>",
+        *([f'<h3 style="margin-top:16px">Failed after all repairs ({len(a["failed"])} shown)</h3>',
+           '<div class="card scroll">' + _table(["Prompt", "Item", "Task", "Last problem"], [
+               [f'p{f["id"]}', _e(f["ref"]), _e(f["task_type"]), f'<span class="err">{_e((f["feedback"] or "")[:300])}'
+                "</span>"] for f in a["failed"]]) + "</div>"] if a["failed"] else []),
+    ]
+
+
 def _eval_html(d: ReportData) -> list[str]:
     e = d.eval_set
     if not e:
@@ -554,6 +647,7 @@ def render_html(d: ReportData) -> str:
         *_repos_html(d),
         *_eval_html(d),
         *_prompts_html(d),
+        *_answers_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",

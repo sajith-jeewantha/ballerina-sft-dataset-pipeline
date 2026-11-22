@@ -35,6 +35,17 @@ LANGLIB_PREFIXES = {"int", "float", "decimal", "string", "boolean", "array", "ma
                     "stream", "object", "function", "future", "typedesc", "byte"}
 
 
+TEST_FAIL_RE = re.compile(r"\[fail\] (\S+?):\s*\n(.*?)(?=\n\s*callableName|\n\s*\[fail\]|\n\s*\d+ passing|\Z)",
+                          re.S)
+
+
+def test_failures(output: str) -> list[dict]:
+    """Failed tests from `bal test` output: name and assertion message, whitespace collapsed."""
+    return [{"file": "tests", "line": None, "col": None,
+             "message": f"test {name} failed: {' '.join(msg.split())}"[:400]}
+            for name, msg in TEST_FAIL_RE.findall(output)[:10]]
+
+
 class BalUnavailable(RuntimeError):
     pass
 
@@ -81,9 +92,10 @@ def prepare(code: str, auto_imports: dict[str, str]) -> Prepared:
     return Prepared(code, form)
 
 
-def parse_errors(output: str, line_offset: int = 0) -> list[dict]:
+def parse_errors(output: str, line_offset: int = 0, *, with_file: bool = False) -> list[dict]:
     errs = [
-        {"line": max(1, int(m.group("l")) - line_offset), "col": int(m.group("c")), "message": m.group("msg").strip()}
+        {**({"file": m.group("file")} if with_file else {}),
+         "line": max(1, int(m.group("l")) - line_offset), "col": int(m.group("c")), "message": m.group("msg").strip()}
         for m in ERROR_RE.finditer(output)
     ]
     if not errs:
@@ -151,6 +163,60 @@ class BalCompiler:
             ballerina_version=self.version,
             checked_at=utc_now_iso(),
         )
+        if outcome.status != "timeout":
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps({k: v for k, v in asdict(outcome).items() if k != "cached"}), encoding="utf-8")
+        return outcome
+
+    def build_package(self, files: dict[str, str], *, test: bool = False, timeout_s: int | None = None
+                      ) -> CompileOutcome:
+        """`bal build` (or `bal test`) a package made of these files (relative paths, e.g. main.bal,
+        tests/main_test.bal). A Ballerina.toml pinned to this toolchain is added if missing.
+        `test=True` runs the package's tests: that executes the code. Otherwise test files are only
+        type-checked (`bal test --list-groups` compiles them without running anything)."""
+        kind = "test" if test else "build"
+        key_src = json.dumps(sorted(files.items()))
+        cache = self._cache_path(f"package-{kind}", key_src)
+        if cache.is_file():
+            return CompileOutcome(**{**json.loads(cache.read_text(encoding="utf-8")), "cached": True})
+        timeout = timeout_s or self.cfg.timeout_s * (3 if test else 1)
+        with tempfile.TemporaryDirectory(prefix="balpkg-") as tmp:
+            root = Path(tmp)
+            if "Ballerina.toml" not in files:
+                (root / "Ballerina.toml").write_text(
+                    f'[package]\norg = "sftgen"\nname = "answer"\nversion = "0.1.0"\n'
+                    f'distribution = "{self.version.split("-")[0]}"\n\n[build-options]\nobservabilityIncluded = false\n',
+                    encoding="utf-8")
+            for rel, text in files.items():
+                path = (root / rel).resolve()
+                if root.resolve() not in path.parents:
+                    return CompileOutcome("error", [{"file": rel, "line": None, "col": None,
+                                                     "message": "file path leaves the package"}], "package")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text, encoding="utf-8")
+
+            def bal(args: list[str]) -> tuple[int | None, str]:
+                try:
+                    p = subprocess.run([self.cfg.bal_path, *args], cwd=root, capture_output=True, text=True,
+                                       timeout=timeout, env=self._env())
+                except subprocess.TimeoutExpired:
+                    return None, ""
+                return p.returncode, p.stdout + "\n" + p.stderr
+
+            def run(cmd: list[str]) -> tuple[int | None, str]:
+                rc, out = bal([cmd[0], "--offline", *cmd[1:]] if self.cfg.offline else cmd)
+                if rc not in (0, None) and self.cfg.offline and UNRESOLVED_RE.search(out):
+                    rc, out = bal(cmd)
+                return rc, out
+
+            rc, out = run([kind])
+            if rc == 0 and not test and any(f.startswith("tests/") for f in files):
+                rc, out = run(["test", "--list-groups"])  # compile the tests, run nothing
+        errors = [] if rc == 0 else parse_errors(out, with_file=True)
+        if test and rc not in (0, None) and not ERROR_RE.search(out):
+            errors = test_failures(out) or errors
+        outcome = CompileOutcome(status="timeout" if rc is None else ("ok" if rc == 0 else "error"), errors=errors,
+                                 code_form="package", ballerina_version=self.version, checked_at=utc_now_iso())
         if outcome.status != "timeout":
             cache.parent.mkdir(parents=True, exist_ok=True)
             cache.write_text(json.dumps({k: v for k, v in asdict(outcome).items() if k != "cached"}), encoding="utf-8")

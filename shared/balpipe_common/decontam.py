@@ -11,7 +11,8 @@ overlaps an eval item when any of these hold:
   were dropped when the fingerprints were built, so boilerplate never triggers a match, and
   items with fewer than `eval.min_shingles` distinctive shingles are matched exactly only.
 
-`apply_decontam` checks chunks, questions (with their answers), prompts and repo `.bal` files and
+`apply_decontam` checks chunks, questions (with their answers), prompts, prompt answers and repo
+`.bal` files and
 records the overlapping item in `eval_overlap`. Rows are re-checked only when the
 fingerprint set changes (`decontam_key`) or a question gets its answer. Chunks of eval pages,
 and chunks that overlap, move from `pending` to `eval_holdout`, so no questions are generated
@@ -111,7 +112,8 @@ def apply_decontam(db: Any, cfg: EvalCfg, dc: Decontaminator | None = None) -> d
     key = dc.key
     now = utc_now_iso()
     eval_pages = {r["url"]: r["id"] for r in db.query("SELECT id, url FROM eval_items WHERE status = 'active'")}
-    stats = {"chunks_checked": 0, "questions_checked": 0, "prompts_checked": 0, "repo_files_checked": 0}
+    stats = {"chunks_checked": 0, "questions_checked": 0, "prompts_checked": 0, "responses_checked": 0,
+             "repo_files_checked": 0}
 
     # chunks: eval pages are held out whole; other chunks by their text
     rows = db.query("SELECT c.id, c.text, c.status, p.url FROM chunks c JOIN pages p ON p.id = c.page_id "
@@ -152,6 +154,15 @@ def apply_decontam(db: Any, cfg: EvalCfg, dc: Decontaminator | None = None) -> d
     db.conn.commit()  # one table at a time: other writers wait only for the UPDATE itself
     stats["prompts_checked"] = len(updates)
 
+    # final answers to prompts
+    rows = db.query("SELECT r.id, p.prompt, a.answer FROM responses r JOIN prompts p ON p.id = r.prompt_id "
+                    "JOIN attempts a ON a.id = r.attempt_id WHERE r.decontam_key IS NOT ?", (key,))
+    updates = [(dc.check(f"{r['prompt']}\n{r['answer']}"), key, now, r["id"]) for r in rows]
+    db.conn.executemany("UPDATE responses SET eval_overlap = ?, decontam_key = ?, updated_at = ? WHERE id = ?",
+                        updates)
+    db.conn.commit()
+    stats["responses_checked"] = len(updates)
+
     # repo .bal files (the raw corpus and the codebase pool)
     rows = db.query("SELECT id, text, minhash FROM repo_files WHERE kind = 'bal' AND text IS NOT NULL "
                     "AND decontam_key IS NOT ?", (key,))
@@ -172,6 +183,7 @@ def overlap_counts(db: Any) -> dict[str, int]:
         "repo_files_overlap": int(db.scalar("SELECT COUNT(*) FROM repo_files WHERE eval_overlap IS NOT NULL")
                                   or 0),
         "prompts_overlap": int(db.scalar("SELECT COUNT(*) FROM prompts WHERE eval_overlap IS NOT NULL") or 0),
+        "responses_overlap": int(db.scalar("SELECT COUNT(*) FROM responses WHERE eval_overlap IS NOT NULL") or 0),
     }
 
 

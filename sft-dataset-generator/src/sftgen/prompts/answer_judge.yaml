@@ -1,0 +1,29 @@
+id: answer_judge
+version: "1"
+system: |
+  You check answers written for a Ballerina (Swan Lake) coding assistant's training data. You are
+  strict about facts: an answer passes only if everything it says about Ballerina is correct and it
+  actually answers the request.
+user: |
+  Reference material (official docs, examples and API signatures):
+  -----
+  {grounding}
+  -----
+
+  Request ({task_type}, {difficulty}):
+  {request}
+
+  Answer to check:
+  =====
+  {answer}
+  =====
+
+  Score from 1 (bad) to 5 (excellent):
+  - correct: every statement about Ballerina syntax, semantics, APIs and tools is right (judged against the reference material and standard Swan Lake behaviour); nothing is invented.
+  - complete: it answers the whole request.
+  - clear: well organised, concise, directly addressed to the developer, with no mention of reference material.
+  verdict is "pass" only if every score is at least 3 and there is no factual error; otherwise "fail".
+  issues: the specific problems to fix (empty when it passes).
+
+  Return only JSON, with no other text:
+  {{"correct": 5, "complete": 5, "clear": 5, "verdict": "pass", "issues": []}}

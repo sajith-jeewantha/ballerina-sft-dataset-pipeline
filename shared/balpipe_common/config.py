@@ -258,6 +258,25 @@ class PromptsCfg(BaseModel):
     max_symbols: int = 6              # Central API entries (signatures, fields) named in the item
 
 
+class AnswersCfg(BaseModel):
+    """`answer-prompts`: teacher answers to accepted prompts, checked with `bal` and repaired."""
+
+    max_attempts: int = Field(default=3, ge=1)  # first answer + up to 2 repairs with the real errors
+    temperature: float = 0.2
+    max_tokens: int = 4096
+    # Tasks whose answer must contain Ballerina code; and tasks whose prose a judge always checks.
+    # Any other answer without code is judged too.
+    code_tasks: list[str] = Field(default_factory=lambda: ["write_code", "fix_code"])
+    judge_tasks: list[str] = Field(default_factory=lambda: ["explain", "design"])
+    judge_min_score: int = 3           # every judge score (1-5) must reach this
+    max_judge_tokens: int = 1200
+    # `bal test` runs tests that the answer itself contains. That EXECUTES model-written code on this
+    # machine (secrets are stripped from its environment, and it is killed at the timeout). Off by
+    # default: turn it on in a sandbox (container/VM). Without it, test files are compiled only.
+    run_tests: bool = False
+    max_feedback_errors: int = 8       # compiler errors passed back to the teacher per repair
+
+
 class EvalCfg(BaseModel):
     """`build-eval`: the held-out evaluation set and the decontamination fingerprints."""
 
@@ -354,6 +373,7 @@ class Settings(BaseSettings):
     sft: SftCfg = Field(default_factory=SftCfg)
     eval_: EvalCfg = Field(default_factory=EvalCfg, alias="eval")
     prompts: PromptsCfg = Field(default_factory=PromptsCfg)
+    answers: AnswersCfg = Field(default_factory=AnswersCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -416,6 +436,10 @@ class Settings(BaseSettings):
     @property
     def prompts_dir(self) -> Path:
         return self.data_path("prompts") / self.prompts.set_name
+
+    @property
+    def answers_dir(self) -> Path:
+        return self.data_path("answers") / self.prompts.set_name
 
     @property
     def eval_dir(self) -> Path:

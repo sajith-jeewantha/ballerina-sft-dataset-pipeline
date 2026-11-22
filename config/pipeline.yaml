@@ -107,6 +107,17 @@ prompts:                             # plan-prompts / generate-prompts (item-dri
   fts_neighbours: 2
   max_symbols: 6
 
+answers:                             # answer-prompts (verified answers, M6)
+  max_attempts: 3                    # first answer + up to 2 repairs with the real bal errors / judge issues
+  temperature: 0.2
+  max_tokens: 4096
+  code_tasks: [write_code, fix_code] # answers to these must contain Ballerina code
+  judge_tasks: [explain, design]     # the judge checks these (and any answer without code)
+  judge_min_score: 3
+  run_tests: false                   # true = `bal test` the tests an answer contains: EXECUTES model-written
+                                     # code. Turn on only in a sandbox (container/VM); off = tests are compiled
+  max_feedback_errors: 8
+
 eval:                                # build-eval: held-out eval set and decontamination
   version: v1                        # files go to <data>/eval/v1/
   bbe_eval_fraction: 0.30            # BBE examples held out, decided by a hash of the example name

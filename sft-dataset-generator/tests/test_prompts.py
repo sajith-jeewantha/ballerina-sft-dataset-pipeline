@@ -206,7 +206,7 @@ def test_generate_prompts_filters_reviews_and_fills_gaps(pilot) -> None:  # noqa
     # code, slot 3 is vague: rejected by the reviewer once, then a near-duplicate for the other items
     assert (st["eval_overlap"], st["rejected"], st["duplicate"], st["accepted"]) == (3, 4, 2, 26 - 9)
     assert stats["items_done"] == 3 and client.calls.count("prompt_reviewer") == 3
-    row = db.one("SELECT * FROM prompts WHERE status = 'accepted' LIMIT 1")
+    row = db.one("SELECT * FROM prompts WHERE status = 'accepted' AND ref = 'lib.http#client_timeout' LIMIT 1")
     assert json.loads(row["covers"]) == [row["ref"]] and json.loads(row["review"])["verdict"] == "accept"
     assert row["writer_model"].startswith("deepseek/") and row["reviewer_model"].startswith("qwen/")
     assert json.loads(row["grounding"])["tokens"] > 0

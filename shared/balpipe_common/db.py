@@ -15,8 +15,11 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * prompts    prompts planned per graph item, written by the writer model, reviewed by the judge
 * symbols    Central API entries (signatures, fields), looked up by `module:Name`
 * chunks_fts full-text index (FTS5, BM25) over chunk text, for grounding
+* attempts   every teacher answer to a prompt (first try and repairs) with its check results
+* responses  the outcome per prompt: the final attempt, verified / judged / failed
+* preference_pairs  a failed attempt and the passing repair of the same prompt (for DPO)
 
-`chunks`, `questions`, `repo_files` and `prompts` carry `eval_overlap` (the eval item they copy, or
+`chunks`, `questions`, `repo_files`, `prompts` and `responses` carry `eval_overlap` (the eval item they copy, or
 NULL) and `decontam_key` (the fingerprint set they were last checked against).
 
 Writes are committed immediately, so an interrupted command loses at most the
@@ -273,6 +276,48 @@ CREATE TABLE IF NOT EXISTS prompts (
     updated_at       TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_prompts_ref ON prompts(set_name, ref, status);
+
+CREATE TABLE IF NOT EXISTS attempts (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    prompt_id        INTEGER NOT NULL REFERENCES prompts(id),
+    n                INTEGER NOT NULL,      -- 1 = first answer, 2.. = repairs
+    model            TEXT NOT NULL,
+    answer           TEXT NOT NULL,
+    feedback         TEXT,                  -- what failed in this answer (errors / judge issues); sent with the repair
+    checks           TEXT NOT NULL DEFAULT '{}', -- JSON: code blocks, packages, compile/test results, judge
+    status           TEXT NOT NULL,         -- pass | fail
+    run_id           INTEGER,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (prompt_id, n)
+);
+
+CREATE TABLE IF NOT EXISTS responses (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    prompt_id        INTEGER NOT NULL UNIQUE REFERENCES prompts(id),
+    set_name         TEXT NOT NULL,
+    attempt_id       INTEGER REFERENCES attempts(id),  -- the final attempt
+    attempts         INTEGER NOT NULL,
+    repaired         INTEGER NOT NULL DEFAULT 0,  -- 1 = passed after at least one repair
+    verification     TEXT,                  -- compile | test | judge | compile+judge | test+judge
+    status           TEXT NOT NULL,         -- verified (code checked) | judged (prose checked) | failed
+    eval_overlap     TEXT,
+    decontam_key     TEXT,
+    run_id           INTEGER,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_responses_status ON responses(set_name, status);
+
+CREATE TABLE IF NOT EXISTS preference_pairs (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    prompt_id        INTEGER NOT NULL UNIQUE REFERENCES prompts(id),
+    chosen_id        INTEGER NOT NULL REFERENCES attempts(id),    -- the passing answer
+    rejected_id      INTEGER NOT NULL REFERENCES attempts(id),    -- the first failed answer
+    reason           TEXT NOT NULL,         -- compile | test | judge | missing_code: why it was rejected
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS symbols (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,

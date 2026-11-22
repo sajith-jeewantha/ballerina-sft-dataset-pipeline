@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M5 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M6 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -188,9 +188,49 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 
 **Not run yet:** the live prompt run needs `OPENROUTER_API_KEY` in `.env`.
 
+### M6: verified answers
+
+- **`sftgen answer-prompts`:** the teacher answers each accepted prompt with the item's grounding,
+  under an **answer-format contract**:
+  - Code goes in ```` ```ballerina ```` blocks, and every block must compile.
+  - A multi-file solution gives each file in full in a `// file: <path>` block. This is the plan's
+    recommendation for §8 question 1, adopted and also used for codebase tasks.
+  - No mention of reference material, and no `Source:` lines.
+- **Checks:**
+  - **Format:** reference-material leaks fail.
+  - **Code:** every block is built with `bal`; `// file:` blocks are built as one package.
+  - **Tests:** test files are type-checked with `bal test --list-groups`. They are run only when
+    `answers.run_tests` is on, which executes model-written code and is off by default.
+  - **Code tasks** must contain code.
+  - **Judge:** a judge of another family (enforced) scores `explain`/`design` answers, and any
+    answer without code, on correctness, completeness and clarity.
+- **Repair loop:** failed answers go back to the teacher with the real problems: compiler errors
+  with file:line, failing test names and assertions, or the judge's issues. Up to 3 attempts;
+  `--retry-failed` adds a round.
+- **Records:** new tables `attempts` (every answer and its checks), `responses` (`verified` ·
+  `judged` · `failed`, attempts, repaired) and `preference_pairs` (first failed vs passing
+  repair).
+- **Outputs:** `data/answers/<set>/sft.jsonl` (chat messages), `pairs.jsonl` (TRL conversational
+  DPO) and `failed.jsonl`. Final answers are decontaminated too.
+- **`BalCompiler.build_package`:** builds multi-file packages, type-checks tests or runs them,
+  and reports errors with file names and failed tests with their assertion messages.
+- **The report** gets an *Answers* section (pass rate, first-try rate, repair rate, attempts
+  used, failure reasons, common compiler errors, results by task type, failed prompts) and a
+  terminal Answers line. Cost per phase is in the usage table (`answer-prompts`,
+  `repair-answers`, `judge-answers`).
+- **Fix:** the template field for the request is `request`. The name `prompt` collided with
+  `LLMClient.chat()`'s own `prompt` parameter, which would have broken every live call.
+
+**Not run yet:** it needs `OPENROUTER_API_KEY` and accepted prompts from M5's live run.
+
 ### Tests
 
-102 tests in total (+5 for M5: task mix and slots; symbol parsing and lookup, FTS5 search and
+106 tests in total (+4 for M6: code blocks and `// file:` packages, missing code and compiler
+feedback; real `bal` checks of a multi-file package with tests, compiled and then run, skipped
+without `bal`; the answer loop with compile, leak, missing-code and judge repairs, preference
+pairs, outputs, the report section and `--retry-failed`; the different-family rule).
+
+M5: 102 tests in total (+5 for M5: task mix and slots; symbol parsing and lookup, FTS5 search and
 grounding from pages, symbols and collected repo files; plan totals and unknown nodes; the
 writer/filter/reviewer loop with gap-fill, outputs and the report section, using a fake model
 client; the different-family rule).

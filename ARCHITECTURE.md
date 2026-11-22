@@ -80,7 +80,8 @@ flowchart LR
 | Questions | `sftgen/generate/questions.py` | Round-robin over chunks, `QUESTIONS_PER_CHUNK` each, stop at `LIMIT_GENERATING`, dedup, save each |
 | Answers | `sftgen/generate/answers.py` | Question + chunk → answer with citation; `answered` / `failed` |
 | LLM client | `sftgen/generate/llm.py` | OpenAI-compatible async client, rate limit, retries, disk cache, tokens + cost |
-| Validate | `sftgen/validate/` | Compile answer code; `valid` / `invalid` / `not_checked` |
+| Validate | `sftgen/validate/` | Compile answer code; `valid` / `invalid` / `not_checked`. `bal_compiler` also builds multi-file packages and compiles (or, with `answers.run_tests`, runs) tests |
+| Verified answers | `sftgen/generate/responses.py`, `sftgen/validate/answer_check.py`, `prompts/prompt_answer*.yaml`, `answer_judge.yaml` | `answer-prompts`: the teacher answers each accepted prompt under the answer-format contract; checks (format, `bal` build of every block / `// file:` package, tests compiled or run, judge for prose); repairs with the real errors up to 3 attempts; `attempts`, `responses`, `preference_pairs`; `data/answers/<set>/` |
 | Export | `sftgen/export/stage.py` | `dataset.jsonl` (5 fields, for review), invalid answers left out |
 | SFT export | `sftgen/export/sft.py` | `data/sft/train.jsonl`, `eval.jsonl` (chat `messages`), `metadata.jsonl`; split by source page; `Source:` line removed |
 | Report | `sftgen/report.py` | Terminal summary + single-file HTML report |
@@ -147,6 +148,7 @@ chunk text each answer was grounded in.
 | `data/reports/report.html` | The report | yes, `sftgen report` |
 | `data/repos/` | `<owner>__<repo>@<sha12>.tar.gz` sparse snapshots of collected repos | yes, `collect-repos --refresh` |
 | `data/prompts/<set>/` | `accepted.jsonl`, `rejected.jsonl`, `coverage.json` | yes, from the database |
+| `data/answers/<set>/` | `sft.jsonl` (chat messages), `pairs.jsonl` (DPO), `failed.jsonl` | yes, from the database |
 | `data/eval/<version>/` | `bbe.jsonl` (eval items), `decontam.jsonl` (fingerprints), `split.json` | yes, `build-eval` |
 | `data/cache/bbe/`, `data/cache/bal-eval/` | BBE examples snapshot per commit; eval check results | yes |
 | `data/cache/repos/` | Temporary clone folders (removed after each snapshot) | yes |
@@ -177,10 +179,10 @@ sft-dataset-generator/
     cli.py                      commands
     clean/                      extractors · stage · dedup (questions)
     chunk/                      markdown_chunker · stage
-    generate/                   llm · questions · answers · prompts (writer/reviewer)
+    generate/                   llm · questions · answers · prompts (writer/reviewer) · responses (answer/check/repair)
     plan/                       planner (item budgets, slots, gaps)
     retrieval/                  fts (FTS5) · symbols (Central) · grounding
-    validate/                   bal_compiler · stage
+    validate/                   bal_compiler (files, packages, tests) · stage · answer_check
     export/                     stage (dataset.jsonl) · sft (chat messages)
     eval/                       bbe (build-eval: split, items, fingerprints) · verify (bal run / build)
     report.py

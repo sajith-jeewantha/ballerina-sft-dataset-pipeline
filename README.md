@@ -124,6 +124,7 @@ without stopping the run.
 | `sftgen collect-repos` | Snapshot whole Ballerina repositories: the platform's module repos, `ballerina-guides`, wso2 and permissive external repos. Licence-gated, pinned, Swan Lake filter, dedup; up to `LIMIT_REPOS` clones per run. See [Code repositories](#code-repositories) | repo: `collected` · `excluded` · `licence_check` · `failed`; file: `kept` · `duplicate` · `near_duplicate` · `legacy` · `too_large` · `context` |
 | `sftgen plan-prompts` | Show the prompt plan for the graph nodes in scope (`prompts.nodes`): items, budget, accepted and open slots per node. Also builds the FTS5 index and the Central symbol table. No model calls | — |
 | `sftgen generate-prompts` | Fill open slots: the writer model (DeepSeek) writes prompts per graph item from its grounding; the judge model (another family) reviews them. Up to `LIMIT_GENERATING` prompts written per run. See [Item-driven prompts](#item-driven-prompts) | prompt: `accepted` · `rejected` · `duplicate` · `eval_overlap` |
+| `sftgen answer-prompts` | Verified answers to accepted prompts: the teacher answers with the item's grounding; code is built with `bal`, prose is checked by the judge, and failures are repaired with the real errors (up to 3 attempts). Up to `LIMIT_GENERATING` prompts per run. See [Verified answers](#verified-answers) | response: `verified` · `judged` · `failed`; attempt: `pass` · `fail` |
 | `sftgen build-eval` | Build eval set v1 from Ballerina by Example: 30% of examples held out, tagged `node#item`, checked with `bal run`/`bal build`, and fingerprinted. Overlapping chunks, questions and repo files are flagged and left out of every export. See [Eval set and decontamination](#eval-set-and-decontamination) | eval item: `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; chunk: `eval_holdout` |
 | `sftgen storage status` | Compare the local data folder with the bucket: files not pushed, changed since the last push, or only in the bucket | — |
 | `sftgen storage push` | Upload new or changed outputs and a database snapshot (commands already do this when `STORAGE_BUCKET=true`) | — |
@@ -137,6 +138,7 @@ Flags:
   `--refresh` re-clones. `--update-lock` re-pins to the latest default-branch commit.
 - `build-eval --no-verify`: skip the `bal` checks. `--recheck` re-runs every check.
   `--update-lock` re-resolves the BBE tag.
+- `answer-prompts --retry-failed`: give failed prompts another round of repairs.
 - `generate-answers --retry-failed`
 - `validate --recheck`
 - `storage pull --overwrite`
@@ -316,6 +318,9 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `prompts` | prompt written for a graph item: task type, difficulty, `covers`, grounding, review | `accepted` · `rejected` · `duplicate` · `eval_overlap` |
 | `symbols` | Central API entry (signatures, fields) by `module:Name`, parsed from Central pages | — |
 | `chunks_fts` | FTS5 (BM25) full-text index over chunks, for grounding | — |
+| `attempts` | every teacher answer to a prompt (first try and repairs) with its checks and feedback | `pass` · `fail` |
+| `responses` | outcome per prompt: final attempt, attempts used, repaired, verification | `verified` · `judged` · `failed` |
+| `preference_pairs` | the first failed answer and the passing repair of a prompt (for DPO) | — |
 
 Inspect it with any SQLite tool, e.g. `sqlite3 data/pipeline.db "SELECT status, COUNT(*) FROM questions GROUP BY 1"`.
 Column reference: [docs/schemas.md](docs/schemas.md).
@@ -429,6 +434,53 @@ grounding URLs and review scores), `rejected.jsonl` and `coverage.json` (planned
 per item). The report shows the plan per node, the task × difficulty mix, review scores,
 rejection reasons and 100 accepted prompts to read. Answers for these prompts come in M6.
 
+### Verified answers
+
+`sftgen answer-prompts` answers every accepted prompt with the teacher (`ANSWER_GEN_MODEL`) and
+keeps only answers that pass their checks.
+
+**Answer format** (the contract the teacher is given, and what the checks enforce):
+- Answer directly, with no mention of reference material and no URLs or `Source:` lines.
+- Code goes in ```` ```ballerina ```` blocks, and **every block must compile** with Swan Lake 2201.14.1.
+- A solution with several files gives **each file in full** in its own block, starting with
+  `// file: <path>` (for example `// file: main.bal`, `// file: tests/main_test.bal`). Those
+  blocks are built together as one package. Codebase tasks (M7) will use the same format: every
+  changed file in full, under its path.
+- For a fix, show the corrected code in full, not the broken version.
+
+**Checks, then repair:**
+1. **Format:** answers that mention excerpts or reference material, or end with a `Source:`
+   line, fail.
+2. **Code:** blocks are built with `bal` (`// file:` blocks as one package). Test files are
+   type-checked with `bal test --list-groups`, and **run only if `answers.run_tests: true`**,
+   because running them executes model-written code; use a sandbox for that. `write_code` and
+   `fix_code` answers must contain code.
+3. **Judge:** `explain` and `design` answers, and any answer without code, are checked by the
+   judge (`JUDGE_MODEL`, a different family from the teacher) for correctness against the
+   grounding, completeness and clarity.
+4. **Repair:** a failed answer goes back to the teacher with the real problems: compiler errors
+   with file and line, failing tests, or the judge's issues. There are up to 3 attempts in all.
+   `--retry-failed` gives failed prompts another round.
+
+**Records:**
+- every attempt (`attempts`);
+- the outcome per prompt (`responses`): `verified` = code checked by the toolchain, `judged` =
+  prose checked by the judge, `failed`;
+- a **preference pair** when a repair passes: the first failed answer as *rejected*, the
+  passing one as *chosen*.
+
+Outputs, in `data/answers/<set>/`:
+
+| File | Contents |
+|---|---|
+| `sft.jsonl` | verified and judged answers as chat `messages` (system prompt from `sft.system_prompt`, user prompt, assistant answer), with `covers`, task type, difficulty, verification, attempts |
+| `pairs.jsonl` | DPO pairs in TRL's conversational format: `prompt`, `chosen`, `rejected` (message lists), with the reason the rejected answer failed |
+| `failed.jsonl` | prompts that failed every attempt, with the last answer and its checks |
+
+The report's *Answers* section shows the pass rate, first-try rate, repair rate, attempts used,
+why attempts failed, the most common compiler errors, and results by task type. Cost per phase
+(`answer-prompts`, `repair-answers`, `judge-answers`) is in the usage table.
+
 ### Local folder and cloud bucket
 
 Everything the pipeline writes lives under **`LOCAL_DATA_DIR`** (default `data/`). That folder is
@@ -493,8 +545,8 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── cli.py                # the commands
 │   │   ├── clean/                # extractors (page → Markdown) · question dedup
 │   │   ├── chunk/                # heading-aware chunker
-│   │   ├── generate/             # questions · answers · prompts (writer/reviewer) · LLM client
-│   │   ├── validate/             # bal compiler wrapper
+│   │   ├── generate/             # questions · answers · prompts (writer/reviewer) · responses (answer, check, repair) · LLM client
+│   │   ├── validate/             # bal compiler wrapper (files, packages, tests) · answer checks
 │   │   ├── export/               # dataset.jsonl · sft (chat messages)
 │   │   ├── eval/                 # build-eval: BBE split, eval items, bal run checks
 │   │   ├── plan/                 # planner: item budgets, slots, gaps
@@ -643,6 +695,8 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `sftgen collect-repos --repo owner/name` | Collect one repository |
 | `sftgen plan-prompts` | See budgets, accepted and open prompt slots per node before spending anything |
 | `LIMIT_GENERATING=30 sftgen generate-prompts` | A small prompt batch (about 3 items) to check quality and cost |
+| `LIMIT_GENERATING=20 sftgen answer-prompts` | Answer 20 accepted prompts, to check pass and repair rates and cost |
+| `sftgen answer-prompts --retry-failed` | Give prompts that failed every attempt another round of repairs |
 | `sftgen build-eval` | Rebuild the eval set and re-flag overlaps (after a new Swan Lake pin) |
 | `sftgen build-eval --recheck` | Re-run every `bal run`/`bal build` check, e.g. after installing a new `bal` |
 | `sftgen storage status` | See what's local only, changed, or only in the bucket |
