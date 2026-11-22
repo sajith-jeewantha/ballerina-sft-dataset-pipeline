@@ -21,6 +21,7 @@ Tables, each with a `status` and `created_at`/`updated_at` timestamps:
 * codebases  the codebase pool: verified Swan Lake projects, graph tags, train/eval split
 * codebase_states  broken or unfinished versions of a codebase (the starting point of a task)
 * benchmark_problems  HumanEval / MBPP problems fetched for translation into Ballerina
+* mined_fixes  before/after bug fixes mined from the commit history of collected repos
 * eval_runs / eval_results  baseline runs: k sampled answers per eval item per model, and scores
 
 `chunks`, `questions`, `repo_files`, `prompts` and `responses` carry `eval_overlap` (the eval item they copy, or
@@ -400,6 +401,26 @@ CREATE TABLE IF NOT EXISTS eval_results (
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL,
     UNIQUE (eval_run_id, item_id, sample)
+);
+
+CREATE TABLE IF NOT EXISTS mined_fixes (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    repo_id          INTEGER REFERENCES repos(id),
+    full_name        TEXT NOT NULL,
+    commit_sha       TEXT NOT NULL,
+    parent_sha       TEXT NOT NULL,
+    message          TEXT NOT NULL,         -- first line of the commit message
+    files            TEXT NOT NULL,         -- JSON [{path, before, after}] (.bal files changed)
+    diff             TEXT NOT NULL,         -- unified diff of those files
+    lines_changed    INTEGER NOT NULL,
+    touches_tests    INTEGER NOT NULL,      -- 1 = the commit also changed tests
+    spdx             TEXT,
+    fix_hash         TEXT NOT NULL UNIQUE,  -- dedup key: code hashes of before + after
+    status           TEXT NOT NULL,         -- mined (unverified: the project isn't built at that commit)
+    eval_overlap     TEXT,
+    created_at       TEXT NOT NULL,
+    updated_at       TEXT NOT NULL,
+    UNIQUE (full_name, commit_sha)
 );
 
 CREATE TABLE IF NOT EXISTS symbols (

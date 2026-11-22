@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M8 (branch `feat/pipeline-plan-v2`)
+## Unreleased: plan v2, milestones M0–M9 (branch `feat/pipeline-plan-v2`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -312,9 +312,56 @@ The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 (3 eval codebases); 188 BBE prompts. **Not run yet:** `eval translate`, `eval ecosystem` and the
 baselines need `OPENROUTER_API_KEY`.
 
+### M9: pool to 100, commit miner, raw corpus
+
+- **`sftgen corpus`** exports the raw pretraining corpus to `data/corpus/raw-v1/`.
+  - **What goes in:** the kept copy of each Swan Lake `.bal` file from licence-safe repos.
+    Decontamination runs first, and eval overlaps, eval-split codebases, 1.x syntax and tiny files
+    are left out.
+  - **Weights:** generated code stays in with `weight` 0.3.
+  - **Files:** gzipped JSONL parts (~5M tokens each), `manifest.json` (totals by group, licence and
+    syntax, plus what was left out) and `ATTRIBUTION.md` (repo, licence, commit, size).
+  - **Register:** the licence register gains `corpus_files`, `corpus_tokens` and `mined_fixes`.
+    Repos that leave the corpus are reset to 0.
+- **`sftgen mine-fixes`** mines before/after fixes from blobless full-history clones (guides,
+  platform, wso2; `LIMIT_REPOS` per run).
+  - **Scan:** `git log --raw` reads trees only. A qualifying commit has a fix-like message (not a
+    bump, release, review, docs, tests or formatting change), a human author, and 1–3 modified
+    `.bal` source files with at most 80 changed lines, some of them deleted.
+  - **Keep:** contents are fetched lazily for qualifying commits only. 1.x syntax and eval
+    overlaps are dropped, and pairs are deduplicated by code.
+  - **Output:** the new `mined_fixes` table and `fixes.jsonl`. The fixes are not built at their
+    commit.
+- **Pool:** `codebases.pool_size` is now 100, and `wso2` repos were collected (15, plus 1 that
+  needs a licence check).
+- **State variants:** each state maker takes a variant number, and `build` tries up to 3 until one
+  verifies. A kind that never verifies is retired instead of staying red.
+  - `init` is never stubbed, since stubbing it leaves fields uninitialised.
+  - Hidden folders (`.meta/`, which `bal` doesn't compile) are skipped. Two exercism projects
+    built from them were dropped.
+- **`codebases attach`** skips identical tasks from sibling copies of a project instead of failing
+  on the unique prompt hash.
+- **The report** gets *Raw corpus and mined fixes* and a terminal Corpus line.
+
+**Live run:**
+- **Corpus:** 16,328 files, ~35.5M tokens (24.3M weighted; generated code is 45% of raw tokens)
+  from 521 repos. 99% of tokens are Apache-2.0, the rest MIT, BSD-3, BSL-1.0 and CC0. 147 files
+  overlapping the eval set were left out.
+- **Miner:** 60 repos, 13,178 commits scanned, **538 fixes** from 56 repos (125 also change tests,
+  ~14 lines on average). 144 MB of clones cached.
+- **Pool:** **100 codebases** (81 train, 19 eval) from 191 tried. 224 states verified and 53
+  failing-test states skipped. **`codebases verify`: all green.**
+- **Prompts and eval tasks:** 177 codebase-task prompts (6 held out as eval overlaps), and 65
+  codebase eval tasks.
+
 ### Tests
 
-118 tests in total (+7 for M8: pass@k; problem parsing and the MBPP split; fetch with licences,
+121 tests in total (+3 for M9: corpus export with filters, weights, the eval-codebase exclusion,
+manifest, attribution and register; the miner against a local git history with a real fix, a
+bump, a pure addition and a bot commit, plus the report section and skipping repos already
+mined; state variant fallback and never stubbing `init`).
+
+M8: 118 tests in total (+7 for M8: pass@k; problem parsing and the MBPP split; fetch with licences,
 register and lockfile; translation with a repair, saved item and fingerprints; codebase and BBE
 tasks plus a full eval run with pass@k, judge, resume, a second model and the score map; unknown
 model labels; every prompt template formats).

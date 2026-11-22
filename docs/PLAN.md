@@ -1,7 +1,7 @@
 # Ballerina SLM dataset: research and plan (v2)
 
 Branch `feat/pipeline-plan-v2` · drafted 2026-11-16, revised 2026-11-19 with your decisions ·
-status: **approved; M0–M4 and M7 done; M5, M6 and M8 built (2026-11-22); their live runs need the API key**. See [Progress](#progress).
+status: **approved; M0–M4, M7 and M9 done; M5, M6 and M8 built (2026-11-22); their live runs need the API key**. See [Progress](#progress).
 
 **Goal.** The final deliverable is **SFT datasets for fine-tuning
 [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B)**, plus everything needed to
@@ -36,7 +36,8 @@ decontamination.
 | M6 | Verified answers | 🟡 built 2026-11-22; live run after M5's | `sftgen answer-prompts` |
 | M7 | Codebase pool v1 | ✅ done 2026-11-22 (failing_test states need `codebases.run_tests`) | `sftgen codebases build` · `verify` · `attach` |
 | M8 | Eval set v2 + baselines | 🟡 built 2026-11-22; translation and baselines wait for `OPENROUTER_API_KEY` | `sftgen eval fetch` · `translate` · `tasks` · `ecosystem` · `run` |
-| M9–M10 | Raw corpus → dataset v1 | not started | — |
+| M9 | Pool to 100 + commit miner + raw corpus | ✅ done 2026-11-22 | `sftgen corpus` · `mine-fixes` · `codebases build` |
+| M10 | Assembly → dataset v1 | not started | — |
 
 Details per milestone are in the "Done" notes under §6.
 
@@ -526,7 +527,7 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
 | **M6** 🟡 | Verified answers | Repair loop with real `bal` errors (up to 3 tries), `bal test` where tests exist, judge for non-code answers, attempt and preference-pair records, answer-format contract (§8, question 1) | Pass rate, repair rate and cost per phase in the report |
 | **M7** ✅ | Codebase pool v1 | 20 projects → states (compile error, failing test, unfinished feature, version drift) → verify → tag with graph items → attach to prompts. Context packing up to ~16k tokens | `sftgen codebases verify` all green; prompts with attached code |
 | **M8** 🟡 | Eval set v2 + baselines | Ballerina translations of HumanEval/MBPP-style problems (tests checked with `bal test`); ecosystem tasks per core node; fix/extend/explain tasks on **eval-split codebases**; an eval runner (pass@k with `bal build/test`, judge for prose); baselines for **base Qwen3.8-27B** and the teacher | Per-item baseline score map in the report; this tells you later whether the dataset helped |
-| **M9** | Pool to 50–150 + commit miner + raw corpus | Scale the pool with external repos; mined before/after fixes; **raw pretraining corpus** (~25–40M tokens, generated code down-weighted, eval fingerprints removed) | Counts, licences and token totals in the register and report |
+| **M9** ✅ | Pool to 50–150 + commit miner + raw corpus | Scale the pool with external repos; mined before/after fixes; **raw pretraining corpus** (~25–40M tokens, generated code down-weighted, eval fingerprints removed) | Counts, licences and token totals in the register and report |
 | **M10** | Assembly + full run → **dataset v1** | ~6,000 prompts plus gap-fill until items reach budget; balance by item, task, difficulty and context mode; dedup; decontaminate. Outputs in Qwen3.8 chat `messages`: **SFT train/eval**, optional **DPO pairs**, **CPT corpus**, and a dataset card; pushed to the bucket | `datasets/v1/` with a card listing coverage per item, licences and the graph version |
 
 **Done (2026-11-19):** M0 and M1 are built and tested; see CHANGELOG "Unreleased".
@@ -696,6 +697,31 @@ Each milestone ends with something you can run and check locally (`STORAGE_BUCKE
   2. `sftgen eval ecosystem`: 43 core nodes × 2 tasks.
   3. `sftgen eval run --model base` and `--model teacher`: about 860 items × 5 samples. The
      plan's estimate is ~$15–25 for both, mostly the teacher.
+
+**Done (2026-11-22):** M9 is built, tested and run (no model calls).
+- **Raw corpus** (`sftgen corpus`, `data/corpus/raw-v1/`): **16,328 files, ~35.5M tokens** from
+  521 repos, inside the 25–40M target.
+  - Generated code is 45% of the raw tokens and is down-weighted to 0.3, so the effective size is
+    24.3M.
+  - 99% Apache-2.0; MIT, BSD-3, BSL-1.0 and CC0 make up the rest.
+  - Eval overlaps (147 files) and the eval-split codebases are removed.
+  - `ATTRIBUTION.md` lists every repo, its licence and commit. The register has `corpus_files` and
+    `corpus_tokens` per repo, matching the manifest.
+- **Commit miner** (`sftgen mine-fixes`): blobless full-history clones of 60 repos, 13,178 commits
+  scanned, **538 before/after fixes** from 56 repos.
+  - Filters: fix-like message, human author, 1–3 `.bal` source files, ≤ 80 lines, some deleted.
+  - 125 fixes also change tests.
+  - They aren't built at their commit; quality varies from clear bug fixes to small reworks, so M10
+    should check them before using them as tasks. 405 platform repos are still unmined
+    (`LIMIT_REPOS=0 sftgen mine-fixes`).
+- **Codebase pool: 100** (81 train, 19 eval) after collecting the wso2 group (15 repos).
+  - Each state kind tries up to 3 variants. **`codebases verify`: all green.**
+  - Result: 177 codebase-task prompts and 65 codebase eval tasks.
+- **Gaps:**
+  - NOTICE files aren't collected (sparse patterns), so Apache NOTICE text isn't in the
+    attribution yet.
+  - Corpus parts are gzip, not zstd (stdlib only).
+  - `wso2/open-healthcare-prebuilt-services` waits for a licence check (no root LICENSE).
 
 M1 and M2 can run in parallel, and so can M3 and M4. M5 is the first point that costs model
 money. The full run (M10) comes after the pool (M9), so most prompts can carry real code.

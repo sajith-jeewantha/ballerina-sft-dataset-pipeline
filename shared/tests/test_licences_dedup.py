@@ -62,7 +62,8 @@ def test_register_keeps_people_fields_and_extra_columns(tmp_path: Path) -> None:
     assert a["verdict"] == "safe" and a["intended_use"] == "codebase-pool" and a["reviewer"] == "sam"
     assert a["pinned_sha"] == "abc" and a["checked_on"] != "2026-11-16"
     assert again.counts() == {"safe": 1, "exclude": 1}
-    assert path.read_text().splitlines()[0].endswith("licence_file_sha256,files,reviewer")
+    assert path.read_text().splitlines()[0].endswith("licence_file_sha256,files,corpus_files,corpus_tokens,mined_fixes,"
+                                                    "reviewer")
 
 
 CODE = """import ballerina/http;

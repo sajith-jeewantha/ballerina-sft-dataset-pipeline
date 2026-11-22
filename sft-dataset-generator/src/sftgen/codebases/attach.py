@@ -87,7 +87,7 @@ def difficulty(kind: str, tokens: int) -> str:
 
 def attach(s: Settings, db: Database, run: RunTracker) -> dict[str, Any]:
     cfg = s.codebases
-    stats = {"states": 0, "added": 0, "existing": 0, "eval_split_skipped": 0}
+    stats = {"states": 0, "added": 0, "existing": 0, "eval_split_skipped": 0, "duplicate": 0}
     rows = db.query(
         "SELECT st.*, cb.files, cb.split, cb.items, cb.nodes, cb.tokens FROM codebase_states st "
         "JOIN codebases cb ON cb.id = st.codebase_id WHERE cb.status = 'active' AND st.status = 'active' "
@@ -107,6 +107,9 @@ def attach(s: Settings, db: Database, run: RunTracker) -> dict[str, Any]:
         detail = json.loads(r["verify_detail"] or "{}")
         text = (f"I'm working on this Ballerina project (Swan Lake 2201.14.1):\n\n{packed}\n\n"
                 f"{task_text(r['kind'], r['target'], detail, r['description'])}")
+        if db.scalar("SELECT 1 FROM prompts WHERE prompt_hash = ?", (content_hash(text.lower()),)):
+            stats["duplicate"] += 1  # identical project copies (e.g. sibling folders) give identical tasks
+            continue
         items = json.loads(r["items"]) or []
         nodes = json.loads(r["nodes"]) or []
         ref = items[0] if items else (f"{nodes[0]}#codebase" if nodes else "codebase#project")

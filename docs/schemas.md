@@ -126,7 +126,7 @@ One row per command run (`run-all` records one per phase).
 
 | Column | Meaning |
 |---|---|
-| `command` | `scrape` · `collect-repos` · `build-eval` · `eval-fetch` · `eval-translate` · `eval-tasks` · `eval-ecosystem` · `eval-run` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
+| `command` | `scrape` · `collect-repos` · `corpus` · `mine-fixes` · `build-eval` · `eval-fetch` · `eval-translate` · `eval-tasks` · `eval-ecosystem` · `eval-run` · `plan-prompts` · `generate-prompts` · `answer-prompts` · `codebases-build` · `codebases-verify` · `codebases-attach` · `generate-questions` · `generate-answers` · `validate` · `export` |
 | `status` | `running` · `succeeded` · `failed` |
 | `started_at`, `finished_at`, `duration_s` | Timing |
 | `limits` | JSON: `LIMIT_SCRAPE_PAGES`, `LIMIT_GENERATING`, `QUESTIONS_PER_CHUNK`, `REQUEST_DELAY_SECONDS` used |
@@ -237,6 +237,20 @@ One row per held-out eval item; the primary key is a text id. v1 items come from
 | `verify_mode` | `run` (one `.bal` + a `$ bal run` transcript) · `build` · `none` · `test` (benchmark tests) · `codebase` · `judge` |
 | `verify_status`, `verify_detail` | `pass` · `output_differs` · `build_failed` · `run_failed` · `timeout` · `skipped`; first difference or error |
 | `status` | `active` · `retired` (no longer on the eval side; its fingerprints are deleted) |
+
+## `mined_fixes`
+
+One row per before/after fix mined from a repo's history (`mine-fixes`).
+
+| Column | Meaning |
+|---|---|
+| `repo_id`, `full_name`, `spdx` | The repo and its licence |
+| `commit_sha`, `parent_sha`, `message` | The fix commit, its parent and the first line of its message |
+| `files` | JSON `[{path, before, after}]`: the `.bal` source files it changed, in full |
+| `diff`, `lines_changed` | Unified diff of those files; lines added + deleted |
+| `touches_tests` | 1 when the commit also changed test files |
+| `fix_hash` | Dedup key (code hashes before and after) |
+| `status` | `mined` (not built at that commit) |
 
 ## `benchmark_problems`
 
@@ -371,7 +385,8 @@ when the chunks change (`kv` records the last build). Grounding uses it for BM25
 ## `docs/licence-register.csv`
 
 Tracked in git. One row per repo reviewed: `owner`, `repo`, `spdx`, `verdict`, `intended_use`,
-`size_kb`, `pinned_sha`, `checked_on`, `notes`, `licence_file_sha256` and `files`. Extra columns
+`size_kb`, `pinned_sha`, `checked_on`, `notes`, `licence_file_sha256`, `files`, and (M9)
+`corpus_files`, `corpus_tokens` (what the raw corpus takes from it) and `mined_fixes`. Extra columns
 that people add are kept.
 - A row set to `exclude` is never collected.
 - `safe` with notes starting `verified:` overrides the automatic gate.
@@ -412,6 +427,15 @@ side. Questions that overlap the eval set are in neither file.
 | `sft.jsonl` | verified or judged answer (no eval overlap) | `id` (`p<prompt id>`), `messages` (optional `system`, `user`, `assistant`), `covers`, `task_type`, `difficulty`, `verification`, `attempts`, `repaired` |
 | `pairs.jsonl` | preference pair | `id`, `covers`, `reason`, `prompt` (system + user messages), `chosen`, `rejected` (assistant messages): TRL's conversational DPO format |
 | `failed.jsonl` | prompt that failed every attempt | `id`, `covers`, `task_type`, `difficulty`, `prompt`, `answer` (the last one), `checks` |
+
+## `data/corpus/<version>/` (from `sftgen corpus` and `sftgen mine-fixes`)
+
+| File | One line per | Fields |
+|---|---|---|
+| `part-NNNN.jsonl.gz` | corpus file | `id`, `text`, `repo`, `path`, `commit`, `url`, `licence`, `group`, `syntax`, `generated`, `weight`, `tokens` |
+| `manifest.json` | — | `files`, `tokens`, `weighted_tokens`, `generated_files`, `generated_tokens`, `repos`, `parts`, `by_group`, `by_licence`, `by_syntax`, `left_out`, `decontamination` |
+| `ATTRIBUTION.md` | repo | licence, commit, files, tokens |
+| `fixes.jsonl` | mined fix | `id`, `repo`, `commit`, `parent`, `message`, `licence`, `files` (path, before, after), `diff`, `lines_changed`, `touches_tests`, `status` |
 
 ## `data/codebases/` (from `sftgen codebases build`)
 

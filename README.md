@@ -128,6 +128,8 @@ without stopping the run.
 | `sftgen codebases build` | Fill the codebase pool: 20 Swan Lake projects from the collected repos that build with the pinned `bal`, tagged with graph items, each turned into verified states (compile error, unfinished feature, version drift, failing test). See [Codebase pool](#codebase-pool) | codebase: `active` · `rejected`; state: `pass` · `fail` · `skipped` |
 | `sftgen codebases verify` | Re-check every base and state with `bal`; exits with an error if anything is red | — |
 | `sftgen codebases attach` | Turn verified states of train codebases into codebase-task prompts with the project packed in | prompt: `accepted` (`context_mode = codebase`) |
+| `sftgen corpus` | Export the raw pretraining corpus: the kept copy of every Swan Lake `.bal` file from licence-safe repos, eval overlaps removed, generated code down-weighted; manifest, attribution, and per-repo totals in the licence register. See [Raw corpus and mined fixes](#raw-corpus-and-mined-fixes) | — |
+| `sftgen mine-fixes` | Before/after bug fixes from the commit history of collected repos (blobless clones); up to `LIMIT_REPOS` repos per run | fix: `mined` |
 | `sftgen eval fetch` | Fetch HumanEval (MIT, 164) and MBPP (CC BY 4.0, test split 11–510): pinned, licence-checked, recorded in the licence register | problem: `pending` |
 | `sftgen eval translate` | The teacher translates each problem into a Ballerina task with a reference solution and `bal` tests; verified and repaired with the real errors. Up to `LIMIT_GENERATING` per run | problem: `translated` · `failed` |
 | `sftgen eval tasks` | Eval tasks from the eval-split codebases (fix, implement, migrate, explain) and prompts for the BBE eval items | — |
@@ -331,6 +333,7 @@ A single SQLite file, `data/pipeline.db`. Every row has a `status`, `created_at`
 | `preference_pairs` | the first failed answer and the passing repair of a prompt (for DPO) | — |
 | `codebases` | a project in the pool: files, graph tags, train/eval split | `active` · `rejected` |
 | `codebase_states` | a broken or unfinished version of a codebase: changed files, patch, verification | `pass` · `fail` · `skipped` |
+| `mined_fixes` | a before/after fix from a repo's history: files, diff, whether tests changed | `mined` |
 | `benchmark_problems` | a HumanEval / MBPP problem fetched for translation | `pending` · `translated` · `failed` |
 | `eval_runs` | one baseline run: model, mode (`compile` / `test`), samples | `running` · `done` |
 | `eval_results` | one sampled answer to an eval item and whether it passed | — |
@@ -529,6 +532,43 @@ state, the project must build, and a stubbed function must actually be implement
 Files in `data/codebases/`: `<id>/base.tar.gz`, `<id>/states/<kind>.patch` and `manifest.jsonl`
 (source, licence, split, tags and states per codebase).
 
+### Raw corpus and mined fixes
+
+**`sftgen corpus`** writes the raw code corpus for continued pretraining to `data/corpus/raw-v1/`.
+
+- **What goes in:** each `.bal` file that is the kept copy after dedup, in a collected,
+  licence-safe repo. It must be Swan Lake or unclassified (never 1.x syntax), not overlapping the
+  eval set (decontamination runs first), not part of an eval-split codebase, and at least 20
+  tokens.
+- **Weights:** generated code (OpenAPI connectors, "do not edit" files) stays in with
+  `weight: 0.3`, so a trainer can sample it less; everything else has weight 1.
+
+| File | Contents |
+|---|---|
+| `part-NNNN.jsonl.gz` | one record per file: `id`, `text`, `repo`, `path`, `commit`, `url`, `licence`, `group`, `syntax`, `generated`, `weight`, `tokens` (~5M tokens per part) |
+| `manifest.json` | totals: files, tokens, weighted tokens, by source group, licence and syntax, and what was left out and why |
+| `ATTRIBUTION.md` | every repository in the corpus with its licence, pinned commit, files and tokens |
+
+The licence register gets `corpus_files` and `corpus_tokens` per repo.
+
+**`sftgen mine-fixes`** mines real bug fixes from the history of collected repos (guides,
+platform and wso2 by default), up to `LIMIT_REPOS` repos per run:
+
+1. **Clone:** a blobless bare clone with full history. Only commits and trees are downloaded;
+   file contents are fetched for qualifying commits only.
+2. **Scan:** the latest 400 non-merge commits touching `.bal` files. A commit qualifies when:
+   - its message reads like a fix and not like a bump, release, merge, revert, dependency
+     update, regeneration, formatting or review change;
+   - its author isn't a bot;
+   - it modifies 1–3 existing `.bal` source files (tests may change too), with at most 80 lines
+     changed and at least one deleted (pure additions are features).
+3. **Keep:** pairs with 1.x syntax, or overlapping the eval set, are dropped, and duplicates are
+   merged.
+
+The fixes go to `mined_fixes` and `data/corpus/raw-v1/fixes.jsonl` (files before and after, diff,
+whether tests changed). They are **not built** at their commit; M10 checks them before using them
+as fix tasks. The register gets `mined_fixes` per repo.
+
 ### Eval set v2 and baselines
 
 `sftgen eval` grows the eval set and measures models on it, so you can later tell whether the
@@ -629,6 +669,7 @@ ballerina-sft-dataset-pipeline/
 │   │   ├── plan/                 # planner: item budgets, slots, gaps
 │   │   ├── codebases/            # pool (select, verify, tag) · states · attach (context packing) · stage
 │   │   ├── eval/                 # bbe (v1) · verify · benchmarks (fetch, translate) · tasks · runner (pass@k)
+│   │   ├── corpus/               # raw (corpus export, attribution) · miner (before/after fixes)
 │   │   ├── retrieval/            # FTS5 search · Central symbol table · grounding per item
 │   │   ├── report.py
 │   │   └── prompts/              # questions.yaml · answer.yaml
@@ -776,6 +817,7 @@ Axolotl (`type: chat_template`) or Unsloth. See [Output format](#output-format).
 | `LIMIT_GENERATING=30 sftgen generate-prompts` | A small prompt batch (about 3 items) to check quality and cost |
 | `LIMIT_GENERATING=20 sftgen answer-prompts` | Answer 20 accepted prompts, to check pass and repair rates and cost |
 | `sftgen codebases verify` | Check that every codebase base and state still verifies (e.g. after a `bal` update) |
+| `LIMIT_REPOS=60 sftgen mine-fixes` | Mine fixes from the next 60 repos (repos already mined are skipped) |
 | `LIMIT_GENERATING=20 sftgen eval translate` | Translate 20 benchmark problems to check quality and cost |
 | `sftgen eval run --model teacher --suite humaneval` | Baseline one model on one suite |
 | `sftgen answer-prompts --retry-failed` | Give prompts that failed every attempt another round of repairs |

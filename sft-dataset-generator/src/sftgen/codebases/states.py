@@ -57,9 +57,11 @@ def patch(base: dict[str, str], changed: dict[str, str]) -> str:
     return "".join(out)
 
 
-def _pick(options: list[Any], key: str) -> Any:
-    """A stable choice among options, by hash of the project and the kind."""
-    return options[int(sha256_text(key)[:8], 16) % len(options)] if options else None
+def _pick(options: list[Any], key: str, nth: int = 0) -> Any:
+    """A stable choice among options, by hash of the project and the kind; `nth` = the next alternatives."""
+    if nth >= len(options):
+        return None
+    return options[(int(sha256_text(key)[:8], 16) + nth) % len(options)]
 
 
 def _match_brace(clean: str, open_pos: int) -> int | None:
@@ -106,13 +108,14 @@ def _main_files(files: dict[str, str]) -> list[str]:
     return sorted(p for p in files if p.endswith(".bal") and not p.startswith("tests/"))
 
 
-def unfinished_feature(cid: str, files: dict[str, str]) -> State | None:
+def unfinished_feature(cid: str, files: dict[str, str], nth: int = 0) -> State | None:
     options = []
     for path in _main_files(files):
         for f in functions(files[path]):
-            if f["name"] != "main" and 4 <= f["lines"] <= 40 and f["statements"] >= 3:
+            # not main, and not init: a stubbed init leaves fields and final variables uninitialised
+            if f["name"] not in ("main", "init") and 4 <= f["lines"] <= 40 and f["statements"] >= 3:
                 options.append((path, f))
-    pick = _pick(sorted(options, key=lambda o: (o[0], o[1]["open"])), f"{cid}:unfinished")
+    pick = _pick(sorted(options, key=lambda o: (o[0], o[1]["open"])), f"{cid}:unfinished", nth)
     if not pick:
         return None
     path, f = pick
@@ -125,7 +128,7 @@ def unfinished_feature(cid: str, files: dict[str, str]) -> State | None:
                  {path: new}, "builds")
 
 
-def compile_error(cid: str, files: dict[str, str]) -> State | None:
+def compile_error(cid: str, files: dict[str, str], nth: int = 0) -> State | None:
     defined = {f["name"] for p in _main_files(files) for f in functions(files[p]) if re.fullmatch(r"\w+", f["name"])}
     defined -= {"main", "init"}
     calls = []
@@ -136,7 +139,7 @@ def compile_error(cid: str, files: dict[str, str]) -> State | None:
             before = clean[max(0, m.start() - 12):m.start()]
             if name in defined and "function" not in before:
                 calls.append((path, m.start(1), name))
-    pick = _pick(sorted(calls), f"{cid}:compile_error")
+    pick = _pick(sorted(calls), f"{cid}:compile_error", nth)
     if pick:
         path, pos, name = pick
         typo = name[:-2] + name[-1] + name[-2] if name[-1] != name[-2] else name[:-1]
@@ -148,7 +151,7 @@ def compile_error(cid: str, files: dict[str, str]) -> State | None:
     for path in _main_files(files):
         for m in re.finditer(r"^import\s+[\w./]+(?:\s+as\s+\w+)?\s*;\s*\n", files[path], re.M):
             imports.append((path, m.start(), m.end()))
-    pick = _pick(sorted(imports), f"{cid}:compile_error")
+    pick = _pick(sorted(imports), f"{cid}:compile_error", nth - min(nth, len(calls)) if calls else nth)
     if not pick:
         return None
     path, a, b = pick
@@ -157,7 +160,9 @@ def compile_error(cid: str, files: dict[str, str]) -> State | None:
                  {path: code[:a] + code[b:]}, "fails_build")
 
 
-def version_drift(cid: str, files: dict[str, str]) -> State | None:
+def version_drift(cid: str, files: dict[str, str], nth: int = 0) -> State | None:
+    if nth:
+        return None  # one rewrite per project
     for path in _main_files(files):
         code = files[path]
         clean = strip_comments_and_strings(code)
@@ -197,7 +202,7 @@ def version_drift(cid: str, files: dict[str, str]) -> State | None:
     return None
 
 
-def failing_test(cid: str, files: dict[str, str]) -> State | None:
+def failing_test(cid: str, files: dict[str, str], nth: int = 0) -> State | None:
     if not any(p.startswith("tests/") for p in files):
         return None
     options = []
@@ -210,7 +215,7 @@ def failing_test(cid: str, files: dict[str, str]) -> State | None:
                 if k >= 0:
                     options.append((path, f["open"] + k, a, b, f["name"]))
                     break
-    pick = _pick(sorted(options), f"{cid}:failing_test")
+    pick = _pick(sorted(options), f"{cid}:failing_test", nth)
     if not pick:
         return None
     path, pos, a, b, fname = pick

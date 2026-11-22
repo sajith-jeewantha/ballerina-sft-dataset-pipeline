@@ -245,3 +245,14 @@ def test_states_with_real_bal(tmp_path: Path) -> None:
     for st in make_states("calc", base, ["compile_error", "unfinished_feature"]):
         status, detail, _ = stage.verify_state(c, s, base, st)
         assert status == "pass", (st.kind, detail)
+
+
+def test_state_variants_fall_back() -> None:
+    """Each maker offers alternatives (`nth`) for when a variant doesn't verify; init is never stubbed."""
+    first, second = compile_error("cb", FILES, 0), compile_error("cb", FILES, 1)
+    assert first and second and first.description != second.description  # the second option: a removed import
+    assert "import" in second.description and compile_error("cb", FILES, 9) is None
+    assert version_drift("cb", FILES, 1) is None
+    cls = ("class Store {\n    int n;\n    function init() {\n        self.n = 0;\n        int a = 1;\n        int b = 2;\n"
+           "        self.n = a + b;\n    }\n}\n")
+    assert unfinished_feature("cb", {"Ballerina.toml": TOML, "store.bal": cls}) is None

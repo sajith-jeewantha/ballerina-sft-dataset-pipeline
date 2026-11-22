@@ -2849,6 +2849,86 @@
    "commit": "b0f7346246b17ed451160a1ccd69b2b2ea3db950",
    "locked_at": "2026-11-21T11:04:08Z"
   },
+  "wso2/api-specs": {
+   "ref": "main",
+   "commit": "db9632f3c61b99ae2940c353dfd89611b9f3f631",
+   "locked_at": "2026-11-22T06:41:24Z"
+  },
+  "wso2/ballerina-integrator-samples": {
+   "ref": "main",
+   "commit": "d120d6d71d14232d442f485cf80da3e76b585580",
+   "locked_at": "2026-11-22T06:41:32Z"
+  },
+  "wso2/banking-demo": {
+   "ref": "main",
+   "commit": "60ef1f49dc4d638a0c288cf7b7b9ddc4c2b0b6c9",
+   "locked_at": "2026-11-22T06:41:20Z"
+  },
+  "wso2/choreo-apim-mediation-policies": {
+   "ref": "main",
+   "commit": "e6e81219df1a7975d1eefa9368172c1c0e26dc24",
+   "locked_at": "2026-11-22T06:41:21Z"
+  },
+  "wso2/cloud-samples": {
+   "ref": "master",
+   "commit": "5724d284f451a854bc35cc0c290ab6fe56779401",
+   "locked_at": "2026-11-22T06:41:19Z"
+  },
+  "wso2/getting-started-samples": {
+   "ref": "main",
+   "commit": "c036fc1b3094700e0e0a491c27932404699a5e1a",
+   "locked_at": "2026-11-22T06:41:33Z"
+  },
+  "wso2/icp-runtime-bridge": {
+   "ref": "main",
+   "commit": "d6d6cdfabc496410ed714b858ae142270b0d2a8b",
+   "locked_at": "2026-11-22T06:41:29Z"
+  },
+  "wso2/integration-control-plane": {
+   "ref": "main",
+   "commit": "aa5524f5897ce14ad0833b4f8536a1553c85cb6c",
+   "locked_at": "2026-11-22T06:41:22Z"
+  },
+  "wso2/integration-samples": {
+   "ref": "main",
+   "commit": "ad741e6b0bcfe9d9e5b84c162c91374676dd37c5",
+   "locked_at": "2026-11-22T06:41:26Z"
+  },
+  "wso2/open-healthcare-prebuilt-services": {
+   "ref": "main",
+   "commit": "65a000ebcac5ff2608bbd3b3ff4b284f16d569fc",
+   "locked_at": "2026-11-22T06:41:18Z"
+  },
+  "wso2/people-ops-suite": {
+   "ref": "main",
+   "commit": "f953c32d6d1d8650f5aa3f5023ad735858f3514d",
+   "locked_at": "2026-11-22T06:41:23Z"
+  },
+  "wso2/product-integrator-websubhub": {
+   "ref": "main",
+   "commit": "11df91868277f012ffb441f1b33dd0031ec4ae35",
+   "locked_at": "2026-11-22T06:41:25Z"
+  },
+  "wso2/reference-implementation-fhirsubscriptions-broker": {
+   "ref": "main",
+   "commit": "abe536424569c281d77101a05135c3d069439e42",
+   "locked_at": "2026-11-22T06:41:31Z"
+  },
+  "wso2/reference-implementation-oncg10": {
+   "ref": "main",
+   "commit": "72e4127c1b213ed8b5dc3b4abd199f8d5bc0f60e",
+   "locked_at": "2026-11-22T06:41:30Z"
+  },
+  "wso2/reference-implementation-openhie": {
+   "ref": "main",
+   "commit": "dce5b189f3725181df6d1b3a0ac0117ac1f1b606",
+   "locked_at": "2026-11-22T06:41:28Z"
+  },
+  "wso2/solutions-financial-demos": {
+   "ref": "main",
+   "commit": "b48abd892ad9d4e62ba0a4be71ad2847092d1d40",
+   "locked_at": "2026-11-22T06:41:34Z"
+  },
   "wx-yz/ai-gateway": {
    "ref": "main",
    "commit": "7e51f983602ebc518fdf1f47b58cccadbcba512a",

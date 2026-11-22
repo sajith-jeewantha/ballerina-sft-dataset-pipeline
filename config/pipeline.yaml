@@ -119,7 +119,7 @@ answers:                             # answer-prompts (verified answers, M6)
   max_feedback_errors: 8
 
 codebases:                           # codebases build / verify / attach (codebase pool, M7)
-  pool_size: 20                      # verified Swan Lake projects kept
+  pool_size: 100                     # verified Swan Lake projects kept (plan: 50-150)
   eval_fraction: 0.2                 # held out (by id hash) for M8's eval tasks; never in training prompts
   groups: [guides, wso2, external, platform]   # preferred sources, in order
   min_files: 2
@@ -131,7 +131,22 @@ codebases:                           # codebases build / verify / attach (codeba
   run_tests: false                   # failing_test states RUN the project's tests: sandbox only
   build_timeout_s: 300
   context_max_tokens: 14000          # code packed into a codebase prompt
-  max_candidates: 80                 # candidates tried per run while filling the pool
+  max_candidates: 250                # candidates tried per run while filling the pool
+
+corpus:                              # corpus: the raw pretraining corpus (M9)
+  version: raw-v1                    # data/corpus/raw-v1/
+  part_tokens: 5000000               # approximate tokens per part-NNNN.jsonl.gz
+  generated_weight: 0.3              # sampling weight of generated code
+  min_tokens: 20
+  include_eval_codebases: false
+
+miner:                               # mine-fixes: before/after fixes from repo history (M9)
+  groups: [guides, platform, wso2]
+  max_commits: 400                   # recent non-merge commits scanned per repo
+  max_files: 3                       # .bal source files a fix may change
+  max_lines: 80                      # added + deleted lines
+  max_fixes_per_repo: 25
+  clone_timeout_s: 900
 
 eval:                                # build-eval: held-out eval set and decontamination
   version: v1                        # files go to <data>/eval/v1/

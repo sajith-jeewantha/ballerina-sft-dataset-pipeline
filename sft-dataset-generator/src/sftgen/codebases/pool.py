@@ -95,8 +95,8 @@ def candidates(db: Database, cfg: CodebasesCfg) -> list[Candidate]:
         files = {"Ballerina.toml": p["text"]}
         for r in rows:
             rel = r["path"][len(prefix):]
-            if rel.startswith(("target/", "build/")):
-                continue
+            if rel.startswith(("target/", "build/")) or any(seg.startswith(".") for seg in rel.split("/")):
+                continue  # build output, and hidden folders (e.g. .meta/) that bal doesn't compile
             files[rel] = r["text"]
         c = Candidate(codebase_id(p["full_name"], root), p["repo_id"], p["full_name"], p["grp"], root,
                       p["commit_sha"], p["spdx"], dict(sorted(files.items())))

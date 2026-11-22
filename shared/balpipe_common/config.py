@@ -280,7 +280,7 @@ class AnswersCfg(BaseModel):
 class CodebasesCfg(BaseModel):
     """`codebases`: the codebase pool, its states, and codebase-task prompts (M7)."""
 
-    pool_size: int = 20               # verified projects to keep
+    pool_size: int = 100              # verified projects to keep (plan: 50-150)
     eval_fraction: float = Field(default=0.2, ge=0.0, lt=1.0)  # held out for eval tasks (M8), by id hash
     split_salt: str = "codebase-split"
     groups: list[str] = Field(default_factory=lambda: ["guides", "wso2", "external", "platform"])  # preference
@@ -296,7 +296,7 @@ class CodebasesCfg(BaseModel):
     run_tests: bool = False
     build_timeout_s: int = 300        # first builds pull dependencies from Central
     context_max_tokens: int = 14000   # code packed into a codebase prompt (Qwen3.8 server budget ~16k)
-    max_candidates: int = 80          # candidates tried per run while filling the pool
+    max_candidates: int = 250         # candidates tried per run while filling the pool
 
 
 class BenchmarkSource(BaseModel):
@@ -319,6 +319,27 @@ def _benchmarks() -> list[BenchmarkSource]:
                         licence_note="dataset released under CC BY 4.0 (dataset card; the repo code is Apache-2.0): "
                                      "attribute Austin et al. 2021 in the dataset card"),
     ]
+
+
+class CorpusCfg(BaseModel):
+    """`corpus`: the raw pretraining corpus from collected repos (M9)."""
+
+    version: str = "raw-v1"           # <data>/corpus/<version>/
+    part_tokens: int = 5_000_000      # approximate tokens per part file
+    generated_weight: float = 0.3     # sampling weight of generated code (OpenAPI connectors etc.)
+    min_tokens: int = 20              # smaller files are left out
+    include_eval_codebases: bool = False  # eval-split codebase files never go in unless this is set
+
+
+class MinerCfg(BaseModel):
+    """`mine-fixes`: before/after bug fixes mined from repo history (M9)."""
+
+    groups: list[str] = Field(default_factory=lambda: ["guides", "platform", "wso2"])
+    max_commits: int = 400            # most recent non-merge commits scanned per repo
+    max_files: int = 3                # .bal files changed by a fix commit
+    max_lines: int = 80               # added + deleted lines
+    max_fixes_per_repo: int = 25
+    clone_timeout_s: int = 900
 
 
 class EvalCfg(BaseModel):
@@ -432,6 +453,8 @@ class Settings(BaseSettings):
     prompts: PromptsCfg = Field(default_factory=PromptsCfg)
     answers: AnswersCfg = Field(default_factory=AnswersCfg)
     codebases: CodebasesCfg = Field(default_factory=CodebasesCfg)
+    corpus: CorpusCfg = Field(default_factory=CorpusCfg)
+    miner: MinerCfg = Field(default_factory=MinerCfg)
     graph: GraphCfg = Field(default_factory=GraphCfg)
     repos: ReposCfg = Field(default_factory=ReposCfg)
     report: ReportCfg = Field(default_factory=ReportCfg)
@@ -494,6 +517,10 @@ class Settings(BaseSettings):
     @property
     def prompts_dir(self) -> Path:
         return self.data_path("prompts") / self.prompts.set_name
+
+    @property
+    def corpus_dir(self) -> Path:
+        return self.data_path("corpus") / self.corpus.version
 
     @property
     def codebases_dir(self) -> Path:

@@ -25,6 +25,11 @@ Commands (run in this order, or all at once with `run-all`):
   eval run             baseline a model (--model base | teacher): eval.samples answers per item,
                        scored with bal (tests/programs run only with eval.run_tests) and the
                        judge; pass@k per suite and per graph item in the report
+  corpus               export the raw pretraining corpus: unique Swan Lake .bal files from licence-safe
+                       repos, eval overlaps removed, generated code down-weighted; data/corpus/<version>/
+                       (parts, manifest, ATTRIBUTION.md); totals per repo in the licence register
+  mine-fixes           before/after bug fixes from the history of collected repos (blobless clones);
+                       up to LIMIT_REPOS repos per run; data/corpus/<version>/fixes.jsonl
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
   generate-answers     answer every pending question from its source chunk
   validate             compile Ballerina code in answers with `bal` (optional)
@@ -75,6 +80,7 @@ from balpipe_common.storage import Storage, StorageError
 log = logging.getLogger("sftgen")
 
 COMMANDS = ["scrape", "collect-repos", "build-eval", "plan-prompts", "generate-prompts", "answer-prompts", "codebases", "eval",
+            "corpus", "mine-fixes",
             "generate-questions", "generate-answers", "validate", "export", "export-sft", "report",
             "run-all", "graph", "storage"]
 ACTIONS = {"graph": ["validate", "stats", "sync"], "storage": ["status", "push", "pull"],
@@ -97,7 +103,8 @@ def print_startup(s: Settings, command: str, store: Storage | None = None) -> No
         f"  LIMIT_GENERATING       {limit(s.limit_generating, 'prompts per run' if 'prompts' in command else 'questions per run')}",
         f"  QUESTIONS_PER_CHUNK    {s.questions_per_chunk}",
         f"  REQUEST_DELAY_SECONDS  {s.request_delay_seconds:g}",
-        *([f"  LIMIT_REPOS            {limit(s.limit_repos, 'repos cloned per run')}"] if command == "collect-repos"
+        *([f"  LIMIT_REPOS            {limit(s.limit_repos, 'repos per run')}"]
+          if command in ("collect-repos", "mine-fixes")
           else []),
         f"  GITHUB_TOKEN           {'set' if s.github_token else 'not set (GitHub API: 60 requests/hour)'}",
         f"  question model         {s.question_gen_model or '(not set)'}",
@@ -143,6 +150,14 @@ def run_command(command: str, s: Settings, db: Database, a: argparse.Namespace) 
 
             return build_eval(s, db, run, open_lock(s), update_lock=a.update_lock,
                               verify=False if a.no_verify else None, reverify=a.recheck)
+        if command == "corpus":
+            from sftgen.corpus.raw import export
+
+            return export(s, db, run)
+        if command == "mine-fixes":
+            from sftgen.corpus.miner import mine
+
+            return mine(s, db, run)
         if command.startswith("eval-"):
             action = command.split("-", 1)[1]
             if action == "fetch":

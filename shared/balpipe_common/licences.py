@@ -34,7 +34,7 @@ RESTRICTED_PREFIXES = ("GPL", "LGPL", "AGPL", "MPL", "EPL", "EUPL", "CDDL", "OSL
 UNKNOWN = {"", "NOASSERTION", "OTHER", "NONE"}
 
 COLUMNS = ["owner", "repo", "spdx", "verdict", "intended_use", "size_kb", "pinned_sha", "checked_on", "notes",
-           "licence_file_sha256", "files"]
+           "licence_file_sha256", "files", "corpus_files", "corpus_tokens", "mined_fixes"]
 
 # (SPDX id, every phrase must appear) checked in order; first match wins
 _TEXTS: list[tuple[str, tuple[str, ...]]] = [

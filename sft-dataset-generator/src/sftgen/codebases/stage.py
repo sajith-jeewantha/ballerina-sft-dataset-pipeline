@@ -25,7 +25,7 @@ from balpipe_common.config import ConfigError, Settings
 from balpipe_common.db import Database, RunTracker
 
 from sftgen.codebases import pool
-from sftgen.codebases.states import State, make_states, patch
+from sftgen.codebases.states import MAKERS, State, patch
 from sftgen.plan.planner import load_nodes
 from sftgen.validate.bal_compiler import BalCompiler, BalUnavailable, CompileOutcome
 
@@ -86,7 +86,7 @@ def verify_state(c: BalCompiler, s: Settings, base: dict[str, str], st: State) -
 def save_state(db: Database, cid: str, base: dict[str, str], st: State, status: str, detail: str) -> None:
     values = {"target": st.target, "description": st.description, "changed": json.dumps(st.changed),
               "patch": patch(base, st.changed), "expect": st.expect, "verify_status": status,
-              "verify_detail": detail, "status": "active"}
+              "verify_detail": detail, "status": "active" if status in ("pass", "skipped") else "retired"}
     row = db.one("SELECT id FROM codebase_states WHERE codebase_id = ? AND kind = ?", (cid, st.kind))
     if row:
         db.update("codebase_states", row["id"], values)
@@ -124,16 +124,31 @@ def build(s: Settings, db: Database, run: RunTracker) -> dict[str, Any]:
                     stats["rejected"] += 1
     stats["active"] = active
 
-    # states for active codebases that miss some
+    # states for active codebases that miss a kind (or whose state never verified): up to 3 variants each
     work = []
     for cb in db.query("SELECT id, files FROM codebases WHERE status = 'active' ORDER BY id"):
-        have = {r["kind"] for r in db.query("SELECT kind FROM codebase_states WHERE codebase_id = ?", (cb["id"],))}
+        have = {r["kind"] for r in db.query("SELECT kind FROM codebase_states WHERE codebase_id = ? "
+                                            "AND verify_status IN ('pass', 'skipped')", (cb["id"],))}
         base = json.loads(cb["files"])
-        for st in make_states(cb["id"], base, [k for k in cfg.kinds if k not in have]):
-            work.append((cb["id"], base, st))
+        work.extend((cb["id"], base, k) for k in cfg.kinds if k not in have and k in MAKERS)
+
+    def first_passing(w: tuple[str, dict[str, str], str]) -> tuple[str, str, State] | None:
+        cid, base, kind = w
+        last = None
+        for nth in range(3):
+            st = MAKERS[kind](cid, base, nth)
+            if st is None:
+                break
+            last = verify_state(c, s, base, st)
+            if last[0] in ("pass", "skipped"):
+                return last
+        return last
+
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        for (cid, base, _), (status, detail, st) in zip(
-                work, ex.map(lambda w: verify_state(c, s, w[1], w[2]), work)):
+        for (cid, base, kind), res in zip(work, ex.map(first_passing, work)):
+            if res is None:
+                continue  # no candidate edit of this kind in the project
+            status, detail, st = res
             save_state(db, cid, base, st, status, detail)
             stats[f"state_{status}"] = stats.get(f"state_{status}", 0) + 1
     stats["files"] = write_files(s, db)

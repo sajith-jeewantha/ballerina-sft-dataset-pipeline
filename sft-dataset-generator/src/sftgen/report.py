@@ -49,6 +49,7 @@ class ReportData:
     answers: dict[str, Any] | None = None   # answer-prompts (sftgen/generate/responses.py)
     codebases: dict[str, Any] | None = None  # codebases build/verify/attach (sftgen/codebases/)
     baselines: dict[str, Any] | None = None  # eval set v2 and eval runs (sftgen/eval/runner.py)
+    corpus: dict[str, Any] | None = None     # corpus + mine-fixes (sftgen/corpus/)
 
     @property
     def total_pages(self) -> int:
@@ -97,7 +98,25 @@ def collect(s: Settings, db: Database) -> ReportData:
         runs=runs, usage=usage, samples=samples, limits=s.limits(), coverage=_coverage(db),
         swan_lake=s.sources.swan_lake, repos=_repos(db), eval_set=_eval(db), prompts=_prompts(s, db),
         answers=_answers(s, db), codebases=_codebases(s, db), baselines=_baselines(s, db),
+        corpus=_corpus(s, db),
     )
+
+
+def _corpus(s: Settings, db: Database) -> dict[str, Any] | None:
+    from sftgen.corpus.raw import manifest
+
+    m = manifest(s)
+    fixes = db.scalar("SELECT COUNT(*) FROM mined_fixes WHERE eval_overlap IS NULL") or 0
+    if m is None and not fixes:
+        return None
+    by_repo = {r[0]: r[1] for r in db.query("SELECT full_name, COUNT(*) FROM mined_fixes GROUP BY 1 "
+                                            "ORDER BY 2 DESC LIMIT 15")}
+    samples = [dict(r) for r in db.query("SELECT full_name, message, lines_changed, touches_tests FROM mined_fixes "
+                                         "ORDER BY substr(fix_hash, 1, 6) LIMIT 15")]
+    mined_repos = db.scalar("SELECT COUNT(*) FROM kv WHERE key LIKE 'mined:%'") or 0
+    with_tests = db.scalar("SELECT COUNT(*) FROM mined_fixes WHERE touches_tests = 1") or 0
+    return {"manifest": m, "fixes": fixes, "by_repo": by_repo, "samples": samples, "mined_repos": mined_repos,
+            "with_tests": with_tests}
 
 
 def _baselines(s: Settings, db: Database) -> dict[str, Any] | None:
@@ -310,6 +329,7 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_answers_line(d.answers)] if d.answers else []),
         *([_codebases_line(d.codebases)] if d.codebases else []),
         *([_baselines_line(d.baselines)] if d.baselines else []),
+        *([_corpus_line(d.corpus)] if d.corpus else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
         f"Report     {report_path}",
         "─" * 60,
@@ -329,6 +349,14 @@ def _repos_line(r: dict[str, Any]) -> str:
 
 def _pct(n: int, total: int) -> str:
     return f"{100 * n / total:.0f}%" if total else "—"
+
+
+def _corpus_line(c: dict[str, Any]) -> str:
+    m = c["manifest"] or {}
+    head = (f"Corpus     {m.get('version')}: {m.get('files', 0):,} files, ~{m.get('tokens', 0) / 1e6:.1f}M tokens "
+            f"(weighted {m.get('weighted_tokens', 0) / 1e6:.1f}M) from {m.get('repos', 0)} repos" if m
+            else "Corpus     not exported yet")
+    return f"{head}  |  mined fixes {c['fixes']} from {c['mined_repos']} repos"
 
 
 def _baselines_line(b: dict[str, Any]) -> str:
@@ -582,6 +610,45 @@ def _prompts_html(d: ReportData) -> list[str]:
     ]
 
 
+def _corpus_html(d: ReportData) -> list[str]:
+    c = d.corpus
+    if not c:
+        return []
+    m = c["manifest"]
+    parts = ["<h2>Raw corpus and mined fixes</h2>",
+             '<p class="muted">From <code>sftgen corpus</code>: the kept copy of each Swan Lake <code>.bal</code> file '
+             "from licence-safe repos, with eval overlaps and eval-split codebases removed; generated code stays with "
+             "a lower sampling weight. <code>sftgen mine-fixes</code>: before/after pairs from fix commits in the "
+             "repos' history (not built). Per-repo counts are in <code>docs/licence-register.csv</code> "
+             "(<code>corpus_files</code>, <code>corpus_tokens</code>, <code>mined_fixes</code>); attribution in "
+             "<code>data/corpus/&lt;version&gt;/ATTRIBUTION.md</code>.</p>"]
+    if m:
+        kpis = (("Files", f"{m['files']:,}"), ("Tokens", f"{m['tokens'] / 1e6:.1f}M"),
+                ("Weighted tokens", f"{m['weighted_tokens'] / 1e6:.1f}M"), ("Repos", m["repos"]),
+                ("Generated share", f"{100 * m['generated_tokens'] / max(1, m['tokens']):.0f}%"),
+                ("Mined fixes", c["fixes"]))
+        tok = lambda d_: {k: v["tokens"] for k, v in d_.items()}  # noqa: E731
+        parts += [
+            '<div class="grid">' + "".join(f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">'
+                                           f"{_e(v)}</div></div>" for k, v in kpis) + "</div>",
+            '<div class="two" style="margin-top:12px">',
+            f'<div class="card"><h3>Tokens by source group</h3>{_bars(tok(m["by_group"]))}</div>',
+            f'<div class="card"><h3>Tokens by licence</h3>{_bars(tok(m["by_licence"]), alt=True)}</div>',
+            "</div>",
+            f'<div class="card" style="margin-top:12px"><h3>Left out (files)</h3>{_bars(m["left_out"], alt=True)}'
+            "</div>"]
+    if c["fixes"]:
+        parts += [
+            '<div class="two" style="margin-top:12px">',
+            f'<div class="card"><h3>Mined fixes by repo (top 15)</h3>{_bars(c["by_repo"])}<p class="muted">'
+            f'{c["fixes"]} fixes from {c["mined_repos"]} repos scanned; {c["with_tests"]} also changed tests.</p></div>',
+            '<div class="card scroll"><h3>Sample fixes</h3>' + _table(["Repo", "Commit message", "Lines", "Tests"], [
+                [_e(f["full_name"].split("/")[-1]), _e(f["message"][:100]), str(f["lines_changed"]),
+                 "yes" if f["touches_tests"] else "no"] for f in c["samples"]], numeric={2}) + "</div>",
+            "</div>"]
+    return parts
+
+
 def _baselines_html(d: ReportData) -> list[str]:
     b = d.baselines
     if not b:
@@ -787,6 +854,7 @@ def render_html(d: ReportData) -> str:
         *_answers_html(d),
         *_codebases_html(d),
         *_baselines_html(d),
+        *_corpus_html(d),
         "<h2>Chunks per source</h2>",
         f'<div class="card">{_bars(chunk_by_source)}</div>',
         "<h2>Questions</h2>",
