@@ -151,7 +151,7 @@ without stopping the run.
 |---|---|---|
 | `sftgen scrape` | Fetch up to `LIMIT_SCRAPE_PAGES` new pages per source, convert them to clean Markdown and split them into heading-aware chunks | page: `chunked` · `empty` · `duplicate` · `blocked` · `failed` |
 | `sftgen generate-questions` | For chunks with no questions yet, generate `QUESTIONS_PER_CHUNK` each, until `LIMIT_GENERATING` questions are saved. Each question is saved as soon as it is generated, with its chunk, source URL, category and difficulty. Near-duplicates are skipped. | question: `pending` |
-| `sftgen generate-answers` | Answer every `pending` question using the question **and its saved chunk**. Answers include working Ballerina code when relevant, must not invent APIs, and cite the source URL. | question: `answered` · `failed` (with error) |
+| `sftgen generate-answers` | Answer `pending` questions (oldest first, up to `LIMIT_GENERATING` per run) using the question **and its saved chunk**. Answers include working Ballerina code when relevant, must not invent APIs, and cite the source URL. | question: `answered` · `failed` (with error) |
 | `sftgen validate` *(optional)* | Compile the ```` ```ballerina ```` blocks in each answer with `bal` if it is installed | answer: `valid` · `invalid` · `not_checked` |
 | `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid`, and questions overlapping the eval set, are left out) | — |
 | `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` (eval-set overlaps left out) | — |
@@ -227,7 +227,7 @@ Set these in `.env`. Every command prints them at startup, so you can confirm wh
 | Variable | Default | Meaning |
 |---|---|---|
 | `LIMIT_SCRAPE_PAGES` | `20` | Max pages to download **per source** per run. `0` = no limit. |
-| `LIMIT_GENERATING` | `10` | Max questions to generate per run. `0` = no limit. |
+| `LIMIT_GENERATING` | `10` | Max questions generated, and max questions answered, per run (prompts for `generate-prompts` / `answer-prompts`). `0` = no limit. |
 | `QUESTIONS_PER_CHUNK` | `3` | Questions generated from each chunk |
 | `REQUEST_DELAY_SECONDS` | `1` | Polite delay between requests |
 | `LIMIT_REPOS` | `20` | `collect-repos`: max repositories cloned per run. `0` = no limit. Repos excluded by licence without cloning don't count. |
@@ -826,7 +826,9 @@ Open `.env`, fill these in and **save the file**:
 ```env
 OPENROUTER_API_KEY=sk-or-...
 QUESTION_GEN_MODEL=qwen/qwen3.8-flash
-ANSWER_GEN_MODEL=deepseek/deepseek-v4.1-flash
+ANSWER_GEN_MODEL=deepseek/deepseek-v4.1-flash-1017
+PROMPT_WRITER_MODEL=deepseek/deepseek-v4.1-flash-1017
+JUDGE_MODEL=qwen/qwen3.8-flash
 GITHUB_TOKEN=github_pat_...
 
 LIMIT_GENERATING=10        # small first run

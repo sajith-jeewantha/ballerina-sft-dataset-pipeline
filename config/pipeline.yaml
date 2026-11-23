@@ -36,7 +36,7 @@ sources:
     include_api_docs: true           # also fetch /docs/<org>/<pkg>/<version> (function and type signatures)
 
 crawl:
-  user_agent: "BallerinaCorpusBot/2.1 (+https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline)"
+  user_agent: "BallerinaCorpusBot/2.2 (+https://github.com/sajith-jeewantha/ballerina-sft-dataset-pipeline)"
   timeout_s: 60
   retries: 3
   respect_robots: true
@@ -57,7 +57,7 @@ generate:
   max_chunk_attempts: 3
   near_duplicate_threshold: 0.85     # word-set Jaccard similarity between questions
   providers:                         # OpenRouter routing per model-id prefix (sent as `provider`)
-    "deepseek/": {order: [deepseek], allow_fallbacks: false, data_collection: deny}  # DeepSeek terms allow distillation
+    "deepseek/": {order: [], allow_fallbacks: true, data_collection: deny}  # DeepSeek terms allow distillation
   # pricing:                         # optional fallback when the provider returns no cost (USD per 1M tokens)
   #   qwen/qwen3.8-flash: {input: 0.15, output: 0.47}
 

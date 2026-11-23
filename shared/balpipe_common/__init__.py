@@ -4,4 +4,4 @@ Both `scraper/` and `sft-dataset-generator/` depend on this package so that
 config, the SQLite store, hashing and logging are defined exactly once.
 """
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"

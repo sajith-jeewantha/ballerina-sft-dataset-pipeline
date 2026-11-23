@@ -43,7 +43,7 @@ sftgen report
 | `mine-fixes` | `corpus/miner.py` | Before/after fixes from repo history |
 | `assemble` | `assemble/build.py`, `card.py` | Dataset v1: decontaminate, dedup, balance by item, split; SFT, DPO, CPT, coverage, gaps, card, manifest |
 | `generate-questions` | `generate/questions.py` | `QUESTIONS_PER_CHUNK` questions per new chunk, round-robin across sources, up to `LIMIT_GENERATING`; near-duplicates skipped (`clean/dedup.py`) |
-| `generate-answers` | `generate/answers.py` | Answer each `pending` question from its own chunk; citation enforced |
+| `generate-answers` | `generate/answers.py` | Answer `pending` questions from their own chunk, up to `LIMIT_GENERATING` per run; citation enforced |
 | `validate` | `validate/stage.py` + `validate/bal_compiler.py` | `bal build` on answer code (fragments wrapped in `main`, common imports added) |
 | `export` · `export-sft` | `export/stage.py`, `export/sft.py` | Q&A as `data/dataset.jsonl` and `data/sft/` (chat `messages`) |
 | `storage status · push · pull` | `balpipe_common.storage` | Mirror `LOCAL_DATA_DIR` to GCS or S3 |

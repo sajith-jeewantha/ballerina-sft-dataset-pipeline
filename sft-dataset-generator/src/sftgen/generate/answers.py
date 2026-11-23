@@ -36,7 +36,9 @@ async def _answer_all(s: Settings, db: Database, run: RunTracker, client: LLMCli
         "SELECT q.id, q.question, q.source_url, c.text AS chunk, c.heading_path FROM questions q "
         "JOIN chunks c ON c.id = q.chunk_id WHERE q.status = 'pending' ORDER BY q.id")
     stats = {"questions_pending": len(rows), "answered": 0, "failed": 0}
-    log.info("%d questions to answer", len(rows))
+    if s.limit_generating:
+        rows = rows[:s.limit_generating]  # LIMIT_GENERATING: questions answered per run; the rest stay pending
+    log.info("%d questions pending; answering %d", stats["questions_pending"], len(rows))
 
     async def answer(q: sqlite3.Row) -> tuple[sqlite3.Row, str | None, Usage | None, Exception | None]:
         try:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "balpipe-common"
-version = "2.1.0"
+version = "2.2.0"
 description = "Shared config, SQLite store, hashing and logging for the Ballerina Q&A dataset pipeline"
 requires-python = ">=3.11"
 dependencies = [

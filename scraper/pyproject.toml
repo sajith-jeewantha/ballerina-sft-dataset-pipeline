@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ballerinascraper"
-version = "2.1.0"
+version = "2.2.0"
 description = "Fetch stage: ballerina.io sitemap pages, GitHub API (BBE + module repos) and the Central API, into SQLite"
 requires-python = ">=3.11"
 # Pinned runtime deps live in requirements.txt (install with -r).

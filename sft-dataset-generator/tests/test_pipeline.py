@@ -122,6 +122,20 @@ def test_answers_cite_source_and_record_failures(settings: Settings, db: Databas
         assert a["answer"].rstrip().endswith(f"Source: {a['source_url']}")
 
 
+def test_answers_respect_limit_generating(settings: Settings, db: Database) -> None:
+    _page(db, "https://ballerina.io/learn/by-example/hello/", "bbe", BBE_MD)
+    _process(settings, db)
+    _questions(settings.model_copy(update={"limit_generating": 3}), db, FakeClient())
+    s = settings.model_copy(update={"limit_generating": 2})
+    with db.run("generate-answers", s.limits()) as run:
+        stats = asyncio.run(answers._answer_all(s, db, run, FakeClient()))  # noqa: SLF001
+    assert stats == {"questions_pending": 3, "answered": 2, "failed": 0}
+    assert db.scalar("SELECT COUNT(*) FROM questions WHERE status = 'pending'") == 1   # left for the next run
+    with db.run("generate-answers", s.limits()) as run:
+        stats = asyncio.run(answers._answer_all(s, db, run, FakeClient()))  # noqa: SLF001
+    assert stats == {"questions_pending": 1, "answered": 1, "failed": 0}
+
+
 def test_export_skips_invalid_and_report_renders(settings: Settings, db: Database) -> None:
     _page(db, "https://ballerina.io/learn/by-example/hello/", "bbe", BBE_MD)
     _process(settings, db)
@@ -164,9 +178,10 @@ def test_export_sft_messages_split_and_source_stripped(settings: Settings, db: D
         _page(db, f"https://ballerina.io/learn/by-example/p{i}/", "bbe",
               BBE_MD.replace("Hello", f"Hello {i}") + f"\n\nUnique sentence {i}.\n")
     _process(settings, db)
-    _questions(settings.model_copy(update={"limit_generating": 12}), db, FakeClient())
-    with db.run("generate-answers", settings.limits()) as run:
-        asyncio.run(answers._answer_all(settings, db, run, FakeClient()))  # noqa: SLF001
+    s12 = settings.model_copy(update={"limit_generating": 12})
+    _questions(s12, db, FakeClient())
+    with db.run("generate-answers", s12.limits()) as run:
+        asyncio.run(answers._answer_all(s12, db, run, FakeClient()))  # noqa: SLF001
     db.execute("UPDATE answers SET status = 'invalid' WHERE id = (SELECT MIN(id) FROM answers)")
     s = settings.model_copy(update={"sft": settings.sft.model_copy(update={"eval_fraction": 0.5})})
     with db.run("export-sft", s.limits()) as run:

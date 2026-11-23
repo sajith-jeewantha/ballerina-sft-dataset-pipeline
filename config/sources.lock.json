@@ -2980,7 +2980,3048 @@
    "locked_at": "2026-11-21T11:07:17Z"
   }
  },
- "central": {},
+ "central": {
+  "ballerina/a2a": {
+   "version": "0.8.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/ai": {
+   "version": "1.17.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/ai.eval": {
+   "version": "0.9.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/ai.np": {
+   "version": "0.5.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/auth": {
+   "version": "2.14.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/authzen": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/avro": {
+   "version": "1.2.7",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/cache": {
+   "version": "3.10.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/cloud": {
+   "version": "4.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/constraint": {
+   "version": "1.7.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/crypto": {
+   "version": "2.13.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/data.csv": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/data.jsondata": {
+   "version": "1.1.7",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/data.xmldata": {
+   "version": "1.7.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/data.yaml": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:44Z"
+  },
+  "ballerina/dataservice": {
+   "version": "0.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/dataservice.http": {
+   "version": "0.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:50Z"
+  },
+  "ballerina/edi": {
+   "version": "1.7.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:44Z"
+  },
+  "ballerina/email": {
+   "version": "2.14.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/etl": {
+   "version": "0.8.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/file": {
+   "version": "1.14.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/ftp": {
+   "version": "2.22.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/graphql": {
+   "version": "1.19.2",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/grpc": {
+   "version": "1.16.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/http": {
+   "version": "2.18.2",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/io": {
+   "version": "1.8.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/jballerina.java": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/jballerina.java.arrays": {
+   "version": "1.6.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/jwt": {
+   "version": "2.15.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/lang.array": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.boolean": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.decimal": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.error": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.float": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.function": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.future": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.int": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.map": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.natural": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.object": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.query": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.regexp": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.runtime": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.stream": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.string": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.table": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.transaction": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.typedesc": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.value": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/lang.xml": {
+   "version": "2201.13.2",
+   "ballerina_version": "2201.13.2",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/ldap": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/log": {
+   "version": "2.17.2",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/math.vector": {
+   "version": "1.2.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/mcp": {
+   "version": "1.5.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/messaging": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/mime": {
+   "version": "2.12.4",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/mqtt": {
+   "version": "1.4.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/np": {
+   "version": "0.3.0",
+   "ballerina_version": "2201.13.0-m1",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/oauth2": {
+   "version": "2.15.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/observe": {
+   "version": "1.8.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/openapi": {
+   "version": "2.4.4",
+   "ballerina_version": "2201.13.4",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/os": {
+   "version": "1.10.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/otel": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/pdf": {
+   "version": "0.9.3",
+   "ballerina_version": "2201.13.1",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/persist": {
+   "version": "1.7.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/protobuf": {
+   "version": "1.8.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/random": {
+   "version": "1.7.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/regex": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.0.4",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/scan": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/smb": {
+   "version": "2.2.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/smpp": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/soap": {
+   "version": "2.4.0",
+   "ballerina_version": "2201.12.11",
+   "locked_at": "2026-11-22T10:10:44Z"
+  },
+  "ballerina/sql": {
+   "version": "1.19.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/task": {
+   "version": "2.11.4",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/tcp": {
+   "version": "1.14.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/test": {
+   "version": "2201.10.4",
+   "ballerina_version": "2201.10.4",
+   "locked_at": "2026-11-22T10:10:51Z"
+  },
+  "ballerina/time": {
+   "version": "2.8.4",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/toml": {
+   "version": "0.8.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/udp": {
+   "version": "1.14.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:42Z"
+  },
+  "ballerina/url": {
+   "version": "2.6.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/uuid": {
+   "version": "1.10.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/websocket": {
+   "version": "2.16.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:39Z"
+  },
+  "ballerina/websub": {
+   "version": "2.16.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/websubhub": {
+   "version": "1.17.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/workflow": {
+   "version": "1.0.4",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/xlsx": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/xmldata": {
+   "version": "2.9.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:41Z"
+  },
+  "ballerina/xslt": {
+   "version": "2.9.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerina/yaml": {
+   "version": "0.8.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:44Z"
+  },
+  "ballerina/zip": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:47Z"
+  },
+  "ballerinax/aayu.mftg.as2": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:22Z"
+  },
+  "ballerinax/ably": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:40Z"
+  },
+  "ballerinax/activecampaign": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:26Z"
+  },
+  "ballerinax/activemq.driver": {
+   "version": "1.1.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:08:50Z"
+  },
+  "ballerinax/adobe.analytics": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:23Z"
+  },
+  "ballerinax/adp.paystatements": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:25Z"
+  },
+  "ballerinax/ai.agent": {
+   "version": "0.9.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:07:27Z"
+  },
+  "ballerinax/ai.anthropic": {
+   "version": "1.4.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:31Z"
+  },
+  "ballerinax/ai.aws.bedrock": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:10:28Z"
+  },
+  "ballerinax/ai.aws.dynamodb": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:32Z"
+  },
+  "ballerinax/ai.azure": {
+   "version": "1.6.0",
+   "ballerina_version": "2201.14.1",
+   "locked_at": "2026-11-22T10:11:45Z"
+  },
+  "ballerinax/ai.deepseek": {
+   "version": "1.1.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:47Z"
+  },
+  "ballerinax/ai.devant": {
+   "version": "1.0.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:01Z"
+  },
+  "ballerinax/ai.google.gemini": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:54Z"
+  },
+  "ballerinax/ai.googleapis.vertex": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.12.6",
+   "locked_at": "2026-11-22T11:00:40Z"
+  },
+  "ballerinax/ai.memory.mssql": {
+   "version": "1.4.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:46Z"
+  },
+  "ballerinax/ai.memory.postgresql": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:18Z"
+  },
+  "ballerinax/ai.memory.redis": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:09:03Z"
+  },
+  "ballerinax/ai.microsoft.sharepoint": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:03Z"
+  },
+  "ballerinax/ai.milvus": {
+   "version": "1.0.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:35Z"
+  },
+  "ballerinax/ai.mistral": {
+   "version": "1.2.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:48Z"
+  },
+  "ballerinax/ai.ollama": {
+   "version": "1.2.5",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:34Z"
+  },
+  "ballerinax/ai.openai": {
+   "version": "1.5.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:26Z"
+  },
+  "ballerinax/ai.openrouter": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:49Z"
+  },
+  "ballerinax/ai.pgvector": {
+   "version": "1.0.6",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:30Z"
+  },
+  "ballerinax/ai.pinecone": {
+   "version": "1.1.6",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:32Z"
+  },
+  "ballerinax/ai.sqlite": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:32Z"
+  },
+  "ballerinax/ai.weaviate": {
+   "version": "1.0.6",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:33Z"
+  },
+  "ballerinax/ai.wso2.integration": {
+   "version": "1.2.1",
+   "ballerina_version": "2201.13.6",
+   "locked_at": "2026-11-22T11:09:52Z"
+  },
+  "ballerinax/alfresco": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.4",
+   "locked_at": "2026-11-22T11:10:40Z"
+  },
+  "ballerinax/amadeus.flightcreateorders": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:26Z"
+  },
+  "ballerinax/amadeus.flightoffersprice": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:13Z"
+  },
+  "ballerinax/amadeus.flightofferssearch": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:11Z"
+  },
+  "ballerinax/amp": {
+   "version": "1.2.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:07:46Z"
+  },
+  "ballerinax/api2pdf": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:47Z"
+  },
+  "ballerinax/apideck.accounting": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:56Z"
+  },
+  "ballerinax/apideck.lead": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:47Z"
+  },
+  "ballerinax/apideck.proxy": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:29Z"
+  },
+  "ballerinax/apple.appstore": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:23Z"
+  },
+  "ballerinax/asana": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:07:52Z"
+  },
+  "ballerinax/asb": {
+   "version": "3.10.2",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:00:56Z"
+  },
+  "ballerinax/asyncapi.native.handler": {
+   "version": "0.6.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:57Z"
+  },
+  "ballerinax/avaza": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:45Z"
+  },
+  "ballerinax/aws": {
+   "version": "1.1.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:01:06Z"
+  },
+  "ballerinax/aws.dynamodb": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:02:43Z"
+  },
+  "ballerinax/aws.dynamodbstreams": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:48Z"
+  },
+  "ballerinax/aws.lambda": {
+   "version": "3.3.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:10:03Z"
+  },
+  "ballerinax/aws.marketplace.mpe": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:16:43Z"
+  },
+  "ballerinax/aws.marketplace.mpm": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:16:44Z"
+  },
+  "ballerinax/aws.redshift": {
+   "version": "1.2.2",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:03:03Z"
+  },
+  "ballerinax/aws.redshift.driver": {
+   "version": "1.1.2",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:07:17Z"
+  },
+  "ballerinax/aws.redshiftdata": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:19Z"
+  },
+  "ballerinax/aws.s3": {
+   "version": "4.1.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:00:38Z"
+  },
+  "ballerinax/aws.secretmanager": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:47Z"
+  },
+  "ballerinax/aws.ses": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:07:32Z"
+  },
+  "ballerinax/aws.simpledb": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:16Z"
+  },
+  "ballerinax/aws.sns": {
+   "version": "4.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:02:55Z"
+  },
+  "ballerinax/aws.sqs": {
+   "version": "5.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:15Z"
+  },
+  "ballerinax/azure.ad": {
+   "version": "2.5.0",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:18:43Z"
+  },
+  "ballerinax/azure.ai.search": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:45Z"
+  },
+  "ballerinax/azure.ai.search.index": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:43Z"
+  },
+  "ballerinax/azure.analysisservices": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:40Z"
+  },
+  "ballerinax/azure.anomalydetector": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:00Z"
+  },
+  "ballerinax/azure.datalake": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:18Z"
+  },
+  "ballerinax/azure.functions": {
+   "version": "4.2.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:09:46Z"
+  },
+  "ballerinax/azure.iotcentral": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:01Z"
+  },
+  "ballerinax/azure.iothub": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:10Z"
+  },
+  "ballerinax/azure.keyvault": {
+   "version": "1.6.1",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:09:50Z"
+  },
+  "ballerinax/azure.openai.chat": {
+   "version": "4.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:21Z"
+  },
+  "ballerinax/azure.openai.deployment": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:53Z"
+  },
+  "ballerinax/azure.openai.embeddings": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:00:41Z"
+  },
+  "ballerinax/azure.openai.finetunes": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:58Z"
+  },
+  "ballerinax/azure.openai.responses": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:49Z"
+  },
+  "ballerinax/azure.openai.text": {
+   "version": "1.0.4",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:01:54Z"
+  },
+  "ballerinax/azure.qnamaker": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:39Z"
+  },
+  "ballerinax/azure.sqldb": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:19:30Z"
+  },
+  "ballerinax/azure.storage.files": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:01:40Z"
+  },
+  "ballerinax/azure.textanalytics": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:31Z"
+  },
+  "ballerinax/azure.timeseries": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:20Z"
+  },
+  "ballerinax/azure_cosmosdb": {
+   "version": "4.5.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:11:51Z"
+  },
+  "ballerinax/azure_eventhub": {
+   "version": "3.1.0",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T11:08:30Z"
+  },
+  "ballerinax/azure_storage_service": {
+   "version": "4.4.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:00:54Z"
+  },
+  "ballerinax/bintable": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:41Z"
+  },
+  "ballerinax/bitbucket": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:59Z"
+  },
+  "ballerinax/bitly": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:04Z"
+  },
+  "ballerinax/botify": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:50Z"
+  },
+  "ballerinax/box": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:22Z"
+  },
+  "ballerinax/candid": {
+   "version": "0.2.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:12Z"
+  },
+  "ballerinax/capsulecrm": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:31Z"
+  },
+  "ballerinax/cdata.connect": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.7.0",
+   "locked_at": "2026-11-22T11:17:38Z"
+  },
+  "ballerinax/cdata.connect.driver": {
+   "version": "1.1.1",
+   "ballerina_version": "2201.2.3",
+   "locked_at": "2026-11-22T11:08:54Z"
+  },
+  "ballerinax/cdc": {
+   "version": "1.5.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/cdc.schema.aws.s3.driver": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:09:33Z"
+  },
+  "ballerinax/cdc.schema.azure.blob.driver": {
+   "version": "1.2.3",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:09:37Z"
+  },
+  "ballerinax/cdc.schema.rocketmq.driver": {
+   "version": "1.2.2",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:09:36Z"
+  },
+  "ballerinax/choreo": {
+   "version": "0.4.12",
+   "ballerina_version": "2201.0.1",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/clever.data": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:21Z"
+  },
+  "ballerinax/client.config": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.2.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/cloudmersive.barcode": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:45Z"
+  },
+  "ballerinax/cloudmersive.currency": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:12Z"
+  },
+  "ballerinax/cloudmersive.security": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:18Z"
+  },
+  "ballerinax/cloudmersive.validate": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:04Z"
+  },
+  "ballerinax/cloudmersive.virusscan": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:10Z"
+  },
+  "ballerinax/commercetools.auditlog": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:17Z"
+  },
+  "ballerinax/commercetools.cartsordershoppinglists": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:25Z"
+  },
+  "ballerinax/commercetools.configuration": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:03Z"
+  },
+  "ballerinax/commercetools.customer": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:47Z"
+  },
+  "ballerinax/commercetools.customizebehavior": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:04Z"
+  },
+  "ballerinax/commercetools.customizedata": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:40Z"
+  },
+  "ballerinax/commercetools.pricingdiscount": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:27Z"
+  },
+  "ballerinax/commercetools.productcatalog": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:32Z"
+  },
+  "ballerinax/confluent.cavroserdes": {
+   "version": "1.0.5",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:11:11Z"
+  },
+  "ballerinax/confluent.cregistry": {
+   "version": "0.4.6",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:11:00Z"
+  },
+  "ballerinax/constantcontact": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:15Z"
+  },
+  "ballerinax/copybook": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:10:04Z"
+  },
+  "ballerinax/covid19": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/dataflowkit": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:09Z"
+  },
+  "ballerinax/dayforce": {
+   "version": "0.1.0",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:18:29Z"
+  },
+  "ballerinax/discord": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:38Z"
+  },
+  "ballerinax/docusign.admin": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:41Z"
+  },
+  "ballerinax/docusign.click": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:23Z"
+  },
+  "ballerinax/docusign.dsadmin": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.8.4",
+   "locked_at": "2026-11-22T10:11:50Z"
+  },
+  "ballerinax/docusign.dsclick": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.8.4",
+   "locked_at": "2026-11-22T11:19:03Z"
+  },
+  "ballerinax/docusign.dsesign": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.8.5",
+   "locked_at": "2026-11-22T11:00:59Z"
+  },
+  "ballerinax/docusign.monitor": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:43Z"
+  },
+  "ballerinax/docusign.rooms": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:45Z"
+  },
+  "ballerinax/dropbox": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:07Z"
+  },
+  "ballerinax/ebay.account": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:28Z"
+  },
+  "ballerinax/ebay.analytics": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:36Z"
+  },
+  "ballerinax/ebay.browse": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:18:53Z"
+  },
+  "ballerinax/ebay.compliance": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:27Z"
+  },
+  "ballerinax/ebay.finances": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:47Z"
+  },
+  "ballerinax/ebay.inventory": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:38Z"
+  },
+  "ballerinax/ebay.listing": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:20Z"
+  },
+  "ballerinax/ebay.logistics": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:25Z"
+  },
+  "ballerinax/ebay.metadata": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:35Z"
+  },
+  "ballerinax/ebay.negotiation": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:18Z"
+  },
+  "ballerinax/ebay.recommendation": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:33Z"
+  },
+  "ballerinax/edifact.d03a.finance": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:22:14Z"
+  },
+  "ballerinax/edifact.d03a.retail": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:16:52Z"
+  },
+  "ballerinax/edifact.d03a.services": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:24:23Z"
+  },
+  "ballerinax/edifact.d03a.supplychain": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:37Z"
+  },
+  "ballerinax/edocs": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:15Z"
+  },
+  "ballerinax/elastic.elasticcloud": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:42Z"
+  },
+  "ballerinax/elasticsearch": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:19:59Z"
+  },
+  "ballerinax/ellucian.studentcharges": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.1.1",
+   "locked_at": "2026-11-22T11:21:02Z"
+  },
+  "ballerinax/elmah": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:05Z"
+  },
+  "ballerinax/eloqua": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:55Z"
+  },
+  "ballerinax/eventbrite": {
+   "version": "1.6.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:01Z"
+  },
+  "ballerinax/exchangerates": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:09:22Z"
+  },
+  "ballerinax/facebook.ads": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:11Z"
+  },
+  "ballerinax/file360": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:29Z"
+  },
+  "ballerinax/financial.iso20022": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.10.5",
+   "locked_at": "2026-11-22T11:08:12Z"
+  },
+  "ballerinax/financial.iso20022ToSwiftmt": {
+   "version": "1.0.4",
+   "ballerina_version": "2201.10.5",
+   "locked_at": "2026-11-22T11:09:39Z"
+  },
+  "ballerinax/financial.iso8583": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.10.1",
+   "locked_at": "2026-11-22T11:20:16Z"
+  },
+  "ballerinax/financial.swift.mt": {
+   "version": "3.0.5",
+   "ballerina_version": "2201.10.5",
+   "locked_at": "2026-11-22T11:08:10Z"
+  },
+  "ballerinax/financial.swiftmtToIso20022": {
+   "version": "2.0.3",
+   "ballerina_version": "2201.10.5",
+   "locked_at": "2026-11-22T11:09:25Z"
+  },
+  "ballerinax/flatapi": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:39Z"
+  },
+  "ballerinax/fraudlabspro.frauddetection": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:10:50Z"
+  },
+  "ballerinax/freemarker": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:02Z"
+  },
+  "ballerinax/freshbooks": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:49Z"
+  },
+  "ballerinax/gcloud.pubsub": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:09:42Z"
+  },
+  "ballerinax/geonames": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:44Z"
+  },
+  "ballerinax/github": {
+   "version": "6.1.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:11:13Z"
+  },
+  "ballerinax/gitlab": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:20:26Z"
+  },
+  "ballerinax/googleapis.abusiveexperiencereport": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:44Z"
+  },
+  "ballerinax/googleapis.appsscript": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:50Z"
+  },
+  "ballerinax/googleapis.bigquery": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:10:43Z"
+  },
+  "ballerinax/googleapis.bigquery.datatransfer": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:30Z"
+  },
+  "ballerinax/googleapis.blogger": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:06Z"
+  },
+  "ballerinax/googleapis.books": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:22Z"
+  },
+  "ballerinax/googleapis.calendar": {
+   "version": "3.2.1",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T10:11:58Z"
+  },
+  "ballerinax/googleapis.chat": {
+   "version": "0.1.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:01:44Z"
+  },
+  "ballerinax/googleapis.classroom": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:43Z"
+  },
+  "ballerinax/googleapis.cloudbillingaccount": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:09Z"
+  },
+  "ballerinax/googleapis.cloudbuild": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:16Z"
+  },
+  "ballerinax/googleapis.clouddatastore": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:32Z"
+  },
+  "ballerinax/googleapis.cloudfilestore": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:48Z"
+  },
+  "ballerinax/googleapis.cloudfunctions": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:18:04Z"
+  },
+  "ballerinax/googleapis.cloudnaturallanguage": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:55Z"
+  },
+  "ballerinax/googleapis.cloudpubsub": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:30Z"
+  },
+  "ballerinax/googleapis.cloudscheduler": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:56Z"
+  },
+  "ballerinax/googleapis.cloudtalentsolution": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:42Z"
+  },
+  "ballerinax/googleapis.cloudtranslation": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:32Z"
+  },
+  "ballerinax/googleapis.discovery": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:30Z"
+  },
+  "ballerinax/googleapis.docs": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:10:20Z"
+  },
+  "ballerinax/googleapis.drive": {
+   "version": "3.5.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:27Z"
+  },
+  "ballerinax/googleapis.gcalendar": {
+   "version": "4.0.2",
+   "ballerina_version": "2201.8.4",
+   "locked_at": "2026-11-22T11:09:09Z"
+  },
+  "ballerinax/googleapis.gmail": {
+   "version": "4.2.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:13Z"
+  },
+  "ballerinax/googleapis.manufacturercenter": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:50Z"
+  },
+  "ballerinax/googleapis.mybusiness": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:28Z"
+  },
+  "ballerinax/googleapis.oauth2": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:18:12Z"
+  },
+  "ballerinax/googleapis.people": {
+   "version": "2.4.1",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T11:07:37Z"
+  },
+  "ballerinax/googleapis.retail": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:21Z"
+  },
+  "ballerinax/googleapis.sheets": {
+   "version": "4.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/googleapis.slides": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:01Z"
+  },
+  "ballerinax/googleapis.tasks": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:09Z"
+  },
+  "ballerinax/googleapis.vault": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:45Z"
+  },
+  "ballerinax/googleapis.vision": {
+   "version": "1.6.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:10:53Z"
+  },
+  "ballerinax/googleapis.youtube.analytics": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:02Z"
+  },
+  "ballerinax/googleapis.youtube.data": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:52Z"
+  },
+  "ballerinax/googleapis.youtube.reporting": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:52Z"
+  },
+  "ballerinax/gotowebinar": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:18Z"
+  },
+  "ballerinax/graphhopper.directions": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:43Z"
+  },
+  "ballerinax/guidewire.insnow": {
+   "version": "0.2.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:24Z"
+  },
+  "ballerinax/h2.driver": {
+   "version": "1.2.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:01:29Z"
+  },
+  "ballerinax/health.base": {
+   "version": "1.1.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T10:11:01Z"
+  },
+  "ballerinax/health.ccda.r3": {
+   "version": "0.9.0",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:16:47Z"
+  },
+  "ballerinax/health.clients.fhir": {
+   "version": "3.0.6",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:01:04Z"
+  },
+  "ballerinax/health.clients.fhir.epic": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:17:03Z"
+  },
+  "ballerinax/health.clients.hl7": {
+   "version": "2.0.3",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:09:55Z"
+  },
+  "ballerinax/health.fhir.cds": {
+   "version": "2.0.4",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:09:49Z"
+  },
+  "ballerinax/health.fhir.r4": {
+   "version": "6.3.3",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T10:11:06Z"
+  },
+  "ballerinax/health.fhir.r4.aubase410": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:09:57Z"
+  },
+  "ballerinax/health.fhir.r4.aubase421": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:07:38Z"
+  },
+  "ballerinax/health.fhir.r4.aucore040": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:55Z"
+  },
+  "ballerinax/health.fhir.r4.carinbb200": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:09:04Z"
+  },
+  "ballerinax/health.fhir.r4.davincicrd210": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:37Z"
+  },
+  "ballerinax/health.fhir.r4.davincidrugformulary210": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:55Z"
+  },
+  "ballerinax/health.fhir.r4.davincidtr210": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:09:44Z"
+  },
+  "ballerinax/health.fhir.r4.davincihrex100": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:09:11Z"
+  },
+  "ballerinax/health.fhir.r4.davincipas": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:43Z"
+  },
+  "ballerinax/health.fhir.r4.davincipdex220": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:10:33Z"
+  },
+  "ballerinax/health.fhir.r4.davinciplannet120": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:25Z"
+  },
+  "ballerinax/health.fhir.r4.international401": {
+   "version": "4.0.5",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T10:11:37Z"
+  },
+  "ballerinax/health.fhir.r4.ips": {
+   "version": "4.0.2",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:02:57Z"
+  },
+  "ballerinax/health.fhir.r4.lkcore010": {
+   "version": "1.3.0",
+   "ballerina_version": "2201.10.2",
+   "locked_at": "2026-11-22T11:10:22Z"
+  },
+  "ballerinax/health.fhir.r4.medcom240": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:09:15Z"
+  },
+  "ballerinax/health.fhir.r4.parser": {
+   "version": "7.1.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T10:12:19Z"
+  },
+  "ballerinax/health.fhir.r4.terminology": {
+   "version": "7.0.2",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:14Z"
+  },
+  "ballerinax/health.fhir.r4.uscore311": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:52Z"
+  },
+  "ballerinax/health.fhir.r4.uscore400": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:21:34Z"
+  },
+  "ballerinax/health.fhir.r4.uscore501": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:01:25Z"
+  },
+  "ballerinax/health.fhir.r4.uscore610": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:10:08Z"
+  },
+  "ballerinax/health.fhir.r4.uscore700": {
+   "version": "3.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:07:49Z"
+  },
+  "ballerinax/health.fhir.r4.validator": {
+   "version": "6.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:01:30Z"
+  },
+  "ballerinax/health.fhir.r4utils": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:09:21Z"
+  },
+  "ballerinax/health.fhir.r4utils.ccdatofhir": {
+   "version": "4.0.1",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:08:21Z"
+  },
+  "ballerinax/health.fhir.r4utils.deidentify": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:25:01Z"
+  },
+  "ballerinax/health.fhir.r4utils.fhirpath": {
+   "version": "6.0.0",
+   "ballerina_version": "2201.12.8",
+   "locked_at": "2026-11-22T11:01:55Z"
+  },
+  "ballerinax/health.fhir.r5": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:08:35Z"
+  },
+  "ballerinax/health.fhir.r5.international500": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:08:59Z"
+  },
+  "ballerinax/health.fhir.r5.parser": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:09:43Z"
+  },
+  "ballerinax/health.fhir.templates.r4.diagnosticreport": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:23:45Z"
+  },
+  "ballerinax/health.fhir.templates.r4.encounter": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:22:15Z"
+  },
+  "ballerinax/health.fhir.templates.r4.epicconnect": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.6.0",
+   "locked_at": "2026-11-22T11:24:27Z"
+  },
+  "ballerinax/health.fhir.templates.r4.metadata": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:22:34Z"
+  },
+  "ballerinax/health.fhir.templates.r4.observation": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:23:56Z"
+  },
+  "ballerinax/health.fhir.templates.r4.patient": {
+   "version": "1.0.4",
+   "ballerina_version": "2201.7.0",
+   "locked_at": "2026-11-22T11:20:01Z"
+  },
+  "ballerinax/health.fhir.templates.r4.practitioner": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:23:13Z"
+  },
+  "ballerinax/health.fhir.templates.r4.smartconfiguration": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:21:55Z"
+  },
+  "ballerinax/health.fhir.templates.r4.uscore501.patient": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.5.0",
+   "locked_at": "2026-11-22T11:21:20Z"
+  },
+  "ballerinax/health.fhirr4": {
+   "version": "3.0.8",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:01:34Z"
+  },
+  "ballerinax/health.fhirr5": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:23:50Z"
+  },
+  "ballerinax/health.hl7v2": {
+   "version": "3.0.11",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:01:07Z"
+  },
+  "ballerinax/health.hl7v2.utils.v2tofhirr4": {
+   "version": "4.0.4",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:03:09Z"
+  },
+  "ballerinax/health.hl7v22": {
+   "version": "1.0.1",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:09:28Z"
+  },
+  "ballerinax/health.hl7v23": {
+   "version": "4.0.6",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:01:49Z"
+  },
+  "ballerinax/health.hl7v23.utils.v2tofhirr4": {
+   "version": "1.1.1",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:09:34Z"
+  },
+  "ballerinax/health.hl7v231": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:00Z"
+  },
+  "ballerinax/health.hl7v24": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:11Z"
+  },
+  "ballerinax/health.hl7v25": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:15Z"
+  },
+  "ballerinax/health.hl7v251": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:36Z"
+  },
+  "ballerinax/health.hl7v26": {
+   "version": "4.0.4",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:22Z"
+  },
+  "ballerinax/health.hl7v27": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:06Z"
+  },
+  "ballerinax/health.hl7v271": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:20:06Z"
+  },
+  "ballerinax/health.hl7v28": {
+   "version": "4.0.3",
+   "ballerina_version": "2201.12.10",
+   "locked_at": "2026-11-22T11:02:29Z"
+  },
+  "ballerinax/health.hl7v2commons": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.12.3",
+   "locked_at": "2026-11-22T11:02:45Z"
+  },
+  "ballerinax/hubspot.automation.actions": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:18Z"
+  },
+  "ballerinax/hubspot.crm.associations": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:01Z"
+  },
+  "ballerinax/hubspot.crm.associations.schema": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:58Z"
+  },
+  "ballerinax/hubspot.crm.commerce.carts": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:41Z"
+  },
+  "ballerinax/hubspot.crm.commerce.discounts": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:00Z"
+  },
+  "ballerinax/hubspot.crm.commerce.orders": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:56Z"
+  },
+  "ballerinax/hubspot.crm.commerce.quotes": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:07Z"
+  },
+  "ballerinax/hubspot.crm.commerce.taxes": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:33Z"
+  },
+  "ballerinax/hubspot.crm.engagement.meeting": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:19:16Z"
+  },
+  "ballerinax/hubspot.crm.engagement.notes": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:35Z"
+  },
+  "ballerinax/hubspot.crm.engagements.calls": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:42Z"
+  },
+  "ballerinax/hubspot.crm.engagements.communications": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:47Z"
+  },
+  "ballerinax/hubspot.crm.engagements.email": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:45Z"
+  },
+  "ballerinax/hubspot.crm.engagements.tasks": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:19:19Z"
+  },
+  "ballerinax/hubspot.crm.extensions.timelines": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:54Z"
+  },
+  "ballerinax/hubspot.crm.extensions.videoconferencing": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:37Z"
+  },
+  "ballerinax/hubspot.crm.import": {
+   "version": "4.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:16:55Z"
+  },
+  "ballerinax/hubspot.crm.lists": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:33Z"
+  },
+  "ballerinax/hubspot.crm.obj.companies": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:46Z"
+  },
+  "ballerinax/hubspot.crm.obj.contacts": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:09:54Z"
+  },
+  "ballerinax/hubspot.crm.obj.deals": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:39Z"
+  },
+  "ballerinax/hubspot.crm.obj.feedback": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:38Z"
+  },
+  "ballerinax/hubspot.crm.obj.leads": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:32Z"
+  },
+  "ballerinax/hubspot.crm.obj.lineitems": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:51Z"
+  },
+  "ballerinax/hubspot.crm.obj.products": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:53Z"
+  },
+  "ballerinax/hubspot.crm.obj.schemas": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:07Z"
+  },
+  "ballerinax/hubspot.crm.obj.tickets": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:09Z"
+  },
+  "ballerinax/hubspot.crm.owners": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:49Z"
+  },
+  "ballerinax/hubspot.crm.pipelines": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:23Z"
+  },
+  "ballerinax/hubspot.crm.properties": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:05Z"
+  },
+  "ballerinax/hubspot.files": {
+   "version": "2.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:47Z"
+  },
+  "ballerinax/hubspot.marketing.campaigns": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:17:00Z"
+  },
+  "ballerinax/hubspot.marketing.emails": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:16:53Z"
+  },
+  "ballerinax/hubspot.marketing.events": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:18:15Z"
+  },
+  "ballerinax/hubspot.marketing.forms": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:16:46Z"
+  },
+  "ballerinax/hubspot.marketing.subscriptions": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:16:58Z"
+  },
+  "ballerinax/hubspot.marketing.transactional": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:16:57Z"
+  },
+  "ballerinax/ibm.ctg": {
+   "version": "0.1.1",
+   "ballerina_version": "2201.10.0",
+   "locked_at": "2026-11-22T11:20:11Z"
+  },
+  "ballerinax/ibm.ibmmq": {
+   "version": "1.4.6",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:32Z"
+  },
+  "ballerinax/idetraceprovider": {
+   "version": "0.10.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:08:33Z"
+  },
+  "ballerinax/impala": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:17:08Z"
+  },
+  "ballerinax/insightly.custom": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:25:02Z"
+  },
+  "ballerinax/interzoid.convertcurrency": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:00Z"
+  },
+  "ballerinax/interzoid.currencyrate": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:49Z"
+  },
+  "ballerinax/interzoid.emailinfo": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:37Z"
+  },
+  "ballerinax/interzoid.globalnumberinfo": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:05Z"
+  },
+  "ballerinax/interzoid.statedata": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:03Z"
+  },
+  "ballerinax/interzoid.weatherzip": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:07Z"
+  },
+  "ballerinax/ip2whois": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:54Z"
+  },
+  "ballerinax/ipgeolocation": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:25:08Z"
+  },
+  "ballerinax/jaeger": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:11:59Z"
+  },
+  "ballerinax/java.jdbc": {
+   "version": "1.15.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/java.jms": {
+   "version": "1.2.2",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:08:05Z"
+  },
+  "ballerinax/jira": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:09:17Z"
+  },
+  "ballerinax/jira.servicemanagement": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:23:46Z"
+  },
+  "ballerinax/kafka": {
+   "version": "4.6.8",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/karbon": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:08Z"
+  },
+  "ballerinax/leanix.integrationapi": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:11:03Z"
+  },
+  "ballerinax/livestorm": {
+   "version": "2.6.1",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:42Z"
+  },
+  "ballerinax/logoraisr": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:33Z"
+  },
+  "ballerinax/mailchimp": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:03:00Z"
+  },
+  "ballerinax/mailchimp.marketing": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:44Z"
+  },
+  "ballerinax/mailchimp.transactional": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:09:13Z"
+  },
+  "ballerinax/mathtools.numbers": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:18Z"
+  },
+  "ballerinax/medium": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:10:36Z"
+  },
+  "ballerinax/metrics.logs": {
+   "version": "1.2.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:02:51Z"
+  },
+  "ballerinax/microsoft.dynamics365.finance.customermain": {
+   "version": "0.8.2",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:05Z"
+  },
+  "ballerinax/microsoft.dynamics365.finance.ledger": {
+   "version": "0.8.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:13Z"
+  },
+  "ballerinax/microsoft.dynamics365.finance.mainaccount": {
+   "version": "0.8.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:17Z"
+  },
+  "ballerinax/microsoft.dynamics365businesscentral": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:20:58Z"
+  },
+  "ballerinax/microsoft.excel": {
+   "version": "2.4.1",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T11:07:41Z"
+  },
+  "ballerinax/microsoft.onedrive": {
+   "version": "3.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:07:21Z"
+  },
+  "ballerinax/microsoft.onenote": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:32Z"
+  },
+  "ballerinax/microsoft.outlook.calendar": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:56Z"
+  },
+  "ballerinax/microsoft.outlook.mail": {
+   "version": "3.1.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:02:52Z"
+  },
+  "ballerinax/microsoft.sharepoint.sites": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:18Z"
+  },
+  "ballerinax/microsoft.teams": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:02:48Z"
+  },
+  "ballerinax/milvus": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:12:10Z"
+  },
+  "ballerinax/mistral": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:02Z"
+  },
+  "ballerinax/moesif": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:09:40Z"
+  },
+  "ballerinax/mongodb": {
+   "version": "5.2.4",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:35Z"
+  },
+  "ballerinax/mssql": {
+   "version": "1.19.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:11:10Z"
+  },
+  "ballerinax/mssql.cdc.driver": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:21Z"
+  },
+  "ballerinax/mssql.driver": {
+   "version": "1.7.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:11:17Z"
+  },
+  "ballerinax/mysql": {
+   "version": "1.19.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/mysql.cdc.driver": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:24Z"
+  },
+  "ballerinax/mysql.driver": {
+   "version": "1.8.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/nats": {
+   "version": "3.3.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:12:09Z"
+  },
+  "ballerinax/netsuite": {
+   "version": "3.3.0",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:01:58Z"
+  },
+  "ballerinax/neutrino": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:36Z"
+  },
+  "ballerinax/newrelic": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:01:35Z"
+  },
+  "ballerinax/newsapi": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:42Z"
+  },
+  "ballerinax/notion": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:07Z"
+  },
+  "ballerinax/np": {
+   "version": "0.9.0",
+   "ballerina_version": "2201.13.0-m1",
+   "locked_at": "2026-11-22T11:01:14Z"
+  },
+  "ballerinax/nytimes.books": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:12Z"
+  },
+  "ballerinax/nytimes.newswire": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:45Z"
+  },
+  "ballerinax/onepassword": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:11Z"
+  },
+  "ballerinax/openai": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:35Z"
+  },
+  "ballerinax/openai.audio": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:06Z"
+  },
+  "ballerinax/openai.chat": {
+   "version": "5.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:20Z"
+  },
+  "ballerinax/openai.embeddings": {
+   "version": "1.0.6",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T10:11:53Z"
+  },
+  "ballerinax/openai.finetunes": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:10:34Z"
+  },
+  "ballerinax/openai.images": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.9.3",
+   "locked_at": "2026-11-22T11:10:49Z"
+  },
+  "ballerinax/openai.moderations": {
+   "version": "1.0.6",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:54Z"
+  },
+  "ballerinax/openai.responses": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:02:46Z"
+  },
+  "ballerinax/openai.text": {
+   "version": "1.0.6",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:01:53Z"
+  },
+  "ballerinax/openair": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:41Z"
+  },
+  "ballerinax/openrouter": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:51Z"
+  },
+  "ballerinax/openweathermap": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:01:57Z"
+  },
+  "ballerinax/optirtc.public": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:20Z"
+  },
+  "ballerinax/optitune": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:36Z"
+  },
+  "ballerinax/oracledb": {
+   "version": "1.17.2",
+   "ballerina_version": "2201.13.1",
+   "locked_at": "2026-11-22T10:11:28Z"
+  },
+  "ballerinax/oracledb.cdc.driver": {
+   "version": "1.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:50Z"
+  },
+  "ballerinax/oracledb.driver": {
+   "version": "1.5.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:01:09Z"
+  },
+  "ballerinax/pagerduty": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:18:01Z"
+  },
+  "ballerinax/pandadoc": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:52Z"
+  },
+  "ballerinax/paylocity": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:21Z"
+  },
+  "ballerinax/paypal.invoices": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:10Z"
+  },
+  "ballerinax/paypal.orders": {
+   "version": "2.0.3",
+   "ballerina_version": "2201.12.7",
+   "locked_at": "2026-11-22T11:08:24Z"
+  },
+  "ballerinax/paypal.payments": {
+   "version": "2.0.2",
+   "ballerina_version": "2201.12.7",
+   "locked_at": "2026-11-22T11:10:47Z"
+  },
+  "ballerinax/paypal.subscriptions": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:09Z"
+  },
+  "ballerinax/pdfbroker": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:35Z"
+  },
+  "ballerinax/peoplehr": {
+   "version": "2.2.1",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T11:09:23Z"
+  },
+  "ballerinax/persist.googlesheets": {
+   "version": "1.6.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:17:31Z"
+  },
+  "ballerinax/persist.inmemory": {
+   "version": "1.6.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:39Z"
+  },
+  "ballerinax/persist.redis": {
+   "version": "0.4.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:10:15Z"
+  },
+  "ballerinax/persist.sql": {
+   "version": "1.8.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:48Z"
+  },
+  "ballerinax/pinecone.index": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:20:15Z"
+  },
+  "ballerinax/pinecone.vector": {
+   "version": "1.0.3",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T10:12:04Z"
+  },
+  "ballerinax/pipedrive": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:03Z"
+  },
+  "ballerinax/plaid": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:24:29Z"
+  },
+  "ballerinax/pocketsmith": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:52Z"
+  },
+  "ballerinax/postgresql": {
+   "version": "1.19.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/postgresql.cdc.driver": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:41Z"
+  },
+  "ballerinax/postgresql.driver": {
+   "version": "1.7.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:11:08Z"
+  },
+  "ballerinax/power.bi": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:41Z"
+  },
+  "ballerinax/powertoolsdeveloper.files": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:58Z"
+  },
+  "ballerinax/powertoolsdeveloper.weather": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:16Z"
+  },
+  "ballerinax/prometheus": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:11:54Z"
+  },
+  "ballerinax/quickbooks.online": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:47Z"
+  },
+  "ballerinax/rabbitmq": {
+   "version": "3.6.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:18Z"
+  },
+  "ballerinax/readme": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:52Z"
+  },
+  "ballerinax/reckon.one": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:20:18Z"
+  },
+  "ballerinax/recurly": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:35Z"
+  },
+  "ballerinax/redis": {
+   "version": "3.5.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:10:58Z"
+  },
+  "ballerinax/ronin": {
+   "version": "1.5.3",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:58Z"
+  },
+  "ballerinax/rudderstack": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:25:07Z"
+  },
+  "ballerinax/salesforce": {
+   "version": "8.7.3",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/salesforce.einstein": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:37Z"
+  },
+  "ballerinax/salesforce.marketingcloud": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:18:10Z"
+  },
+  "ballerinax/salesforce.pubsub": {
+   "version": "0.1.0",
+   "ballerina_version": "2201.13.6",
+   "locked_at": "2026-11-22T11:10:52Z"
+  },
+  "ballerinax/sap": {
+   "version": "1.4.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:11:03Z"
+  },
+  "ballerinax/sap.businessone": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:07:34Z"
+  },
+  "ballerinax/sap.commerce.webservices": {
+   "version": "0.9.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:50Z"
+  },
+  "ballerinax/sap.jco": {
+   "version": "2.1.3",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:08:58Z"
+  },
+  "ballerinax/sap.s4hana.api_sales_inquiry_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:19:01Z"
+  },
+  "ballerinax/sap.s4hana.api_sales_order_simulation_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:45Z"
+  },
+  "ballerinax/sap.s4hana.api_sales_order_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:09:59Z"
+  },
+  "ballerinax/sap.s4hana.api_sales_quotation_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:54Z"
+  },
+  "ballerinax/sap.s4hana.api_salesdistrict_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:56Z"
+  },
+  "ballerinax/sap.s4hana.api_salesorganization_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:19:07Z"
+  },
+  "ballerinax/sap.s4hana.api_sd_incoterms_srv": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:58Z"
+  },
+  "ballerinax/sap.s4hana.api_sd_sa_soldtopartydetn": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:19:06Z"
+  },
+  "ballerinax/sap.s4hana.ce_salesorder_0001": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:19:14Z"
+  },
+  "ballerinax/sap.s4hana.salesarea_0001": {
+   "version": "2.2.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:18:59Z"
+  },
+  "ballerinax/sap.successfactors.litmos": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:50Z"
+  },
+  "ballerinax/saps4hana.externaltaxcalculation.taxquote": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:25:04Z"
+  },
+  "ballerinax/saps4hana.itcm.agreement": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:25:05Z"
+  },
+  "ballerinax/saps4hana.itcm.customer": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:26Z"
+  },
+  "ballerinax/saps4hana.itcm.product": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:24Z"
+  },
+  "ballerinax/saps4hana.itcm.user": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:43Z"
+  },
+  "ballerinax/saps4hana.wls.screeninghits": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:38Z"
+  },
+  "ballerinax/scim": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:16Z"
+  },
+  "ballerinax/sendgrid": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:09:26Z"
+  },
+  "ballerinax/servicenow": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:03:02Z"
+  },
+  "ballerinax/shipwire.receivings": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:06Z"
+  },
+  "ballerinax/shopify.admin": {
+   "version": "3.0.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:03:05Z"
+  },
+  "ballerinax/shortcut": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:49Z"
+  },
+  "ballerinax/shorten.rest": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:54Z"
+  },
+  "ballerinax/siemens.iotandstorage.iotfileservice": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:35Z"
+  },
+  "ballerinax/siemens.platformcore.identitymanagement": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:57Z"
+  },
+  "ballerinax/sinch.sms": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:07Z"
+  },
+  "ballerinax/slack": {
+   "version": "5.0.1",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T11:01:31Z"
+  },
+  "ballerinax/smartsheet": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:18:20Z"
+  },
+  "ballerinax/snowflake": {
+   "version": "2.2.2",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T10:11:29Z"
+  },
+  "ballerinax/snowflake.driver": {
+   "version": "2.8.1",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:07:18Z"
+  },
+  "ballerinax/solace": {
+   "version": "1.2.1",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T10:12:23Z"
+  },
+  "ballerinax/solace.jms": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:01:10Z"
+  },
+  "ballerinax/soundcloud": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:31Z"
+  },
+  "ballerinax/spotify": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:35Z"
+  },
+  "ballerinax/spotto": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:59Z"
+  },
+  "ballerinax/stabilityai": {
+   "version": "1.0.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:20:38Z"
+  },
+  "ballerinax/storecove": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:12Z"
+  },
+  "ballerinax/stripe": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.9.0",
+   "locked_at": "2026-11-22T11:01:18Z"
+  },
+  "ballerinax/sugarcrm": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:02Z"
+  },
+  "ballerinax/tableau": {
+   "version": "1.4.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:13Z"
+  },
+  "ballerinax/telegram": {
+   "version": "0.9.4",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:42Z"
+  },
+  "ballerinax/themoviedb": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:07:44Z"
+  },
+  "ballerinax/transformer": {
+   "version": "0.1.0",
+   "ballerina_version": "2201.2.3",
+   "locked_at": "2026-11-22T11:20:03Z"
+  },
+  "ballerinax/trello": {
+   "version": "2.0.1",
+   "ballerina_version": "2201.12.7",
+   "locked_at": "2026-11-22T11:07:29Z"
+  },
+  "ballerinax/trigger.aayu.mftg.as2": {
+   "version": "0.10.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:08:29Z"
+  },
+  "ballerinax/trigger.asb": {
+   "version": "1.2.0",
+   "ballerina_version": "2201.4.1",
+   "locked_at": "2026-11-22T11:07:25Z"
+  },
+  "ballerinax/trigger.asgardeo": {
+   "version": "0.8.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:03:08Z"
+  },
+  "ballerinax/trigger.github": {
+   "version": "0.12.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T10:11:24Z"
+  },
+  "ballerinax/trigger.google.calendar": {
+   "version": "0.12.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:01:12Z"
+  },
+  "ballerinax/trigger.google.drive": {
+   "version": "0.11.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:02:54Z"
+  },
+  "ballerinax/trigger.google.mail": {
+   "version": "0.12.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:07:19Z"
+  },
+  "ballerinax/trigger.google.sheets": {
+   "version": "0.10.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:02:42Z"
+  },
+  "ballerinax/trigger.hubspot": {
+   "version": "0.12.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:00:57Z"
+  },
+  "ballerinax/trigger.quickbooks": {
+   "version": "1.3.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:10:30Z"
+  },
+  "ballerinax/trigger.shopify": {
+   "version": "1.6.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:00:46Z"
+  },
+  "ballerinax/trigger.slack": {
+   "version": "0.9.0",
+   "ballerina_version": "2201.11.0",
+   "locked_at": "2026-11-22T11:00:53Z"
+  },
+  "ballerinax/trigger.twilio": {
+   "version": "0.10.1",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:01:17Z"
+  },
+  "ballerinax/twilio": {
+   "version": "5.0.2",
+   "ballerina_version": "2201.10.0",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/twitter": {
+   "version": "5.0.1",
+   "ballerina_version": "2201.12.2",
+   "locked_at": "2026-11-22T10:10:55Z"
+  },
+  "ballerinax/visiblethread": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:10Z"
+  },
+  "ballerinax/vonage.sms": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:09:48Z"
+  },
+  "ballerinax/weaviate": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:00:36Z"
+  },
+  "ballerinax/webscraping.ai": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:18:40Z"
+  },
+  "ballerinax/whatsapp.business": {
+   "version": "2.1.1",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:01:39Z"
+  },
+  "ballerinax/wordnik": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:52Z"
+  },
+  "ballerinax/wordpress": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:00Z"
+  },
+  "ballerinax/workday.absencemanagement": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:04Z"
+  },
+  "ballerinax/workday.common": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:22:23Z"
+  },
+  "ballerinax/workday.connect": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:17Z"
+  },
+  "ballerinax/workday.coreaccounting": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:42Z"
+  },
+  "ballerinax/workday.customeraccounts": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:20Z"
+  },
+  "ballerinax/workday.expense": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:34Z"
+  },
+  "ballerinax/workday.payroll": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:24:59Z"
+  },
+  "ballerinax/worldbank": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T10:11:04Z"
+  },
+  "ballerinax/worldtimeapi": {
+   "version": "1.5.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:01Z"
+  },
+  "ballerinax/wso2.apim.catalog": {
+   "version": "1.3.0",
+   "ballerina_version": "2201.13.1",
+   "locked_at": "2026-11-22T11:09:08Z"
+  },
+  "ballerinax/wso2.controlplane": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T10:11:56Z"
+  },
+  "ballerinax/xero.accounts": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:08:08Z"
+  },
+  "ballerinax/xero.appstore": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:21:13Z"
+  },
+  "ballerinax/xero.assets": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:21Z"
+  },
+  "ballerinax/xero.bankfeeds": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:23:48Z"
+  },
+  "ballerinax/xero.files": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:19:42Z"
+  },
+  "ballerinax/xero.finance": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:20:25Z"
+  },
+  "ballerinax/xero.projects": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:51Z"
+  },
+  "ballerinax/ynab": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:23:15Z"
+  },
+  "ballerinax/zendesk": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.8.6",
+   "locked_at": "2026-11-22T11:20:28Z"
+  },
+  "ballerinax/zipkin": {
+   "version": "1.1.0",
+   "ballerina_version": "2201.14.0",
+   "locked_at": "2026-11-22T11:08:32Z"
+  },
+  "ballerinax/zoho.books": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:23:51Z"
+  },
+  "ballerinax/zoho.crm.rest": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:21:17Z"
+  },
+  "ballerinax/zoho.people": {
+   "version": "1.3.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:08:27Z"
+  },
+  "ballerinax/zoom": {
+   "version": "1.7.2",
+   "ballerina_version": "2201.8.0",
+   "locked_at": "2026-11-22T11:07:24Z"
+  },
+  "ballerinax/zoom.meetings": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.13.0",
+   "locked_at": "2026-11-22T11:11:00Z"
+  },
+  "ballerinax/zoom.scheduler": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.7",
+   "locked_at": "2026-11-22T11:16:50Z"
+  },
+  "ballerinax/zuora.revenue": {
+   "version": "2.0.0",
+   "ballerina_version": "2201.12.0",
+   "locked_at": "2026-11-22T11:20:54Z"
+  }
+ },
  "benchmarks": {
   "humaneval": {
    "repo": "openai/human-eval",

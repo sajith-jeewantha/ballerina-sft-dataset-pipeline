@@ -35,7 +35,7 @@ Commands (run in this order, or all at once with `run-all`):
                        data/datasets/<version>/ (sft/{train,eval}.jsonl in chat messages, metadata,
                        dpo/pairs.jsonl, cpt/ raw corpus, coverage.csv, gaps.jsonl, CARD.md)
   generate-questions   QUESTIONS_PER_CHUNK questions per new chunk, up to LIMIT_GENERATING
-  generate-answers     answer every pending question from its source chunk
+  generate-answers     answer pending questions from their source chunk (up to LIMIT_GENERATING)
   validate             compile Ballerina code in answers with `bal` (optional)
   export               write data/dataset.jsonl (question, answer, source_url, category, difficulty)
   export-sft           write data/sft/{train,eval,metadata}.jsonl in chat `messages` format

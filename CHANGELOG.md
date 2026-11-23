@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: plan v2, milestones M0–M10 (branch `feat/pipeline-plan-v2`)
+## 2.2.0: plan v2, milestones M0–M10 (2026-11-22, branch `feat/pipeline-plan-v2`, released from `release/v2.2.0`)
 
 The plan is in [docs/PLAN.md](docs/PLAN.md), and the seed licence register in
 [docs/licence-register.csv](docs/licence-register.csv).
@@ -373,6 +373,12 @@ baselines need `OPENROUTER_API_KEY`.
 - **Config:** new `assemble` section.
 - **The report** gets a *Dataset* section and a terminal Dataset line.
 - **Not run:** the dataset is built after the full prompt and answer runs (README, *Full run*).
+
+### Fixes
+
+- **`generate-answers` respects `LIMIT_GENERATING`:** it answers at most that many pending questions per
+  run (oldest first) and leaves the rest pending; before, it answered every pending question, so
+  `--retry-failed` could answer hundreds at once. `0` still means no limit.
 
 ### Tests
 

@@ -297,7 +297,7 @@ sftgen report && open data/reports/report.html
 | scrape | pages not yet in the DB, plus failed ones | `--refresh` re-checks stored pages: unchanged by version key (no request), 304, or same hash |
 | clean + chunk | pages with status `fetched` | re-chunking keeps unchanged chunks (and their questions), marks removed ones `stale` |
 | generate-questions | `pending` chunks with no questions | failed calls retried up to `generate.max_chunk_attempts` |
-| generate-answers | `pending` questions | `--retry-failed` resets failed ones |
+| generate-answers | `pending` questions, up to `LIMIT_GENERATING` per run | `--retry-failed` resets failed ones |
 | validate | `not_checked` answers that have code | `--recheck` re-validates all |
 | collect-repos | repos not yet collected | `--refresh` re-clones; `--update-lock` re-pins |
 | generate-prompts | open slots in the plan | rejected slots refilled, up to `prompts.max_rounds` writer calls per item |
