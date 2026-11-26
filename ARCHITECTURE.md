@@ -85,7 +85,9 @@ flowchart TB
 
 The original Q&A path inside "Q&A" is: `scrape` (fetch → clean → chunk) → `generate-questions` →
 `generate-answers` → `validate` → `export` / `export-sft`. Every phase reads and writes
-`data/pipeline.db`; the report (`data/reports/report.html`) is rebuilt after every command.
+`data/pipeline.db`; the report (`data/reports/report.html`) is rebuilt after every command, and a dated
+copy of its content is kept as data in `data/reports/history/` (pick earlier ones in `report.html`; compare
+any two in `data/reports/compare.html`).
 
 ---
 
@@ -186,7 +188,8 @@ chunk text each answer was grounded in.
 | `data/cache/bal/` | Compile results by code hash + Ballerina version | yes |
 | `data/dataset.jsonl` | The exported dataset (review format) | yes, from the database |
 | `data/sft/` | `train.jsonl`, `eval.jsonl` (chat `messages`), `metadata.jsonl` | yes, from the database |
-| `data/reports/report.html` | The report | yes, `sftgen report` |
+| `data/reports/report.html` | The latest report | yes, `sftgen report` |
+| `data/reports/history/` | Each command's report as data (`<date>_<time>_<command>.js`, JSON in a one-line script wrapper) and `index.json` (time, command, runs, headline numbers); shown by the picker in `report.html` and by `data/reports/compare.html` | no: each is the state at that time |
 | `data/repos/` | `<owner>__<repo>@<sha12>.tar.gz` sparse snapshots of collected repos | yes, `collect-repos --refresh` |
 | `data/prompts/<set>/` | `accepted.jsonl`, `rejected.jsonl`, `coverage.json` | yes, from the database |
 | `data/answers/<set>/` | `sft.jsonl` (chat messages), `pairs.jsonl` (DPO), `failed.jsonl` | yes, from the database |

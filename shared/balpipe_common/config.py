@@ -400,6 +400,7 @@ class GraphCfg(BaseModel):
 class ReportCfg(BaseModel):
     path: str = "reports/report.html"  # relative to LOCAL_DATA_DIR
     samples: int = 5
+    keep_history: int = 0              # dated reports kept in reports/history/ (oldest removed); 0 = keep all
 
 
 class StorageCfg(BaseModel):

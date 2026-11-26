@@ -189,8 +189,10 @@ eval:                                # build-eval: held-out eval set and deconta
                                      # Sandbox only. false = compile-only scores (mode "compile")
 
 report:
-  path: reports/report.html
+  path: reports/report.html          # the latest report
   samples: 5
+  keep_history: 0                    # every command also saves its report as data: reports/history/<date>_<time>_<command>.js
+                                     # (picker in report.html, compare.html). Max kept (oldest removed); 0 = all
 
 repos:                                # collect-repos (LIMIT_REPOS in .env caps clones per run)
   register_file: docs/licence-register.csv

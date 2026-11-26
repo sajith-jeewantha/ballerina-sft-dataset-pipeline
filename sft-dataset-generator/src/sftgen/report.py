@@ -1,7 +1,10 @@
 """Progress report: a short terminal summary and a single-file reports/report.html.
 
 Everything is read from data/pipeline.db, so the report can be rebuilt at any
-time (`sftgen report`) and is refreshed after every command.
+time (`sftgen report`) and is refreshed after every command. After every command
+the report also gets a *This run* section (the runs it started and what changed),
+and its content is kept as data in reports/history/: report.html has a picker for
+earlier reports, and reports/compare.html compares any two (see report_history.py).
 """
 
 from __future__ import annotations
@@ -51,6 +54,7 @@ class ReportData:
     baselines: dict[str, Any] | None = None  # eval set v2 and eval runs (sftgen/eval/runner.py)
     corpus: dict[str, Any] | None = None     # corpus + mine-fixes (sftgen/corpus/)
     dataset: dict[str, Any] | None = None    # assemble (sftgen/assemble/): card.json of the current version
+    this_run: dict[str, Any] | None = None   # the command that wrote this report: its runs and the changes
 
     @property
     def total_pages(self) -> int:
@@ -339,10 +343,49 @@ def terminal_summary(d: ReportData, report_path: Path) -> str:
         *([_corpus_line(d.corpus)] if d.corpus else []),
         *([_dataset_line(d.dataset)] if d.dataset else []),
         f"LLM usage  {tokens:,} tokens, ${cost:.4f}" + ("" if d.usage else " (no calls yet)"),
+        *(_this_run_lines(d.this_run) if d.this_run else []),
         f"Report     {report_path}",
         "─" * 60,
     ]
     return "\n".join(lines)
+
+
+def _this_run_lines(t: dict[str, Any]) -> list[str]:
+    lines = []
+    if t.get("previous_at"):
+        ch = ", ".join(f"{k} {'+' if v > 0 else ''}{v:,}" for k, v in t["delta"].items()) or "no change"
+        lines.append(f"Changes    since {t['previous_at'].replace('T', ' ')[:19]}: {ch}")
+    if t.get("saved"):
+        lines.append(f"Saved      {t['saved']}")
+        lines.append(f"Compare    {t['index']}")
+    return lines
+
+
+def _this_run_html(d: ReportData) -> list[str]:
+    t = d.this_run
+    if not t:
+        return []
+    runs = [[str(r["id"]), _e(r["command"]), _e(r["status"]) + (f'<div class="err">{_e(r.get("error"))}</div>'
+                                                                 if r.get("error") else ""),
+             f'{r["duration_s"]:.1f}s' if r.get("duration_s") is not None else "—", _e(_fmt_stats(r["stats"]))]
+            for r in t["runs"]]
+    if t.get("previous_at"):
+        changes = (_table(["Metric", "Before", "Now", "Change"], [
+            [_e(k), f"{t['metrics'].get(k, 0) - v:,}", f"{t['metrics'].get(k, 0):,}",
+             f'{"+" if v > 0 else ""}{v:,}'] for k, v in t["delta"].items()], numeric={1, 2, 3})
+            if t["delta"] else '<p class="muted">No change in the headline numbers.</p>')
+        changes = f'<h3>Changes since the previous report ({_e(t["previous_at"].replace("T", " ")[:19])})</h3>{changes}'
+    else:
+        changes = '<p class="muted">First saved report: nothing to compare with yet.</p>'
+    status = "succeeded" if not t["exit_code"] else f"failed (exit code {t['exit_code']})"
+    return [
+        f"<h2>This run: sftgen {_e(t['command'])}</h2>",
+        f'<div class="card"><p>Finished {_e(t["at"].replace("T", " ")[:19])} · {_e(status)} · '
+        '<a href="compare.html">compare reports</a></p>'
+        + (_table(["#", "Command", "Status", "Duration", "Processed"], runs, numeric={0}) if runs
+           else '<p class="muted">No pipeline run (report only).</p>')
+        + changes + "</div>",
+    ]
 
 
 def _repos_line(r: dict[str, Any]) -> str:
@@ -865,7 +908,23 @@ def _eval_html(d: ReportData) -> list[str]:
     ]
 
 
-def render_html(d: ReportData) -> str:
+def render_html(d: ReportData, history: list[dict[str, Any]] | None = None, current: str | None = None) -> str:
+    """The whole page: the report picker (when there is history) and the report content."""
+    from sftgen import report_history as hist
+
+    picker = hist.picker_html(history or [], current)
+    return "\n".join([
+        "<!doctype html><html lang=en><head><meta charset=utf-8>",
+        '<meta name=viewport content="width=device-width,initial-scale=1">',
+        f"<title>Pipeline report</title><style>{CSS}{hist.PICKER_CSS if picker else ''}</style></head><body><main>",
+        picker, f'<div id="report">{render_body(d)}</div>',
+        f"<script>{hist.PICKER_JS}</script>" if picker else "",
+        "</main></body></html>",
+    ])
+
+
+def render_body(d: ReportData) -> str:
+    """The report content (everything inside <main>); also what is saved per run."""
     srcs = [x for x in d.sources if x in d.pages or x in d.chunks] + sorted(
         (set(d.pages) | set(d.chunks)) - set(d.sources))
     statuses = sorted({st for v in d.pages.values() for st in v})
@@ -882,14 +941,12 @@ def render_html(d: ReportData) -> str:
             ("Questions", d.total_questions), ("Answered", answered), ("Pending", qs.get("pending", 0)),
             ("Failed answers", qs.get("failed", 0)), ("LLM cost", f"${cost_total:.4f}")]
     parts = [
-        "<!doctype html><html lang=en><head><meta charset=utf-8>",
-        '<meta name=viewport content="width=device-width,initial-scale=1">',
-        f"<title>Pipeline report</title><style>{CSS}</style></head><body><main>",
         "<h1>Ballerina Q&amp;A dataset: pipeline report</h1>",
         f'<p class="muted">Generated {_e(d.generated_at)} from data/pipeline.db · current limits: '
         + _e(", ".join(f"{k}={v}" for k, v in d.limits.items())) + "</p>",
         '<div class="grid">' + "".join(f'<div class="card"><div class="muted">{_e(k)}</div><div class="kpi">{_e(v)}'
                                        "</div></div>" for k, v in kpis) + "</div>",
+        *_this_run_html(d),
         "<h2>Pages scraped</h2>",
         '<div class="card">' + _table(["Source", *statuses, "Total"], page_rows,
                                       numeric=set(range(1, len(statuses) + 2))) + "</div>",
@@ -949,13 +1006,37 @@ def render_html(d: ReportData) -> str:
             f'<span class="tag">{_e(smp["category"])}</span><span class="tag">{_e(smp["difficulty"])}</span>'
             f'<span class="tag">{_e(smp["validation"])}</span></p>{_render_answer(smp["answer"])}'
             f'<p class="muted url">Source: <a href="{_e(smp["source_url"])}">{_e(smp["source_url"])}</a></p></div>')
-    parts.append("</main></body></html>")
     return "\n".join(parts)
 
 
-def write_report(s: Settings, db: Database) -> tuple[Path, str]:
+def write_report(s: Settings, db: Database, *, archive: bool = False, command: str = "report",
+                 since_run: int | None = None, exit_code: int = 0) -> tuple[Path, str]:
+    """Write reports/report.html. With `archive`, also add the *This run* section (runs with id >
+    `since_run`, changes since the previous saved report) and save the content as data (report_history)."""
+    from datetime import datetime
+
+    from sftgen import report_history as hist
+
     data = collect(s, db)
     path = s.report_path
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_html(data), encoding="utf-8")
+    current = None
+    if archive:
+        runs = []
+        if since_run is not None:
+            for r in db.query("SELECT * FROM runs WHERE id > ? ORDER BY id", (since_run,)):
+                runs.append({**dict(r), "limits": json.loads(r["limits"] or "{}"),
+                             "stats": json.loads(r["stats"] or "{}")})
+        now = hist.metrics(data, s)
+        before = hist.previous(s)
+        at = datetime.now().astimezone()
+        current = hist.next_name(s, command, at)
+        data.this_run = {"command": command, "exit_code": exit_code, "runs": runs, "metrics": now,
+                         "at": at.isoformat(timespec="seconds"),
+                         "delta": hist.delta(now, before["metrics"] if before else None),
+                         "previous_at": before["at"] if before else None, "index": hist.compare_page(s),
+                         "saved": hist.history_dir(s) / current}
+        hist.archive(s, render_body(data), name=current, command=command, exit_code=exit_code, runs=runs,
+                     metrics_now=now, now=at, css=CSS)
+    path.write_text(render_html(data, hist.load_entries(s), current), encoding="utf-8")
     return path, terminal_summary(data, path)

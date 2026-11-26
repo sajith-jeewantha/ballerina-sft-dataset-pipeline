@@ -40,6 +40,8 @@ Commands (run in this order, or all at once with `run-all`):
   export               write data/dataset.jsonl (question, answer, source_url, category, difficulty)
   export-sft           write data/sft/{train,eval,metadata}.jsonl in chat `messages` format
   report               rebuild data/reports/report.html and print the summary
+                       (every command also saves its report as data in data/reports/history/;
+                       pick earlier ones in report.html, compare two in compare.html)
   run-all              scrape -> generate-questions -> generate-answers -> validate -> export -> export-sft
   graph validate       check graph/graph.json (schema 0.2, ballerina_graph rules, SOURCE.json hash)
   graph stats          node, item and edge counts of the knowledge graph
@@ -465,6 +467,7 @@ def main(argv: list[str] | None = None) -> int:
         single = {"graph": "graph-sync", "codebases": f"codebases-{a.action or 'build'}",
                   "eval": f"eval-{a.action or 'run'}"}.get(a.command, a.command)
         commands = RUN_ALL if a.command == "run-all" else [single]
+        since_run = int(db.scalar("SELECT COALESCE(MAX(id), 0) FROM runs") or 0)
         for command in commands:
             if command == "report":
                 break
@@ -486,7 +489,7 @@ def main(argv: list[str] | None = None) -> int:
                 log.exception("%s failed", command)
                 code = 1
                 break
-        path, summary = write_report(s, db)
+        path, summary = write_report(s, db, archive=True, command=shown, since_run=since_run, exit_code=code)
     # after the database is closed: the report, any files still unpushed, and a database snapshot
     push_error = push_error or _push_quietly(store, snapshot_db=True)
     print(summary)

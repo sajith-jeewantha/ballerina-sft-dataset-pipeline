@@ -225,11 +225,13 @@ def test_cli_pushes_outputs_and_restores_db_with_storage_on(tmp_path: Path, monk
     assert main(["report"]) == 0
     assert "local only" in capsys.readouterr().out
     assert not (tmp_path / "bucket").exists()
-    local = sorted(p.relative_to(root / "data").as_posix() for p in (root / "data").rglob("*") if p.is_file())
 
     monkeypatch.setenv("STORAGE_BUCKET", "true")
     assert main(["report"]) == 0
     assert "Storage    synced to file://" in capsys.readouterr().out
+    local = sorted(p.relative_to(root / "data").as_posix() for p in (root / "data").rglob("*")
+                   if p.is_file() and not p.relative_to(root / "data").as_posix().startswith(".storage/"))
+    assert sum(f.startswith("reports/history/") and f.endswith(".js") for f in local) == 2     # one per command
     bucket = tmp_path / "bucket"
     files = sorted(p.relative_to(bucket).as_posix() for p in bucket.rglob("*") if p.is_file())
     assert [f for f in files if not f.startswith("db/")] == [f for f in local if not f.startswith("pipeline.db")]

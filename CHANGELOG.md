@@ -380,6 +380,19 @@ baselines need `OPENROUTER_API_KEY`.
   run (oldest first) and leaves the rest pending; before, it answered every pending question, so
   `--retry-failed` could answer hundreds at once. `0` still means no limit.
 
+### Report history
+
+- **A report per run:** after every command the report gets a *This run* section (the runs the command
+  started, what each processed, and the headline numbers that changed since the previous report), and its
+  content is saved as data, `data/reports/history/<YYYY-MM-DD_HH-MM-SS>_<command>.js` (local time; JSON in
+  a one-line script wrapper so the pages work from disk). No extra HTML page per run.
+- **`data/reports/history/index.json`** records each report: time, command, exit code, runs and numbers.
+- **`report.html` picker:** the latest report is shown first; the picker loads any earlier one in place.
+- **`data/reports/compare.html`** lists every saved report with the change since the one before; pick any
+  two (A and B) for a metric-by-metric comparison and the two reports side by side. Works offline.
+- **Config:** `report.keep_history` caps the saved reports (oldest removed; `0` = keep all).
+- The terminal summary adds `Changes`, `Saved` and `Compare` lines.
+
 ### Tests
 
 123 tests in total (+2 for M10: assembly end to end with dedup, eval overlap, caps and

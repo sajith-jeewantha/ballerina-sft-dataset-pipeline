@@ -155,7 +155,7 @@ without stopping the run.
 | `sftgen validate` *(optional)* | Compile the ```` ```ballerina ```` blocks in each answer with `bal` if it is installed | answer: `valid` · `invalid` · `not_checked` |
 | `sftgen export` | Write `data/dataset.jsonl` for review (answers marked `invalid`, and questions overlapping the eval set, are left out) | — |
 | `sftgen export-sft` | Write fine-tuning files in chat `messages` format: `data/sft/train.jsonl`, `eval.jsonl`, `metadata.jsonl` (eval-set overlaps left out) | — |
-| `sftgen report` | Rebuild `data/reports/report.html` and print the summary | — |
+| `sftgen report` | Rebuild `data/reports/report.html` and print the summary. Every command (this one too) also saves its report as data in `data/reports/history/`: pick earlier reports in `report.html`, compare two in `data/reports/compare.html` | — |
 | `sftgen run-all` | `scrape` → `generate-questions` → `generate-answers` → `validate` → `export` → `export-sft` | — |
 | `sftgen graph validate` | Check `graph/graph.json`: schema 0.2 and the graph rules from [ballerina-ecosystem](https://github.com/sajith-jeewantha/ballerina-ecosystem), plus the hash recorded in `graph/SOURCE.json` | — |
 | `sftgen graph stats` | Nodes, items and edges by type, priority, status and difficulty | — |
@@ -290,6 +290,39 @@ It shows:
   - chunks, questions and repo files held out because they overlap the eval set
   - rows each export dropped, and the overlap re-check of the written files (should be 0)
 - 5 random Q&A samples, so you can spot-check quality
+- **this run:** the runs the command started, what each processed, and every headline number that
+  changed since the previous report
+
+### Report history
+
+Every command also saves its report as data, so earlier runs are never lost. No extra HTML pages
+are made per run:
+
+```
+data/reports/
+├── report.html                                    # the latest report, with a picker for earlier ones
+├── compare.html                                   # compare any two reports
+└── history/
+    ├── 2026-11-26_10-30-19_generate-questions.js  # one report's content: <local date>_<time>_<command>.js
+    ├── 2026-11-26_10-42-05_run-all.js
+    └── index.json                                 # one entry per report: time, command, runs, numbers
+```
+
+- **`report.html`** opens on the latest report. The **Report** picker at the top lists every saved
+  report, newest first; pick one to see it in place, and **Back to latest** to return. The address
+  keeps the choice (`report.html#r=<file>`), so you can bookmark it.
+- **`compare.html`** lists every saved report with the change in the key numbers since the one
+  before. Pick any two as **A** and **B** for a metric-by-metric comparison (only what changed, or
+  everything) and the two reports side by side (`compare.html#a=4&b=2`).
+- Each history file is JSON wrapped in one line of JavaScript, because browsers don't let a page
+  read `.json` files from disk. The pages work offline with no server.
+- `report.keep_history` in `config/pipeline.yaml` caps how many are kept (oldest removed first;
+  `0` = keep all).
+
+```bash
+open data/reports/report.html          # macOS; Linux: xdg-open; Windows: start
+open data/reports/compare.html
+```
 
 Terminal summary (illustrative numbers):
 
@@ -300,6 +333,9 @@ Chunks     1272  |  bbe 6, spec 351, learn 7, central 877, github 31
 Questions  10  |  pending 0, answered 10, failed 0
 Validation valid 6, not_checked 3, invalid 1
 LLM usage  48,210 tokens, $0.0123
+Changes    since 2026-11-26 10:30:19: Questions +10, Questions pending +10
+Saved      data/reports/history/2026-11-26_10-42-05_generate-questions.js
+Compare    data/reports/compare.html
 Report     data/reports/report.html
 ```
 
@@ -772,7 +808,7 @@ ballerina-sft-dataset-pipeline/
 │   └── tests/
 └── data/                         # gitignored (LOCAL_DATA_DIR): pipeline.db · datasets/ · corpus/ ·
                                   #   codebases/ · eval/ · prompts/ · answers/ · repos/ · dataset.jsonl ·
-                                  #   sft/ · reports/report.html · cache/ · .storage/ (push bookkeeping)
+                                  #   sft/ · reports/ (report.html, compare.html, history/) · cache/ · .storage/
 ```
 
 ---

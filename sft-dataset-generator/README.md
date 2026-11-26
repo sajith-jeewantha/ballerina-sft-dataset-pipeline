@@ -47,7 +47,7 @@ sftgen report
 | `validate` | `validate/stage.py` + `validate/bal_compiler.py` | `bal build` on answer code (fragments wrapped in `main`, common imports added) |
 | `export` · `export-sft` | `export/stage.py`, `export/sft.py` | Q&A as `data/dataset.jsonl` and `data/sft/` (chat `messages`) |
 | `storage status · push · pull` | `balpipe_common.storage` | Mirror `LOCAL_DATA_DIR` to GCS or S3 |
-| `report` | `report.py` | Terminal summary + `data/reports/report.html` (also refreshed after every command) |
+| `report` | `report.py`, `report_history.py` | Terminal summary + `data/reports/report.html` (also refreshed after every command); every command also saves its report as data, `data/reports/history/<date>_<time>_<command>.js`; `report.html` has a picker for earlier reports and `data/reports/compare.html` compares any two |
 | `run-all` | `cli.py` | The Q&A path in order |
 
 Prompts are versioned YAML files in `src/sftgen/prompts/` (questions, answers, prompt writer and
