@@ -25,7 +25,7 @@ sources:
     bbe_repo: ballerina-distribution  # BBE explanation + code + output: examples/<name>/
     bbe_path: examples
     bbe_ref: "v{swan_lake}"          # ballerina-distribution release tag for the pinned update
-    module_repo_patterns: ["^module-ballerina-", "^module-ballerinax-"]
+    module_repo_patterns: ["^module-ballerina-", "^module-ballerinax-","^ballerina-"]
     module_include: ["README.md", "ballerina/Module.md", "ballerina/Package.md", "ballerina/README.md", "ballerina/*.bal"]
     module_exclude: ["ballerina/tests/**", "**/test*.bal"]
     max_file_bytes: 300000
@@ -199,7 +199,7 @@ repos:                                # collect-repos (LIMIT_REPOS in .env caps 
   groups:                             # earlier groups win when the same file is in several repos
     - name: platform
       org: ballerina-platform
-      include: ["^module-ballerina-", "^module-ballerinax-"]
+      include: ["^module-ballerina-", "^module-ballerinax-", "^ballerina-"]
       intended_use: "corpus; commit-mining"
     - name: guides
       org: ballerina-guides
